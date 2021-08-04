@@ -868,29 +868,28 @@ if __name__ == "__main__":
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
     momenta = ["mass"]
-    # lambdas = ["lp01", "lp-01"]
+    lambdas = [0.005, 0.02, 0.04]
+    mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
     # quarks = ["quark2"]
 
     ### ----------------------------------------------------------------------
-    ### file locations
-    # for file_num, file_name in enumerate(file_list):
-    #     databs = read_pickle(file_name, nboot=pars.nboot, nbin=1)
-
+    ### Unperturbed correlators
     unpertfile_nucleon_pos = list(
         (
             pickledir
             / Path(
-                "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
+                "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+                # + mom_strings[2]
+                + "p+1+0+0/"
             )
         ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
     )
     for filename in unpertfile_nucleon_pos:
         G2_unpert_qp100_nucl = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        print(f"{np.shape(G2_unpert_qp100_nucl)=}")
+        # print(f"{np.shape(G2_unpert_qp100_nucl)=}")
         stats.ploteffmass(
             G2_unpert_qp100_nucl[:, :, 0], "neutron_unpert", plotdir, show=False
         )
-
     ### ----------------------------------------------------------------------
     unpertfile_sigma = list(
         (
@@ -902,69 +901,215 @@ if __name__ == "__main__":
     )
     for filename in unpertfile_sigma:
         G2_unpert_q000_sigma = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        print(f"{np.shape(G2_unpert_q000_sigma)=}")
+        # print(f"{np.shape(G2_unpert_q000_sigma)=}")
         stats.ploteffmass(
             G2_unpert_q000_sigma[:, :, 0], "sigma_unpert", plotdir, show=False
         )
 
     ratio = G2_unpert_qp100_nucl[:, :, 0] / G2_unpert_q000_sigma[:, :, 0]
-    stats.plot_correlator(ratio, "ratio", plotdir, show=False)
+    stats.plot_correlator(ratio, "ratio", plotdir, show=False, ylim=(-0.2, 0.3))
 
+    ### ----------------------------------------------------------------------
+    # Perturbed correlators
+    ### ----------------------------------------------------------------------
+    lmb_val = lambdas[2]
+
+    ### ----------------------------------------------------------------------
+    ### SD
+    filelist = list(
+        (
+            pickledir
+            / Path(
+                "baryon-3pt_SD_lmb_"
+                + str(lmb_val)
+                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+                + mom_strings[2]  # + "p+1+0+0/"
+                + "/"
+            )
+        ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
+    )
+    # print(f"{filelist=}")
+    for filename in filelist:
+        G2_q100_SD_lmb = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        stats.ploteffmass(G2_q100_SD_lmb[:, :, 0], "SD_lmb", plotdir, show=False)
     ### ----------------------------------------------------------------------
     filelist = list(
         (
             pickledir
             / Path(
-                "baryon-3pt_SD_lmb_0.04_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
+                "baryon-3pt_SD_lmb+lmb3_"
+                + str(lmb_val)
+                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+                + mom_strings[2]  # "p+1+0+0/"
+                + "/"
             )
         ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
     )
+    # print(f"{filelist=}")
     for filename in filelist:
-        G2_pert_q100_SD_lmb_lp04 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        G2_q100_SD_lmb_lmb3 = read_pickle(filename, nboot=pars.nboot, nbin=1)
         stats.ploteffmass(
-            G2_pert_q100_SD_lmb_lp04[:, :, 0], "SD_lmb_lp04", plotdir, show=True
+            G2_q100_SD_lmb_lmb3[:, :, 0], "SD_lmb+lmb3", plotdir, show=False
         )
 
+    ### ----------------------------------------------------------------------
+    ### DS
+    filelist = list(
+        (
+            pickledir
+            / Path(
+                "baryon-3pt_DS_lmb_"
+                + str(lmb_val)
+                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+                + mom_strings[0]  # "p+1+0+0/"
+                + "/"
+            )
+        ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
+    )
+    # print(f"{filelist=}")
+    for filename in filelist:
+        G2_q100_DS_lmb = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        stats.ploteffmass(G2_q100_DS_lmb[:, :, 0], "DS_lmb", plotdir, show=False)
     ### ----------------------------------------------------------------------
     filelist = list(
         (
             pickledir
             / Path(
-                "baryon-3pt_SD_lmb_0.005_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
+                "baryon-3pt_DS_lmb+lmb3_"
+                + str(lmb_val)
+                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+                + mom_strings[0]  # "p+1+0+0/"
+                + "/"
             )
         ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
     )
+    # print(f"{filelist=}")
     for filename in filelist:
-        G2_pert_q100_SD_lmb_lp005 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        G2_q100_DS_lmb_lmb3 = read_pickle(filename, nboot=pars.nboot, nbin=1)
         stats.ploteffmass(
-            G2_pert_q100_SD_lmb_lp005[:, :, 0], "SD_lmb_lp005", plotdir, show=True
+            G2_q100_DS_lmb_lmb3[:, :, 0], "DS_lmb+lmb3", plotdir, show=False
         )
 
     ### ----------------------------------------------------------------------
-    ratio1 = G2_pert_q100_SD_lmb_lp005[:, :, 0] / G2_unpert_q000_sigma[:, :, 0]
-    stats.plot_correlator(ratio1, "ratio_SD_lmb_lp005", plotdir, show=True)
-
+    ### DD
+    filelist = list(
+        (
+            pickledir
+            / Path(
+                "baryon-3pt_DD_unp+lmb2_"
+                + str(lmb_val)
+                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+                + mom_strings[1]  # "p+0+0+0/"
+                + "/"
+            )
+        ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
+    )
+    # print(f"{filelist=}")
+    for filename in filelist:
+        G2_q000_DD_lmb2 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        stats.ploteffmass(
+            G2_q000_DD_lmb2[:, :, 0],
+            "DD_lmb0+lmb2",
+            plotdir,
+            show=False,
+        )
     ### ----------------------------------------------------------------------
     filelist = list(
         (
             pickledir
             / Path(
-                "baryon-3pt_SD_lmb+lmb3_0.005_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
+                "baryon-3pt_DD_unp+lmb2+lmb4_"
+                + str(lmb_val)
+                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+                + mom_strings[1]  # "p+0+0+0/"
+                + "/"
             )
         ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
     )
+    # print(f"{filelist=}")
     for filename in filelist:
-        G2_pert_q100_SD_lmb3_lp005 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        G2_q000_DD_lmb2_lmb4 = read_pickle(filename, nboot=pars.nboot, nbin=1)
         stats.ploteffmass(
-            G2_pert_q100_SD_lmb3_lp005[:, :, 0], "SD_lmb3_lp005", plotdir, show=True
+            G2_q000_DD_lmb2_lmb4[:, :, 0],
+            "DD_lmb0+lmb2+lmb4",
+            plotdir,
+            show=False,
         )
 
     ### ----------------------------------------------------------------------
-    ratio2 = G2_pert_q100_SD_lmb3_lp005[:, :, 0] / G2_unpert_q000_sigma[:, :, 0]
-    stats.plot_correlator(ratio2, "ratio_SD_lmb3_lp005", plotdir, show=True)
+    ### SS
+    filelist = list(
+        (
+            pickledir
+            / Path(
+                "baryon-3pt_SS_unp+lmb2_"
+                + str(lmb_val)
+                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+                + mom_strings[1]  # "p+0+0+0/"
+                + "/"
+            )
+        ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
+    )
+    # print(f"{filelist=}")
+    for filename in filelist:
+        G2_q000_SS_lmb2 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        stats.ploteffmass(
+            G2_q000_SS_lmb2[:, :, 0],
+            "SS_lmb0+lmb2",
+            plotdir,
+            show=False,
+        )
+    ### ----------------------------------------------------------------------
+    filelist = list(
+        (
+            pickledir
+            / Path(
+                "baryon-3pt_SS_unp+lmb2+lmb4_"
+                + str(lmb_val)
+                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+                + mom_strings[1]  # "p+0+0+0/"
+                + "/"
+            )
+        ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
+    )
+    # print(f"{filelist=}")
+    for filename in filelist:
+        G2_q000_SS_lmb2_lmb4 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        stats.ploteffmass(
+            G2_q000_SS_lmb2_lmb4[:, :, 0],
+            "SS_lmb0+lmb2+lmb4",
+            plotdir,
+            show=False,
+        )
+
+    ### ----------------------------------------------------------------------
+    ### Construct correlation matrix
+    matrix_1 = np.array(
+        [
+            [G2_unpert_qp100_nucl[:, :, 0], G2_q100_DS_lmb[:, :, 0]],
+            [G2_q100_SD_lmb[:, :, 0], G2_unpert_q000_sigma[:, :, 0]],
+        ]
+    )
+    print(f"{np.shape(matrix_1)=}")
+    ### ----------------------------------------------------------------------
+    ### Diagonalise the matrix
+    # wl, vl = np.linalg.eig(matmul(Gtpdt, la.inv(Gt)).T)
+    # wr, vr = np.linalg.eig(matmul(la.inv(Gt), Gtpdt))
+    time_choice = 10
+    mat = np.average(matrix_1[:, :, :, time_choice], axis=2)
+    print(f"{np.shape(mat)=}")
+    print(mat)
+    wl, vl = np.linalg.eig(mat.T)
+    # wr, vr = np.linalg.eig(mat)
+    print(wl)
+    print(vl)
+    # print(wr, vr)
 
     ### ----------------------------------------------------------------------
     ### ----------------------------------------------------------------------
+    exit()
+    ### ----------------------------------------------------------------------
+
     filelist = list(
         (
             pickledir
@@ -974,9 +1119,9 @@ if __name__ == "__main__":
         ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
     )
     for filename in filelist:
-        G2_pert_q100_DD_lmb4_lp04 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        G2_q100_DD_lmb4_lp04 = read_pickle(filename, nboot=pars.nboot, nbin=1)
         stats.ploteffmass(
-            G2_pert_q100_DD_lmb4_lp04[:, :, 0],
+            G2_q100_DD_lmb4_lp04[:, :, 0],
             "DD_lmb0+lmb2+lmb4_lp04",
             plotdir,
             show=True,
@@ -992,16 +1137,16 @@ if __name__ == "__main__":
         ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
     )
     for filename in filelist:
-        G2_pert_q100_DD_lmb4_lp005 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        G2_q100_DD_lmb4_lp005 = read_pickle(filename, nboot=pars.nboot, nbin=1)
         stats.ploteffmass(
-            G2_pert_q100_DD_lmb4_lp005[:, :, 0],
+            G2_q100_DD_lmb4_lp005[:, :, 0],
             "DD_lmb0+lmb2+lmb4_lp005",
             plotdir,
             show=True,
         )
 
     ### ----------------------------------------------------------------------
-    ratio3 = G2_pert_q100_DD_lmb4_lp005[:, :, 0] / G2_unpert_q000_sigma[:, :, 0]
+    ratio3 = G2_q100_DD_lmb4_lp005[:, :, 0] / G2_unpert_q000_sigma[:, :, 0]
     stats.plot_correlator(ratio3, "ratio_DD_lmb4_lp005", plotdir, show=True)
 
     # ### ----------------------------------------------------------------------
@@ -1014,9 +1159,9 @@ if __name__ == "__main__":
     #     ).glob("barspec_nucleon_rel" + "_[0-9]*cfgs.pickle")
     # )
     # for filename in filelist:
-    #     G2_pert_q100_DD_lmb4 = read_pickle(filename, nboot=pars.nboot, nbin=1)
-    #     print(f"{np.shape(G2_pert_q100_DD_lmb4)=}")
-    #     stats.ploteffmass(G2_pert_q100_DD_lmb4[:, :, 0], "DD_lmb4", plotdir, show=True)
+    #     G2_q100_DD_lmb4 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+    #     print(f"{np.shape(G2_q100_DD_lmb4)=}")
+    #     stats.ploteffmass(G2_q100_DD_lmb4[:, :, 0], "DD_lmb4", plotdir, show=True)
 
     exit()
 
@@ -1051,8 +1196,8 @@ if __name__ == "__main__":
     G2_unpert_q000_sigma = evxptdata(
         unpertfile_sigma, numbers=[0, 1], nboot=500, nbin=1
     )
-    G2_pert_q100_pos = evxptdata(fh_file_pos, numbers=[0, 1], nboot=500, nbin=1)
-    G2_pert_q100_neg = evxptdata(fh_file_neg, numbers=[0, 1], nboot=500, nbin=1)
+    G2_q100_pos = evxptdata(fh_file_pos, numbers=[0, 1], nboot=500, nbin=1)
+    G2_q100_neg = evxptdata(fh_file_neg, numbers=[0, 1], nboot=500, nbin=1)
 
     ### ----------------------------------------------------------------------
     # Average over the normal time and time-reversed correlators
