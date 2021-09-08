@@ -1,7 +1,5 @@
 import numpy as np
 from pathlib import Path
-import scipy.optimize as syopt
-from scipy.optimize import curve_fit
 import pickle
 import sys
 import matplotlib.pyplot as pypl
@@ -1219,7 +1217,9 @@ def plotting_script_sigma_nucl(corr_matrix, corr_matrix1, name="", show=False):
     return
 
 
-def plotting_script_all(corr_matrix, corr_matrix1, corr_matrix2, name="", show=False):
+def plotting_script_all(
+    corr_matrix, corr_matrix1, corr_matrix2, lmb_val, name="", show=False
+):
     spacing = 2
     xlim = 16
     time = np.arange(0, np.shape(corr_matrix[0][0])[1])
@@ -1295,7 +1295,8 @@ def plotting_script_all(corr_matrix, corr_matrix1, corr_matrix2, name="", show=F
     pypl.semilogy()
     pypl.legend(fontsize="x-small")
     # pypl.ylabel(r"$G_{nn}(t;\vec{p}=(1,0,0))$")
-    pypl.title("$\lambda=0.04$")
+    # pypl.title("$\lambda=0.04$")
+    pypl.title("$\lambda=" + str(lmb_val) + "$")
     # pypl.xlabel(r"$\textrm{t/a}$")
     pypl.xlabel(r"$t/a$")
     pypl.savefig(plotdir / ("comp_plot_all" + name + ".pdf"))
@@ -1334,7 +1335,7 @@ def plotting_script2(diffG, name="", show=False):
     return
 
 
-def plotting_script_diff(diffG1, diffG2, diffG3, diffG4, name="", show=False):
+def plotting_script_diff(diffG1, diffG2, diffG3, diffG4, lmb_val, name="", show=False):
     spacing = 2
     xlim = 15
     time = np.arange(0, np.shape(diffG1)[1])
@@ -1399,7 +1400,7 @@ def plotting_script_diff(diffG1, diffG2, diffG3, diffG4, name="", show=False):
     pypl.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
     pypl.xlabel("$t/a$")
     pypl.legend(fontsize="x-small")
-    pypl.title("$\lambda=0.04$")
+    pypl.title("$\lambda=" + str(lmb_val) + "$")
     pypl.savefig(plotdir / ("diff_G" + name + ".pdf"))
     if show:
         pypl.show()
@@ -1416,18 +1417,18 @@ if __name__ == "__main__":
     nboot = 200  # 700
     nbin = 1  # 10
     pickledir = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn/pickle/"
+        "Documents/PhD/analysis_results/six_point_fn2/pickle/"
     )
-    plotdir = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn/plots/")
-    datadir = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn/data/")
+    plotdir = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn2/plots/")
+    datadir = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn2/data/")
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
     momenta = ["mass"]
-    lambdas = [0.005, 0.02, 0.04]
+    lambdas = [0.005, 0.02, 0.04, 0.08, 0.16, 0.32, 0.64]
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
     # quarks = ["quark2"]
-    conf_num = 207
-    lmb_val = lambdas[2]
+    conf_num = 43
+    lmb_val = lambdas[6]
 
     ### ----------------------------------------------------------------------
     ### Unperturbed correlators
@@ -1445,9 +1446,9 @@ if __name__ == "__main__":
     for filename in unpertfile_nucleon_pos:
         G2_unpert_qp100_nucl = read_pickle(filename, nboot=pars.nboot, nbin=1)
         # print(f"{np.shape(G2_unpert_qp100_nucl)=}")
-        stats.ploteffmass(
-            G2_unpert_qp100_nucl[:, :, 0], "neutron_unpert", plotdir, show=False
-        )
+        # stats.ploteffmass(
+        #     G2_unpert_qp100_nucl[:, :, 0], "neutron_unpert", plotdir, show=False
+        # )
     ### ----------------------------------------------------------------------
     unpertfile_sigma = list(
         (
@@ -1460,12 +1461,12 @@ if __name__ == "__main__":
     for filename in unpertfile_sigma:
         G2_unpert_q000_sigma = read_pickle(filename, nboot=pars.nboot, nbin=1)
         # print(f"{np.shape(G2_unpert_q000_sigma)=}")
-        stats.ploteffmass(
-            G2_unpert_q000_sigma[:, :, 0], "sigma_unpert", plotdir, show=False
-        )
+        # stats.ploteffmass(
+        #     G2_unpert_q000_sigma[:, :, 0], "sigma_unpert", plotdir, show=False
+        # )
 
     ratio = G2_unpert_qp100_nucl[:, :, 0] / G2_unpert_q000_sigma[:, :, 0]
-    stats.plot_correlator(ratio, "ratio", plotdir, show=False, ylim=(-0.2, 0.3))
+    # stats.plot_correlator(ratio, "ratio", plotdir, show=False, ylim=(-0.2, 0.3))
 
     ### ----------------------------------------------------------------------
     # Perturbed correlators
@@ -1477,9 +1478,7 @@ if __name__ == "__main__":
         (
             pickledir
             / Path(
-                "baryon-3pt_SD_lmb_"
-                + str(lmb_val)
-                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+                "baryon-3pt_SD_lmb_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
                 + mom_strings[2]  # + "p+1+0+0/"
                 + "/"
             )
@@ -1488,15 +1487,13 @@ if __name__ == "__main__":
     # print(f"{filelist=}")
     for filename in filelist:
         G2_q100_SD_lmb = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        stats.ploteffmass(G2_q100_SD_lmb[:, :, 0], "SD_lmb", plotdir, show=False)
+        # stats.ploteffmass(G2_q100_SD_lmb[:, :, 0], "SD_lmb", plotdir, show=False)
     ### ----------------------------------------------------------------------
     filelist = list(
         (
             pickledir
             / Path(
-                "baryon-3pt_SD_lmb+lmb3_"
-                + str(lmb_val)
-                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+                "baryon-3pt_SD_lmb3_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
                 + mom_strings[2]  # "p+1+0+0/"
                 + "/"
             )
@@ -1504,10 +1501,10 @@ if __name__ == "__main__":
     )
     # print(f"{filelist=}")
     for filename in filelist:
-        G2_q100_SD_lmb_lmb3 = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        stats.ploteffmass(
-            G2_q100_SD_lmb_lmb3[:, :, 0], "SD_lmb+lmb3", plotdir, show=False
-        )
+        G2_q100_SD_lmb3 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        # stats.ploteffmass(
+        #     G2_q100_SD_lmb_lmb3[:, :, 0], "SD_lmb+lmb3", plotdir, show=False
+        # )
 
     ### ----------------------------------------------------------------------
     ### DS
@@ -1515,9 +1512,7 @@ if __name__ == "__main__":
         (
             pickledir
             / Path(
-                "baryon-3pt_DS_lmb_"
-                + str(lmb_val)
-                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+                "baryon-3pt_DS_lmb_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
                 + mom_strings[0]  # "p+1+0+0/"
                 + "/"
             )
@@ -1526,15 +1521,13 @@ if __name__ == "__main__":
     # print(f"{filelist=}")
     for filename in filelist:
         G2_q100_DS_lmb = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        stats.ploteffmass(G2_q100_DS_lmb[:, :, 0], "DS_lmb", plotdir, show=False)
+        # stats.ploteffmass(G2_q100_DS_lmb[:, :, 0], "DS_lmb", plotdir, show=False)
     ### ----------------------------------------------------------------------
     filelist = list(
         (
             pickledir
             / Path(
-                "baryon-3pt_DS_lmb+lmb3_"
-                + str(lmb_val)
-                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+                "baryon-3pt_DS_lmb3_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
                 + mom_strings[0]  # "p+1+0+0/"
                 + "/"
             )
@@ -1542,10 +1535,10 @@ if __name__ == "__main__":
     )
     # print(f"{filelist=}")
     for filename in filelist:
-        G2_q100_DS_lmb_lmb3 = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        stats.ploteffmass(
-            G2_q100_DS_lmb_lmb3[:, :, 0], "DS_lmb+lmb3", plotdir, show=False
-        )
+        G2_q100_DS_lmb3 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        # stats.ploteffmass(
+        #     G2_q100_DS_lmb_lmb3[:, :, 0], "DS_lmb+lmb3", plotdir, show=False
+        # )
 
     ### ----------------------------------------------------------------------
     ### DD
@@ -1553,9 +1546,7 @@ if __name__ == "__main__":
         (
             pickledir
             / Path(
-                "baryon-3pt_DD_unp+lmb2_"
-                + str(lmb_val)
-                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+                "baryon-3pt_DD_lmb2_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
                 + mom_strings[2]  # "p+0+0+0/"
                 + "/"
             )
@@ -1564,20 +1555,18 @@ if __name__ == "__main__":
     # print(f"{filelist=}")
     for filename in filelist:
         G2_q100_DD_lmb2 = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        stats.ploteffmass(
-            G2_q100_DD_lmb2[:, :, 0],
-            "DD_lmb0+lmb2",
-            plotdir,
-            show=False,
-        )
+        # stats.ploteffmass(
+        #     G2_q100_DD_lmb2[:, :, 0],
+        #     "DD_lmb0+lmb2",
+        #     plotdir,
+        #     show=False,
+        # )
     ### ----------------------------------------------------------------------
     filelist = list(
         (
             pickledir
             / Path(
-                "baryon-3pt_DD_unp+lmb2+lmb4_"
-                + str(lmb_val)
-                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+                "baryon-3pt_DD_lmb4_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
                 + mom_strings[2]  # "p+0+0+0/"
                 + "/"
             )
@@ -1585,13 +1574,13 @@ if __name__ == "__main__":
     )
     # print(f"{filelist=}")
     for filename in filelist:
-        G2_q100_DD_lmb2_lmb4 = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        stats.ploteffmass(
-            G2_q100_DD_lmb2_lmb4[:, :, 0],
-            "DD_lmb0+lmb2+lmb4",
-            plotdir,
-            show=False,
-        )
+        G2_q100_DD_lmb4 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        # stats.ploteffmass(
+        #     G2_q100_DD_lmb4[:, :, 0],
+        #     "DD_lmb0+lmb2+lmb4",
+        #     plotdir,
+        #     show=False,
+        # )
 
     ### ----------------------------------------------------------------------
     ### SS
@@ -1599,9 +1588,7 @@ if __name__ == "__main__":
         (
             pickledir
             / Path(
-                "baryon-3pt_SS_unp+lmb2_"
-                + str(lmb_val)
-                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+                "baryon-3pt_SS_lmb2_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
                 + mom_strings[1]  # "p+0+0+0/"
                 + "/"
             )
@@ -1610,20 +1597,18 @@ if __name__ == "__main__":
     # print(f"{filelist=}")
     for filename in filelist:
         G2_q000_SS_lmb2 = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        stats.ploteffmass(
-            G2_q000_SS_lmb2[:, :, 0],
-            "SS_lmb0+lmb2",
-            plotdir,
-            show=False,
-        )
+        # stats.ploteffmass(
+        #     G2_q000_SS_lmb2[:, :, 0],
+        #     "SS_lmb0+lmb2",
+        #     plotdir,
+        #     show=False,
+        # )
     ### ----------------------------------------------------------------------
     filelist = list(
         (
             pickledir
             / Path(
-                "baryon-3pt_SS_unp+lmb2+lmb4_"
-                + str(lmb_val)
-                + "_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+                "baryon-3pt_SS_lmb4_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
                 + mom_strings[1]  # "p+0+0+0/"
                 + "/"
             )
@@ -1631,44 +1616,75 @@ if __name__ == "__main__":
     )
     # print(f"{filelist=}")
     for filename in filelist:
-        G2_q000_SS_lmb2_lmb4 = read_pickle(filename, nboot=pars.nboot, nbin=1)
-        stats.ploteffmass(
-            G2_q000_SS_lmb2_lmb4[:, :, 0],
-            "SS_lmb0+lmb2+lmb4",
-            plotdir,
-            show=False,
-        )
+        G2_q000_SS_lmb4 = read_pickle(filename, nboot=pars.nboot, nbin=1)
+        # stats.ploteffmass(
+        #     G2_q000_SS_lmb4[:, :, 0],
+        #     "SS_lmb0+lmb2+lmb4",
+        #     plotdir,
+        #     show=False,
+        # )
 
     ### ----------------------------------------------------------------------
     ### Construct correlation matrix
     matrix_1 = np.array(
         [
-            [G2_unpert_qp100_nucl[:, :, 0], G2_q100_DS_lmb[:, :, 0] * lmb_val],
-            [G2_q100_SD_lmb[:, :, 0] * lmb_val, G2_unpert_q000_sigma[:, :, 0]],
+            [G2_unpert_qp100_nucl[:, :, 0], lmb_val * G2_q100_DS_lmb[:, :, 0]],
+            [lmb_val * G2_q100_SD_lmb[:, :, 0], G2_unpert_q000_sigma[:, :, 0]],
         ]
     )
     matrix_2 = np.array(
         [
-            [G2_q100_DD_lmb2[:, :, 0], G2_q100_DS_lmb[:, :, 0] * lmb_val],
-            [G2_q100_SD_lmb[:, :, 0] * lmb_val, G2_q000_SS_lmb2[:, :, 0]],
+            [
+                G2_unpert_qp100_nucl[:, :, 0] + lmb_val ** 2 * G2_q100_DD_lmb2[:, :, 0],
+                lmb_val * G2_q100_DS_lmb[:, :, 0],
+            ],
+            [
+                lmb_val * G2_q100_SD_lmb[:, :, 0],
+                G2_unpert_q000_sigma[:, :, 0] + lmb_val ** 2 * G2_q000_SS_lmb2[:, :, 0],
+            ],
         ]
     )
     matrix_3 = np.array(
         [
-            [G2_q100_DD_lmb2[:, :, 0], G2_q100_DS_lmb_lmb3[:, :, 0] * lmb_val],
-            [G2_q100_SD_lmb_lmb3[:, :, 0] * lmb_val, G2_q000_SS_lmb2[:, :, 0]],
+            [
+                G2_unpert_qp100_nucl[:, :, 0] + lmb_val ** 2 * G2_q100_DD_lmb2[:, :, 0],
+                lmb_val * G2_q100_DS_lmb[:, :, 0]
+                + lmb_val ** 3 * G2_q100_DS_lmb3[:, :, 0],
+            ],
+            [
+                lmb_val * G2_q100_SD_lmb[:, :, 0]
+                + lmb_val ** 3 * G2_q100_SD_lmb3[:, :, 0],
+                G2_unpert_q000_sigma[:, :, 0] + lmb_val ** 2 * G2_q000_SS_lmb2[:, :, 0],
+            ],
         ]
     )
     matrix_4 = np.array(
         [
-            [G2_q100_DD_lmb2_lmb4[:, :, 0], G2_q100_DS_lmb_lmb3[:, :, 0] * lmb_val],
-            [G2_q100_SD_lmb_lmb3[:, :, 0] * lmb_val, G2_q000_SS_lmb2_lmb4[:, :, 0]],
+            [
+                G2_unpert_qp100_nucl[:, :, 0]
+                + (lmb_val ** 2) * G2_q100_DD_lmb2[:, :, 0]
+                + (lmb_val ** 4) * G2_q100_DD_lmb4[:, :, 0],
+                lmb_val * G2_q100_DS_lmb[:, :, 0]
+                + (lmb_val ** 3) * G2_q100_DS_lmb3[:, :, 0],
+            ],
+            [
+                lmb_val * G2_q100_SD_lmb[:, :, 0]
+                + (lmb_val ** 3) * G2_q100_SD_lmb3[:, :, 0],
+                G2_unpert_q000_sigma[:, :, 0]
+                + (lmb_val ** 2) * G2_q000_SS_lmb2[:, :, 0]
+                + (lmb_val ** 4) * G2_q000_SS_lmb4[:, :, 0],
+            ],
         ]
     )
     print(f"{np.shape(matrix_1)=}")
     ### ----------------------------------------------------------------------
     plotting_script_all(
-        matrix_1 / 1e39, matrix_2 / 1e39, matrix_3 / 1e39, name="", show=False
+        matrix_1 / 1e39,
+        matrix_2 / 1e39,
+        matrix_3 / 1e39,
+        lmb_val,
+        name="_l" + str(lmb_val),
+        show=False,
     )
     plotting_script_nucl(matrix_1, matrix_2, matrix_3, name="", show=False)
     plotting_script_sigma(matrix_1, matrix_2, matrix_3, name="", show=False)
@@ -1680,27 +1696,33 @@ if __name__ == "__main__":
     effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
     effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
     diffG1 = (effmassdata_1 - effmassdata_2) / lmb_val / 2
-    plotting_script2(diffG1, name="_l" + str(lmb_val) + "_1", show=False)
-    plotting_script3(matrix_1, Gt1_1, Gt2_1, name="_l" + str(lmb_val) + "_1")
+    # plotting_script2(diffG1, name="_l" + str(lmb_val) + "_1", show=False)
+    # plotting_script3(matrix_1, Gt1_1, Gt2_1, name="_l" + str(lmb_val) + "_1")
 
     Gt1_2, Gt2_2 = gevp(matrix_2, time_choice=13, delta_t=1, name="_test", show=False)
     effmassdata_1 = stats.bs_effmass(Gt1_2, time_axis=1, spacing=1)
     effmassdata_2 = stats.bs_effmass(Gt2_2, time_axis=1, spacing=1)
     diffG2 = (effmassdata_1 - effmassdata_2) / lmb_val / 2
-    plotting_script2(diffG1, name="_l" + str(lmb_val) + "_2", show=False)
-    plotting_script3(matrix_2, Gt1_2, Gt2_2, name="_l" + str(lmb_val) + "_2")
+    # plotting_script2(diffG1, name="_l" + str(lmb_val) + "_2", show=False)
+    # plotting_script3(matrix_2, Gt1_2, Gt2_2, name="_l" + str(lmb_val) + "_2")
 
     Gt1_3, Gt2_3 = gevp(matrix_3, time_choice=13, delta_t=1, name="_test", show=False)
-    plotting_script3(matrix_3, Gt1_3, Gt2_3, name="_l" + str(lmb_val) + "_3")
+    # plotting_script3(matrix_3, Gt1_3, Gt2_3, name="_l" + str(lmb_val) + "_3")
     effmassdata_1_3 = stats.bs_effmass(Gt1_3, time_axis=1, spacing=1)
     effmassdata_2_3 = stats.bs_effmass(Gt2_3, time_axis=1, spacing=1)
     diffG3 = (effmassdata_1_3 - effmassdata_2_3) / lmb_val / 2
 
     Gt1_4, Gt2_4 = gevp(matrix_4, time_choice=13, delta_t=1, name="_test", show=False)
-    plotting_script3(matrix_4, Gt1_4, Gt2_4, name="_l" + str(lmb_val) + "_4")
+    # plotting_script3(matrix_4, Gt1_4, Gt2_4, name="_l" + str(lmb_val) + "_4")
 
     plotting_script_diff(
-        diffG1, diffG2, diffG3, diffG3, name="_l" + str(lmb_val) + "_all", show=True
+        diffG1,
+        diffG2,
+        diffG3,
+        diffG3,
+        lmb_val,
+        name="_l" + str(lmb_val) + "_all",
+        show=True,
     )
 
     exit()
@@ -2077,780 +2099,3 @@ if __name__ == "__main__":
     pypl.close()
 
     exit()
-
-    # ### ----------------------------------------------------------------------
-    # ### ----------------------------------------------------------------------
-    # ### ----------------------------------------------------------------------
-    # ### ----------------------------------------------------------------------
-    # ### The ratio of the FH pos over nucl. pos
-    # print("\nRatio of FH over nucl with positive momentum")
-    # ratio_pert_nucl = G2_pert_q100_pos[:, 0, :, 0] * (
-    #     G2_unpert_qp100_nucl[:, 0, :, 0]
-    # ) ** (-1)
-
-    # fitrange = slice(9, 15)
-    # popt, paramboots = correlator_fitting(
-    #     ratio_pert_nucl, fitrange, ff.linear, p0=[1, 0.1]
-    # )
-    # print(
-    #     "slope =",
-    #     err_brackets(np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]),
-    # )
-    # matrix_element = paramboots[:, 1] * ratio_z_factors
-    # print("matrix element pos = ", np.average(matrix_element))
-    # print(
-    #     "matrix element pos = ",
-    #     err_brackets(np.average(matrix_element), np.std(matrix_element)),
-    # )
-
-    # fitparam = {
-    #     "x": np.arange(64)[fitrange],
-    #     "y": [ff.linear(np.arange(64)[fitrange], *i) for i in paramboots],
-    #     "label": "slope ="
-    #     + err_brackets(
-    #         np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]
-    #     ),
-    # }
-
-    # plot_correlator(
-    #     ratio_pert_nucl,
-    #     "pert_ratio_nucl_pos_TBC16",
-    #     plotdir,
-    #     fitparam=fitparam,
-    #     ylim=(-0.5, 90),
-    #     ylabel=r"$G_{N}^{\lambda}(\mathbf{p}')/G_{N}(\mathbf{p}')$",
-    # )
-
-    ### ----------------------------------------------------------------------
-    ### The ratio of the FH neg over nucl. neg
-    print("\nRatio of FH over nucl with negative momentum")
-    ratio_pert_nucl = G2_pert_q100_neg[:, 0, :, 0] * (
-        G2_unpert_qm100_nucl[:, 0, :, 0]
-    ) ** (-1)
-
-    # fitrange = slice(9, 17)
-    fitrange = slice(14, 19)
-    popt, paramboots = correlator_fitting(
-        ratio_pert_nucl, fitrange, ff.linear, p0=[1, 0.1]
-    )
-    print(
-        "slope =",
-        err_brackets(np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]),
-    )
-
-    matrix_element_nucl_neg = paramboots[:, 1] * ratio_z_factors
-    # print(f"{np.shape(paramboots[:,1])=}")
-    # print(f"{np.shape(ratio_z_factors)=}")
-    # print(f"{np.shape(matrix_element_nucl)=}")
-    print(
-        "matrix element = ",
-        err_brackets(
-            np.average(matrix_element_nucl_neg), np.std(matrix_element_nucl_neg)
-        ),
-    )
-
-    fitparam = {
-        "x": np.arange(64)[fitrange],
-        "y": [ff.linear(np.arange(64)[fitrange], *i) for i in paramboots],
-        "label": "slope ="
-        + err_brackets(
-            np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]
-        ),
-    }
-
-    plot_correlator(
-        ratio_pert_nucl,
-        "pert_ratio_nucl_neg_TBC16",
-        plotdir,
-        fitparam=fitparam,
-        ylim=(-0.5, 200),
-        ylabel=r"$G_{N}^{\lambda}(\mathbf{p}')/G_{N}(\mathbf{p}')$",
-    )
-
-    ### ----------------------------------------------------------------------
-    ### We need the z-factors of the two-point functions
-    ### NUCL
-    unpert_nucl = G2_unpert_qm100_nucl_tavg
-
-    ### ------------------------------------------------------------
-    func_aexp = ff.initffncs("Aexp")
-    # time_limits = [[7, 8], [14, 19]]
-    time_limits = [[7, 8], [14, 19]]
-    fitlist, weightlist = stats.fit_loop(
-        G2_unpert_qm100_nucl_tavg[:, :, 0], func_aexp, time_limits
-    )
-    filename = plotdir / "unpert_twopt_q000_effmass.pkl"
-    with open(filename, "wb") as file_out:
-        pickle.dump(fitlist, file_out)
-    bestweight = np.argmax(weightlist)
-    print(f"\n{bestweight=}")
-    print(f"{fitlist[bestweight]['paramavg']=}")
-    z_factor_nucl_best = np.sqrt(
-        np.abs(fitlist[bestweight]["param"][:, 0] * m_S / (m_S + m_N))
-    )
-    print(
-        "z-factor nucleon =",
-        err_brackets(np.average(z_factor_nucl_best), np.std(z_factor_nucl_best)),
-    )
-
-    fitparam_plot = {
-        "x": fitlist[bestweight]["x"],
-        "y": np.array(
-            [
-                stats.effmass(fitlist[bestweight]["fitfunction"](np.arange(64), i))
-                for i in fitlist[bestweight]["param"]
-            ]
-        )[:, fitlist[bestweight]["x"]],
-        "label": r"$\chi^2_{\textrm{dof}} = $"
-        + f"{fitlist[bestweight]['redchisq']:0.2f}",
-        "redchisq": fitlist[bestweight]["redchisq"],
-    }
-    stats.ploteffmass(
-        fitlist[bestweight]["y"],
-        "unpert_twopt_q000_effmass_best",
-        plotdir,
-        ylim=(0, 1.8),
-        # ylim=None,
-        fitparam=fitparam_plot,
-        # fitparam_q1=None,
-        ylabel=None,
-        show=False,
-    )
-    ### ------------------------------------------------------------
-
-    # fitrange = slice(9, 19)
-    # popt, paramboots = correlator_fitting(
-    #     G2_unpert_qm100_nucl_tavg[:, :, 0] / 1e37, fitrange, oneexp1, p0=[-1, 0.5]
-    # )
-    # paramboots[:, 0] = paramboots[:, 0] * 1e37
-    # print(
-    #     "amplitude =",
-    #     err_brackets(np.average(paramboots, axis=0)[0], np.std(paramboots, axis=0)[0]),
-    # )
-    # z_factor_nucl = np.sqrt(np.abs(paramboots[:, 0] * m_S / (m_S + m_N)))
-    # print(
-    #     "z-factor nucleon =",
-    #     err_brackets(np.average(z_factor_nucl), np.std(z_factor_nucl)),
-    # )
-
-    ### SIGMA
-    ### ------------------------------------------------------------
-    fitlist, weightlist = stats.fit_loop(
-        G2_unpert_q000_sigma_tavg[:, :, 0], func_aexp, time_limits
-    )
-    filename = plotdir / "unpert_sigma_twopt_q000_effmass.pkl"
-    with open(filename, "wb") as file_out:
-        pickle.dump(fitlist, file_out)
-    bestweight = np.argmax(weightlist)
-    print(f"\n{bestweight=}")
-    print(f"{fitlist[bestweight]['paramavg']=}")
-    z_factor_sigma_best = np.sqrt(
-        np.abs(fitlist[bestweight]["param"][:, 0] * m_S / (m_S + m_N))
-    )
-    print(
-        "z-factor sigma =",
-        err_brackets(np.average(z_factor_sigma_best), np.std(z_factor_sigma_best)),
-    )
-    z_factor_ratio_best = z_factor_nucl_best / z_factor_sigma_best
-    print(
-        "\nz-factor ratio =",
-        err_brackets(np.average(z_factor_ratio_best), np.std(z_factor_ratio_best)),
-    )
-
-    fitparam_plot = {
-        "x": fitlist[bestweight]["x"],
-        "y": np.array(
-            [
-                stats.effmass(fitlist[bestweight]["fitfunction"](np.arange(64), i))
-                for i in fitlist[bestweight]["param"]
-            ]
-        )[:, fitlist[bestweight]["x"]],
-        "label": r"$\chi^2_{\textrm{dof}} = $"
-        + f"{fitlist[bestweight]['redchisq']:0.2f}",
-        "redchisq": fitlist[bestweight]["redchisq"],
-    }
-    stats.ploteffmass(
-        fitlist[bestweight]["y"],
-        "unpert_sigma_twopt_q000_effmass_best",
-        plotdir,
-        ylim=(0, 1.8),
-        # ylim=None,
-        fitparam=fitparam_plot,
-        # fitparam_q1=None,
-        ylabel=None,
-        show=False,
-    )
-    ### ------------------------------------------------------------
-    # popt, paramboots = correlator_fitting(
-    #     G2_unpert_q000_sigma_tavg[:, :, 0] / 1e37, fitrange, oneexp1, p0=[1, 0.1]
-    # )
-    # paramboots[:, 0] = paramboots[:, 0] * 1e37
-    # z_factor_sigma = np.sqrt(np.abs(paramboots[:, 0] / 2))
-    # print(
-    #     "z-factor sigma =",
-    #     err_brackets(np.average(z_factor_sigma), np.std(z_factor_sigma)),
-    # )
-
-    # print(f"{np.shape(z_factor_nucl)=}")
-    # print(f"{np.shape(z_factor_sigma)=}")
-    # ratio_z_factors2 = z_factor_nucl / z_factor_sigma
-    # print(f"{np.average(ratio_z_factors2)=}")
-
-    ### ----------------------------------------------------------------------
-    ### The ratio of the two unperturbed correlators
-    # print("\nThe ratio of the two unperturbed correlators pos mom. and trev avgd")
-    # ratio_unpert = G2_unpert_qp100_nucl_tavg[:, :, 0] * (
-    #     G2_unpert_q000_sigma_tavg[:, :, 0]
-    # ) ** (-1)
-    # fitrange = slice(9, 19)
-    # popt, paramboots = correlator_fitting(ratio_unpert, fitrange, ff.constant, p0=[0.1])
-    # print("plateau =", err_brackets(np.average(paramboots), np.std(paramboots)))
-
-    # fitparam = {
-    #     "x": np.arange(64)[fitrange],
-    #     "y": [ff.constant(np.arange(64)[fitrange], i) for i in paramboots],
-    #     "label": "plateau ="
-    #     + str(err_brackets(np.average(paramboots, axis=0), np.std(paramboots, axis=0))),
-    # }
-
-    # plotratio(ratio_unpert, 1, "unpert_eff_ratio_TBC16", plotdir, ylim=(-0.5, 0.5))
-    # plot_correlator(
-    #     ratio_unpert,
-    #     "unpert_ratio_pos_TBC16",
-    #     plotdir,
-    #     ylim=(-0.2, 0.4),
-    #     fitparam=fitparam,
-    #     ylabel=r"$G_{N}(\mathbf{p}',\lambda=0)/G_{\Sigma}(\mathbf{0},\lambda=0)$",
-    # )
-
-    ### ----------------------------------------------------------------------
-    ### The ratio of the two unperturbed correlators
-    # print("\nThe ratio of the two unperturbed correlators neg mom. and trev avgd")
-    # ratio_unpert = G2_unpert_qm100_nucl_tavg[:, :, 0] * (
-    #     G2_unpert_q000_sigma_tavg[:, :, 0]
-    # ) ** (-1)
-    # fitrange = slice(9, 19)
-    # popt, paramboots = correlator_fitting(ratio_unpert, fitrange, ff.constant, p0=[0.1])
-    # print("plateau =", err_brackets(np.average(paramboots), np.std(paramboots)))
-
-    # fitparam = {
-    #     "x": np.arange(64)[fitrange],
-    #     "y": [ff.constant(np.arange(64)[fitrange], i) for i in paramboots],
-    #     "label": "plateau ="
-    #     + str(err_brackets(np.average(paramboots, axis=0), np.std(paramboots, axis=0))),
-    # }
-
-    # plotratio(ratio_unpert, 1, "unpert_eff_ratio_TBC16", plotdir, ylim=(-0.5, 0.5))
-    # plot_correlator(
-    #     ratio_unpert,
-    #     "unpert_ratio_neg_TBC16",
-    #     plotdir,
-    #     ylim=(-0.2, 0.4),
-    #     fitparam=fitparam,
-    #     ylabel=r"$G_{N}(\mathbf{p}',\lambda=0)/G_{\Sigma}(\mathbf{0},\lambda=0)$",
-    # )
-
-    ### ----------------------------------------------------------------------
-    ### The ratio of the FH neg over nucl. neg
-    print("\nRatio of FH over nucl with negative momentum")
-    ratio_pert_nucl = G2_pert_q100_neg[:, 0, :, 0] * (
-        G2_unpert_qm100_nucl[:, 0, :, 0]
-    ) ** (-1)
-
-    # fitrange = slice(9, 17)
-    fitrange = slice(14, 19)
-    popt, paramboots = correlator_fitting(
-        ratio_pert_nucl, fitrange, ff.linear, p0=[1, 0.1]
-    )
-    print(
-        "slope =",
-        err_brackets(np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]),
-    )
-
-    matrix_element_nucl_neg = paramboots[:, 1] * ratio_z_factors
-    # print(f"{np.shape(paramboots[:,1])=}")
-    # print(f"{np.shape(ratio_z_factors)=}")
-    # print(f"{np.shape(matrix_element_nucl)=}")
-    print(
-        "matrix element = ",
-        err_brackets(
-            np.average(matrix_element_nucl_neg), np.std(matrix_element_nucl_neg)
-        ),
-    )
-
-    fitparam = {
-        "x": np.arange(64)[fitrange],
-        "y": [ff.linear(np.arange(64)[fitrange], *i) for i in paramboots],
-        "label": "slope ="
-        + err_brackets(
-            np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]
-        ),
-    }
-
-    plot_correlator(
-        ratio_pert_nucl,
-        "pert_ratio_nucl_neg_TBC16",
-        plotdir,
-        fitparam=fitparam,
-        ylim=(-0.5, 200),
-        ylabel=r"$G_{N}^{\lambda}(\mathbf{p}')/G_{N}(\mathbf{p}')$",
-    )
-
-    ### ----------------------------------------------------------------------
-    ### The ratio of the FH neg over nucl. mom avg
-    print("\n-->Ratio of FH neg mom over nucl momentum avgd")
-    ratio_pert_nucl = G2_pert_q100_neg[:, 0, :, 0] * (momaverage) ** (-1)
-
-    # fitrange = slice(10, 17)
-    # fitrange = slice(13, 21)
-    fitrange = slice(14, 21)
-    popt, paramboots = correlator_fitting(
-        ratio_pert_nucl, fitrange, ff.linear, p0=[1, 0.1]
-    )
-    print(
-        "slope =",
-        err_brackets(np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]),
-    )
-    matrix_element_nucl = paramboots[:, 1] * ratio_z_factors
-    # print(f"{np.shape(paramboots[:,1])=}")
-    # print(f"{np.shape(ratio_z_factors)=}")
-    # print(f"{np.shape(matrix_element_nucl)=}")
-    print(
-        "matrix element = ",
-        err_brackets(np.average(matrix_element_nucl), np.std(matrix_element_nucl)),
-    )
-
-    fitparam = {
-        "x": np.arange(64)[fitrange],
-        "y": [ff.linear(np.arange(64)[fitrange], *i) for i in paramboots],
-        "label": "slope ="
-        + err_brackets(
-            np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]
-        ),
-    }
-
-    plot_correlator(
-        ratio_pert_nucl,
-        "pert_ratio_nucl_neg_momavg_TBC16",
-        plotdir,
-        fitparam=fitparam,
-        ylim=(-0.5, 200),
-        ylabel=r"$2G_{N}^{3}(\mathbf{p}')/(G_{N}(+\mathbf{p}')+G_{N}(-\mathbf{p}'))$",
-    )
-
-    ### ----------------------------------------------------------------------
-    ### The ratio of the FH neg over the sigma
-    print("\n-->Ratio of FH nucl with negative momentum over the Sigma")
-    ratio_pert_nucl = G2_pert_q100_neg[:, 0, :, 0] * (
-        # G2_unpert_q000_sigma[:, 0, :, 0]
-        G2_unpert_q000_sigma_tavg[:, :, 0]
-    ) ** (-1)
-
-    # fitrange = slice(10, 19)
-    fitrange = slice(16, 25)
-    popt, paramboots = correlator_fitting(
-        ratio_pert_nucl, fitrange, ff.linear, p0=[1, 0.1]
-    )
-    print(
-        "slope =",
-        err_brackets(np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]),
-    )
-    matrix_element_sigma = paramboots[:, 1] / (ratio_z_factors * 0.5 * (1 + m_N / m_S))
-    print(
-        "matrix element neg = ",
-        err_brackets(np.average(matrix_element_sigma), np.std(matrix_element_sigma)),
-    )
-
-    fitparam = {
-        "x": np.arange(64)[fitrange],
-        "y": [ff.linear(np.arange(64)[fitrange], *i) for i in paramboots],
-        "label": "slope ="
-        + err_brackets(
-            np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]
-        ),
-    }
-
-    plot_correlator(
-        ratio_pert_nucl,
-        "pert_ratio_nucl_neg_sigma_TBC16",
-        plotdir,
-        fitparam=fitparam,
-        ylim=(-0.5, 30),
-        ylabel=r"$G_{N}^{3}(\mathbf{p}')/G_{\Sigma}(\mathbf{0})$",
-    )
-
-    ### ----------------------------------------------------------------------
-    # ### The ratio of the FH positive momentum over the sigma
-    # print("\nRatio of FH nucl with positive momentum over the Sigma")
-    # ratio_pert_nucl = G2_pert_q100_pos[:, 0, :, 0] * (
-    #     G2_unpert_q000_sigma_tavg[:, :, 0]
-    # ) ** (-1)
-
-    # fitrange = slice(9, 19)
-    # popt, paramboots = correlator_fitting(
-    #     ratio_pert_nucl, fitrange, ff.linear, p0=[1, 0.1]
-    # )
-    # print(
-    #     "slope =",
-    #     err_brackets(np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]),
-    # )
-    # matrix_element = paramboots[:, 1] / (ratio_z_factors * 0.5 * (1 + m_N / m_S))
-    # print(
-    #     "matrix element neg = ",
-    #     err_brackets(np.average(matrix_element), np.std(matrix_element)),
-    # )
-
-    # fitparam = {
-    #     "x": np.arange(64)[fitrange],
-    #     "y": [ff.linear(np.arange(64)[fitrange], *i) for i in paramboots],
-    #     "label": "slope ="
-    #     + err_brackets(
-    #         np.average(paramboots, axis=0)[1], np.std(paramboots, axis=0)[1]
-    #     ),
-    # }
-
-    # plot_correlator(
-    #     ratio_pert_nucl,
-    #     "pert_ratio_nucl_pos_sigma_TBC16",
-    #     plotdir,
-    #     fitparam=fitparam,
-    #     ylim=(-0.5, 10),
-    #     ylabel=r"$G_{N}^{\lambda}(\mathbf{p}')/G_{\Sigma}(\mathbf{0})$",
-    # )
-
-    ### ----------------------------------------------------------------------
-    ### The ratio of the FH negative momentum over the sum of the nucleon and sigma two-point functions
-    print(
-        "\n-->Ratio of FH nucl over the sum of the nucleon and sigma two-point functions"
-    )
-
-    ratio = []
-    timelength = len(G2_pert_q100_pos[0, 0, :, 0])
-    for ti in np.arange(timelength):
-        ratio.append(
-            G2_pert_q100_neg[:, 0, ti, 0]
-            / np.sum(
-                [
-                    G2_unpert_qm100_nucl[:, 0, tau, 0]
-                    * G2_unpert_q000_sigma[:, 0, ti - tau, 0]
-                    for tau in np.arange(ti)
-                ],
-                axis=0,
-            )
-        )
-
-    # ratio = np.array(ratio)
-    ratio = np.moveaxis(ratio, 0, 1)
-
-    func_const = ff.initffncs("Constant")
-    func_const.initpar = [2e-39]
-    fitparamlist = []
-    timeranges = []
-    chisqlist = []
-    for t in np.arange(15, 19):
-        timerange = np.arange(t, 25)
-        fitparam_unpert = stats.fitratio(
-            func_const.eval,
-            func_const.initpar,
-            timerange,
-            ratio[:, timerange],
-            bounds=None,
-            time=False,
-        )
-        fitparamlist.append(fitparam_unpert["param"])
-        timeranges.append(timerange)
-        chisqlist.append(fitparam_unpert["redchisq"])
-        print(f"{fitparam_unpert['redchisq']=}")
-        print(f"{fitparam_unpert['paramavg']=}")
-    print("loop done")
-    choice = 2
-    fitparam = {
-        "x": timeranges[choice],
-        "y": [ff.constant(timeranges[choice], i) for i in fitparamlist[choice]],
-        "label": "plateau = $ "
-        + str(
-            err_brackets(
-                np.average(fitparamlist[choice], axis=0),
-                np.std(fitparamlist[choice], axis=0),
-            )
-        )
-        + f"$\n $\chi^2_{{\\textrm{{dof}}}} = {chisqlist[choice]:0.2}$",
-    }
-    print("fitparam done")
-    plot_correlator(
-        ratio,
-        "ratio_TBC16_summed",
-        plotdir,
-        ylim=(-1e-38, 0.5e-38),
-        xlim=30,
-        fitparam=fitparam,
-        ylabel=r"$G_{N}^3(t;\mathbf{p}')/ \left(\sum_{\tau=0}^{t} G_{N}(\tau;\mathbf{p}') G_{\Sigma}(t-\tau;\mathbf{0})\right)$",
-    )
-    print("plot done")
-    matr_summed = (
-        fitparamlist[choice][:, 0] * z_factor_nucl_best * z_factor_sigma_best * 2
-    )
-    print(
-        "\nmatr. summed =",
-        err_brackets(np.average(matr_summed), np.std(matr_summed)),
-    )
-
-    ### ------------------------------------------------------------
-    fitrange = slice(13, 23)
-    popt, paramboots = correlator_fitting(ratio, fitrange, ff.constant, p0=[0.1])
-    print(
-        "constant =",
-        err_brackets(np.average(paramboots, axis=0), np.std(paramboots, axis=0)),
-    )
-
-    matrix_element_summed = (
-        paramboots[:, 0] * z_factor_nucl_best * z_factor_sigma_best * 2  # * m_S / m_N
-    )
-    print(
-        "matrix element summed = ",
-        err_brackets(np.average(matrix_element_summed), np.std(matrix_element_summed)),
-    )
-
-    fitparam = {
-        "x": np.arange(64)[fitrange],
-        "y": [ff.constant(np.arange(64)[fitrange], i) for i in paramboots],
-        "label": "plateau ="
-        + err_brackets(np.average(paramboots, axis=0), np.std(paramboots, axis=0)),
-    }
-
-    plot_correlator(
-        ratio,
-        "pert_ratio_nucl_sigma_summed_TBC16",
-        plotdir,
-        fitparam=fitparam,
-        ylim=(-1e-38, 0.5e-38),
-        # ylim=None,
-        ylabel=r"$G_{N}^{3}(t;\mathbf{p}')/ \left(\sum_{\tau=0}^{t} G_{N}(\tau;\mathbf{p}') G_{\Sigma}(t-\tau;\mathbf{0})\right)$",
-    )
-
-    ### ----------------------------------------------------------------------
-    ratio = []
-    timelength = len(G2_pert_q100_pos[0, 0, :, 0])
-    for ti in np.arange(timelength):
-        ratio.append(
-            G2_pert_q100_neg[:, 0, ti, 0]
-            / np.sum(
-                [
-                    # G2_unpert_qm100_nucl[:, 0, tau, 0]
-                    # * G2_unpert_qm100_nucl[:, 0, ti - tau, 0]
-                    G2_unpert_q000_sigma[:, 0, tau, 0]
-                    * G2_unpert_q000_sigma[:, 0, ti - tau, 0]
-                    for tau in np.arange(ti)
-                ],
-                axis=0,
-            )
-        )
-
-    # ratio = np.array(ratio)
-    ratio = np.moveaxis(ratio, 0, 1)
-
-    func_const = ff.initffncs("Constant")
-    func_const.initpar = [2e-39]
-    fitparamlist = []
-    timeranges = []
-    chisqlist = []
-    for t in np.arange(15, 19):
-        timerange = np.arange(t, 27)
-        fitparam_unpert = stats.fitratio(
-            func_const.eval,
-            func_const.initpar,
-            timerange,
-            ratio[:, timerange],
-            bounds=None,
-            time=False,
-        )
-        fitparamlist.append(fitparam_unpert["param"])
-        timeranges.append(timerange)
-        chisqlist.append(fitparam_unpert["redchisq"])
-        # print(f"{fitparam_unpert['redchisq']=}")
-        # print(f"{fitparam_unpert['paramavg']=}")
-    print("loop done")
-    choice = 2
-    fitparam = {
-        "x": timeranges[choice],
-        "y": [ff.constant(timeranges[choice], i) for i in fitparamlist[choice]],
-        "label": "plateau = $ "
-        + str(
-            err_brackets(
-                np.average(fitparamlist[choice], axis=0),
-                np.std(fitparamlist[choice], axis=0),
-            )
-        )
-        + f"$\n $\chi^2_{{\\textrm{{dof}}}} = {chisqlist[choice]:0.2}$",
-    }
-    print("fitparam done")
-    plot_correlator(
-        ratio,
-        "ratio_TBC16_summed_sigma",
-        plotdir,
-        ylim=(-1e-39, 1e-39),
-        xlim=30,
-        fitparam=fitparam,
-        ylabel=r"$G_{N}^{3}(t;\mathbf{p}')/ \left(\sum_{\tau=0}^{t} G_{\Sigma}(\tau;\mathbf{p}') G_{\Sigma}(t-\tau;\mathbf{0})\right)$",
-    )
-    fitrange = slice(13, 23)
-    popt, paramboots = correlator_fitting(ratio, fitrange, ff.constant, p0=[0.1])
-    print(
-        "constant =",
-        err_brackets(np.average(paramboots, axis=0), np.std(paramboots, axis=0)),
-    )
-
-    matrix_element_summed_sigma = (
-        paramboots[:, 0]
-        * z_factor_sigma_best ** 3
-        * 4
-        / z_factor_nucl_best  # * m_S / m_N
-        / (1 + m_N / m_S)
-    )
-    print(
-        "matrix element summed = ",
-        err_brackets(
-            np.average(matrix_element_summed_sigma), np.std(matrix_element_summed_sigma)
-        ),
-    )
-
-    ### ----------------------------------------------------------------------
-    ratio = []
-    timelength = len(G2_pert_q100_pos[0, 0, :, 0])
-    for ti in np.arange(timelength):
-        ratio.append(
-            G2_pert_q100_neg[:, 0, ti, 0]
-            / np.sum(
-                [
-                    G2_unpert_qm100_nucl[:, 0, tau, 0]
-                    * G2_unpert_qm100_nucl[:, 0, ti - tau, 0]
-                    # G2_unpert_q000_sigma[:, 0, tau, 0]
-                    # * G2_unpert_q000_sigma[:, 0, ti - tau, 0]
-                    for tau in np.arange(ti)
-                ],
-                axis=0,
-            )
-        )
-
-    # ratio = np.array(ratio)
-    ratio = np.moveaxis(ratio, 0, 1)
-
-    func_const = ff.initffncs("Constant")
-    func_const.initpar = [2e-39]
-    fitparamlist = []
-    timeranges = []
-    chisqlist = []
-    for t in np.arange(15, 19):
-        timerange = np.arange(t, 22)
-        fitparam_unpert = stats.fitratio(
-            func_const.eval,
-            func_const.initpar,
-            timerange,
-            ratio[:, timerange],
-            bounds=None,
-            time=False,
-        )
-        fitparamlist.append(fitparam_unpert["param"])
-        timeranges.append(timerange)
-        chisqlist.append(fitparam_unpert["redchisq"])
-        # print(f"{fitparam_unpert['redchisq']=}")
-        # print(f"{fitparam_unpert['paramavg']=}")
-    print("loop done")
-    choice = 2
-    fitparam = {
-        "x": timeranges[choice],
-        "y": [ff.constant(timeranges[choice], i) for i in fitparamlist[choice]],
-        "label": "plateau = $ "
-        + str(
-            err_brackets(
-                np.average(fitparamlist[choice], axis=0),
-                np.std(fitparamlist[choice], axis=0),
-            )
-        )
-        + f"$\n $\chi^2_{{\\textrm{{dof}}}} = {chisqlist[choice]:0.2}$",
-    }
-    print("fitparam done")
-    plot_correlator(
-        ratio,
-        "ratio_TBC16_summed_nucl",
-        plotdir,
-        ylim=(-1e-37, 1e-39),
-        xlim=30,
-        fitparam=fitparam,
-        ylabel=r"$G_{N}^{3}(t;\mathbf{p}')/ \left(\sum_{\tau=0}^{t} G_{n}(\tau;\mathbf{p}') G_{n}(t-\tau;\mathbf{0})\right)$",
-    )
-    fitrange = slice(13, 23)
-    popt, paramboots = correlator_fitting(ratio, fitrange, ff.constant, p0=[0.1])
-    print(
-        "constant =",
-        err_brackets(np.average(paramboots, axis=0), np.std(paramboots, axis=0)),
-    )
-
-    matrix_element_summed_nucl = (
-        paramboots[:, 0]
-        * z_factor_nucl_best ** 3
-        * (1 + m_N / m_S)
-        / z_factor_sigma_best  # * m_S / m_N
-    )
-    print(
-        "matrix element summed = ",
-        err_brackets(
-            np.average(matrix_element_summed_nucl), np.std(matrix_element_summed_nucl)
-        ),
-    )
-
-    ### ----------------------------------------------------------------------
-    ### Comparison plot of the results from the different ratios
-    pypl.figure(figsize=(9, 6))
-    pypl.errorbar(
-        ["nucl", "nucl negative", "sigma", "summed", "summed sigma", "summed nucl"],
-        np.array(
-            [
-                np.average(matrix_element_nucl),
-                np.average(matrix_element_nucl_neg),
-                np.average(matrix_element_sigma),
-                -np.average(matrix_element_summed),
-                -np.average(matrix_element_summed_sigma),
-                -np.average(matrix_element_summed_nucl),
-            ]
-        ),
-        np.array(
-            [
-                np.std(matrix_element_nucl),
-                np.std(matrix_element_nucl_neg),
-                np.std(matrix_element_sigma),
-                np.std(matrix_element_summed),
-                np.std(matrix_element_summed_sigma),
-                np.std(matrix_element_summed_nucl),
-            ]
-        ),
-        capsize=4,
-        elinewidth=1,
-        color="b",
-        fmt="s",
-        markerfacecolor="none",
-    )
-    plotname = "matrix_elements"
-    metadata["Title"] = plotname
-    pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
-    pypl.xlabel("ratio type")
-    pypl.ylim(0, 2.1)
-    pypl.grid(True, alpha=0.4)
-    pypl.savefig(plotdir / (plotname + ".pdf"), metadata=metadata)
-    pypl.show()
-    pypl.close()
-
-    mat_elements = np.array(
-        [
-            matrix_element_nucl,
-            matrix_element_sigma,
-            matrix_element_summed,
-        ]
-    )
-
-    with open("mat_elements.pkl", "wb") as file_out:
-        pickle.dump(mat_elements, file_out)
-
-        # with open("mat_elements.csv", "w") as csvfile:
-        #     datawrite = csv.writer(csvfile, delimiter=",", quotechar="|")
-        #     datawrite.writerow(headernames)
