@@ -11,7 +11,6 @@ from analysis import stats
 from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
 from analysis import fitfunc as ff
-from analysis.evxptreaders import evxptdata
 
 from params import params
 
@@ -19,10 +18,10 @@ from params import params
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
 _colors = [
     "#377eb8",
-    "#ff7f00",
     "#4daf4a",
     "#f781bf",
     "#a65628",
+    "#ff7f00",
     "#984ea3",
     "#999999",
     "#e41a1c",
@@ -46,7 +45,6 @@ def read_pickle(filename, nboot=200, nbin=1):
     """
     with open(filename, "rb") as file_in:
         data = pickle.load(file_in)
-        print(f"{np.shape(data)=}")
     bsdata = bootstrap(data, config_ax=0, nboot=nboot, nbin=nbin)
     return bsdata
 
@@ -150,7 +148,7 @@ def plotting_script(corr_matrix, Gt1, Gt2, name="", show=False):
     yeffstd_2 = np.std(effmassdata_2, axis=0)
     f, axs = pypl.subplots(3, 2, figsize=(9, 12), sharex=True, sharey=True)
     for i in range(4):
-        print(int(i / 2), i % 2)
+        # print(int(i / 2), i % 2)
         effmassdata = stats.bs_effmass(
             corr_matrix[int(i / 2)][i % 2], time_axis=1, spacing=spacing
         )
@@ -862,8 +860,8 @@ def fit_value(diffG, t_range):
         popt, pcov = curve_fit(ff.constant, t_range, values[t_range], sigma=covmat)
         bootfit.append(popt)
     bootfit = np.array(bootfit)
-    print(popt_avg)
-    print(np.average(bootfit))
+    # print(popt_avg)
+    # print(np.average(bootfit))
     return bootfit
 
 
@@ -875,14 +873,14 @@ if __name__ == "__main__":
     pars = params(0)
     nboot = 200  # 700
     nbin = 1  # 10
-    pickledir = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn2/pickle/"
+    pickledir = Path(
+        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta2/kappa1/pickle/"
     )
-    pickledir2 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn4/pickle/"
+    pickledir2 = Path(
+        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta2/kappa2/pickle/"
     )
-    plotdir = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn2/plots/")
-    datadir = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn2/data/")
+    plotdir = Path("/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta2/analysis/plots")
+    datadir = Path("/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta2/analysis/data")
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
     momenta = ["mass"]
@@ -891,23 +889,34 @@ if __name__ == "__main__":
     ### ----------------------------------------------------------------------
     ### find the highest number of configurations available
     files = (
-        pickledir
+         pickledir
         / Path(
-            "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
+            "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
         )
     ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
-    conf_num_list = [int("".join(filter(str.isdigit, l.name))) for l in list(files)]
+    print(pickledir)
+    print(pickledir
+        / Path(
+            "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
+        ))
+
+    # print("list1",[i for i in files])
+    # print("list2",list(files))
+
+    conf_num_list = np.array([int("".join(filter(str.isdigit, l.name))) for l in list(files)])
+    print(conf_num_list)
+    # conf_num_list = [50]
     conf_num = conf_num_list[np.argmax(conf_num_list)]
     barspec_name = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
 
     ### ----------------------------------------------------------------------
     ### Unperturbed correlators
     unpertfile_nucleon_pos = pickledir / Path(
-        "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+        "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[2]
         + barspec_name
     )
-    unpertfile_sigma = pickledir / Path(
+    unpertfile_sigma = pickledir2 / Path(
         "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_name
@@ -917,18 +926,18 @@ if __name__ == "__main__":
     unpert_ratio = G2_unpert_qp100_nucl/G2_unpert_q000_sigma
     t_range0 = np.arange(4, 9)
     unpert_fit = fit_value(unpert_ratio[:,:,0], t_range0)
-    print(unpert_fit)
-    print(np.shape(unpert_fit))
+    # print(unpert_fit)
+    # print(np.shape(unpert_fit))
 
     ### ----------------------------------------------------------------------
     ### SD
-    filelist_SD1 = pickledir / Path(
-        "baryon-3pt_SD_lmb_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+    filelist_SD1 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[2]
         + barspec_name
     )
-    filelist_SD3 = pickledir / Path(
-        "baryon-3pt_SD_lmb3_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+    filelist_SD3 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[2]
         + barspec_name
     )
@@ -939,12 +948,12 @@ if __name__ == "__main__":
     ### ----------------------------------------------------------------------
     ### DS
     filelist_DS1 = pickledir / Path(
-        "baryon-3pt_DS_lmb_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+        "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[0]
         + barspec_name
     )
     filelist_DS3 = pickledir / Path(
-        "baryon-3pt_DS_lmb3_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+        "baryon-3pt_US_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[0]
         + barspec_name
     )
@@ -955,13 +964,13 @@ if __name__ == "__main__":
     ### ----------------------------------------------------------------------
     ### DD
     filelist_DD2 = pickledir / Path(
-        # "baryon-3pt_DD_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        "baryon-3pt_DD_lmb2_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
+        # "baryon-3pt_DD_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040//lp0lp0__lp0lp0/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        "baryon-3pt_UU_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[2]
         + barspec_name
     )
-    filelist_DD4 = pickledir2 / Path(
-        "baryon-3pt_DD_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+    filelist_DD4 = pickledir / Path(
+        "baryon-3pt_UU_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[2]
         + barspec_name
     )
@@ -971,13 +980,13 @@ if __name__ == "__main__":
 
     ### ----------------------------------------------------------------------
     ### SS
-    filelist_SS2 = pickledir / Path(
-        "baryon-3pt_SS_lmb2_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+    filelist_SS2 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_name
     )
-    filelist_SS4 = pickledir / Path(
-        "baryon-3pt_SS_lmb4_TBC/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+    filelist_SS4 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_name
     )
@@ -1020,11 +1029,12 @@ if __name__ == "__main__":
     #     0.256,
     #     0.512,
     # ])
-    lambdas = np.linspace(0,0.5)
-    plotting = False
+    lambdas = np.linspace(0,0.18,20)
+    plotting = True
+
+    print("\n HERE0\n")
     
     for lmb_val in lambdas:
-        print(f"\n\n\n {lmb_val}")
         # Construct a correlation matrix for each order in lambda (skipping order 0)
         matrix_1 = np.array(
             [
@@ -1082,10 +1092,9 @@ if __name__ == "__main__":
         )
         ### ----------------------------------------------------------------------
         # Test the magnitude of the order lambda^4 correlator
-        print(f"{np.shape(matrix_1)=}")
-        test1 = np.average(G2_q100_DD_lmb4[:, :, 0], axis=0)
-        test2 = np.average(G2_q100_DD_lmb2[:, :, 0], axis=0)
-        test3 = np.average(G2_q000_SS_lmb4[:, :, 0], axis=0)
+        # test1 = np.average(G2_q100_DD_lmb4[:, :, 0], axis=0)
+        # test2 = np.average(G2_q100_DD_lmb2[:, :, 0], axis=0)
+        # test3 = np.average(G2_q000_SS_lmb4[:, :, 0], axis=0)
         # print("\n\n", test1, test2, test3, "\n\n")
         ### ----------------------------------------------------------------------
         if plotting:
@@ -1109,6 +1118,8 @@ if __name__ == "__main__":
                 show=False,
             )
 
+        print(f"\n HERE {lmb_val}\n")
+
         t_range = np.arange(4, 9)
         time_choice = 13
         delta_t = 1
@@ -1122,7 +1133,6 @@ if __name__ == "__main__":
         # popt_1, pcov_1 = curve_fit(ff.constant, t_range, diffG1_avg, sigma=covmat)
         # print(popt_1)
         bootfit1 = fit_value(diffG1, t_range)
-        print(f"{np.shape(bootfit1[:,0])=}")
         order0_fit.append(bootfit1[:, 0])
 
         Gt1_2, Gt2_2 = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
@@ -1182,6 +1192,8 @@ if __name__ == "__main__":
                 name="_l" + str(lmb_val) + "_all",
                 show=False,
             )
+
+    print(f"\n\n\n END of LOOP \n\n")
 
     # print("\n\n")
     # print(np.shape(order0_fit))
@@ -1259,4 +1271,4 @@ if __name__ == "__main__":
     # pypl.plot(lambdas, np.average(order3_fit, axis=1))
     pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     pypl.savefig(plotdir / ("lambda_dep.pdf"))
-    pypl.show()
+    # pypl.show()
