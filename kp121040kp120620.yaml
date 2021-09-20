@@ -52,6 +52,7 @@ operators :
       - [[6,4,2],[-6,-4,-2]]
 
 nboot : 500
+nbin : 1
     
 xlim: 32
 norma: [1e16,1e16,1e16]

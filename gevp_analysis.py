@@ -865,7 +865,168 @@ def fit_value(diffG, t_range):
     # print(np.average(bootfit))
     return bootfit
 
+def read_correlators(pars, pickledir, mom_strings):
+    ### ----------------------------------------------------------------------
+    ### find the highest number of configurations available
+    files = (
+         pickledir
+        / Path(
+            "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
+        )
+    ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
+    # Strip the conf number from the file names
+    conf_num_list = np.array([int("".join(filter(str.isdigit, l.name))) for l in list(files)])
+    print(conf_num_list)
+    # conf_num_list = [50] # hard code a choice
+    conf_num = conf_num_list[np.argmax(conf_num_list)]
+    barspec_name = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
 
+
+    ### ----------------------------------------------------------------------
+    G2_nucl = []
+    G2_sigm = []
+    ### ----------------------------------------------------------------------
+    ### Unperturbed correlators
+    unpertfile_nucleon_pos = pickledir / Path(
+        "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[2]
+        + barspec_name
+    )
+    unpertfile_sigma = pickledir2 / Path(
+        "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_name
+    )
+    G2_unpert_qp100_nucl = read_pickle(unpertfile_nucleon_pos, nboot=pars.nboot, nbin=pars.nbin)
+    G2_unpert_q000_sigma = read_pickle(unpertfile_sigma, nboot=pars.nboot, nbin=pars.nbin)
+    G2_nucl.append(G2_unpert_qp100_nucl)
+    G2_sigm.append(G2_unpert_q000_sigma)
+
+    ### ----------------------------------------------------------------------
+    ### SU & SS
+    filelist_SU1 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[2]
+        + barspec_name
+    )
+    filelist_SU3 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[2]
+        + barspec_name
+    )
+    filelist_SS2 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_name
+    )
+    filelist_SS4 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_name
+    )
+
+    G2_q100_SU_lmb = read_pickle(filelist_SU1, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q000_SS_lmb2 = read_pickle(filelist_SS2, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q100_SU_lmb3 = read_pickle(filelist_SU3, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q000_SS_lmb4 = read_pickle(filelist_SS4, nboot=pars.nboot, nbin=pars.nbin)
+    G2_sigm.append(G2_q100_SU_lmb)
+    G2_sigm.append(G2_q000_SS_lmb2)
+    G2_sigm.append(G2_q100_SU_lmb3)
+    G2_sigm.append(G2_q000_SS_lmb4)
+
+    ### ----------------------------------------------------------------------
+    ### US & UU
+    filelist_US1 = pickledir / Path(
+        "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[0]
+        + barspec_name
+    )
+    filelist_UU2 = pickledir / Path(
+        "baryon-3pt_UU_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[2]
+        + barspec_name
+    )
+    filelist_US3 = pickledir / Path(
+        "baryon-3pt_US_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[0]
+        + barspec_name
+    )
+    filelist_UU4 = pickledir / Path(
+        "baryon-3pt_UU_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[2]
+        + barspec_name
+    )
+
+    G2_q000_US_lmb = read_pickle(filelist_US1, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q100_UU_lmb2 = read_pickle(filelist_UU2, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q000_US_lmb3 = read_pickle(filelist_US3, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q100_UU_lmb4 = read_pickle(filelist_UU4, nboot=pars.nboot, nbin=pars.nbin)
+    G2_nucl.append(G2_q000_US_lmb)
+    G2_nucl.append(G2_q100_UU_lmb2)
+    G2_nucl.append(G2_q000_US_lmb3)
+    G2_nucl.append(G2_q100_UU_lmb4)
+
+    return G2_nucl, G2_sigm
+
+def makematrices(G2_nucl, G2_sigm, lmb_val):
+    matrix_1 = np.array(
+        [
+            [G2_nucl[0][:, :, 0], lmb_val * G2_nucl[1][:, :, 0]],
+            [lmb_val * G2_sigm[1][:, :, 0], G2_sigm[0][:, :, 0]],
+        ]
+    )
+    matrix_2 = np.array(
+        [
+            [
+                G2_nucl[0][:, :, 0]
+                + lmb_val ** 2 * G2_nucl[2][:, :, 0],
+                lmb_val * G2_nucl[1][:, :, 0],
+            ],
+            [
+                lmb_val * G2_sigm[1][:, :, 0],
+                G2_sigm[0][:, :, 0]
+                + lmb_val ** 2 * G2_sigm[2][:, :, 0],
+            ],
+        ]
+    )
+    matrix_3 = np.array(
+        [
+            [
+                G2_nucl[0][:, :, 0]
+                + lmb_val ** 2 * G2_nucl[2][:, :, 0],
+                lmb_val * G2_nucl[1][:, :, 0]
+            + lmb_val ** 3 * G2_nucl[3][:, :, 0],
+            ],
+            [
+                lmb_val * G2_sigm[1][:, :, 0]
+                + lmb_val ** 3 * G2_sigm[3][:, :, 0],
+                G2_sigm[0][:, :, 0]
+                + lmb_val ** 2 * G2_sigm[2][:, :, 0],
+            ],
+        ]
+    )
+    matrix_4 = np.array(
+        [
+            [
+                G2_nucl[0][:, :, 0]
+                + (lmb_val ** 2) * G2_nucl[2][:, :, 0]
+                + (lmb_val ** 4) * G2_nucl[4][:, :, 0],
+                lmb_val * G2_nucl[1][:, :, 0]
+                + (lmb_val ** 3) * G2_nucl[3][:, :, 0],
+            ],
+            [
+                lmb_val * G2_sigm[1][:, :, 0]
+                + (lmb_val ** 3) * G2_sigm[3][:, :, 0],
+                G2_sigm[0][:, :, 0]
+                + (lmb_val ** 2) * G2_sigm[2][:, :, 0]
+                + (lmb_val ** 4) * G2_sigm[4][:, :, 0],
+            ],
+        ]
+    )
+
+    return matrix_1, matrix_2, matrix_3, matrix_4
+    
+    
 if __name__ == "__main__":
     pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     pypl.rc("text", usetex=True)
@@ -890,245 +1051,27 @@ if __name__ == "__main__":
     momenta = ["mass"]
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
 
-    ### ----------------------------------------------------------------------
-    ### find the highest number of configurations available
-    files = (
-         pickledir
-        / Path(
-            "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
-        )
-    ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
-    print(pickledir)
-    print(pickledir
-        / Path(
-            "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/p+1+0+0/"
-        ))
-
-    # print("list1",[i for i in files])
-    # print("list2",list(files))
-
-    conf_num_list = np.array([int("".join(filter(str.isdigit, l.name))) for l in list(files)])
-    print(conf_num_list)
-    # conf_num_list = [50]
-    conf_num = conf_num_list[np.argmax(conf_num_list)]
-    barspec_name = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
-
-    ### ----------------------------------------------------------------------
-    ### Unperturbed correlators
-    unpertfile_nucleon_pos = pickledir / Path(
-        "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[2]
-        + barspec_name
-    )
-    unpertfile_sigma = pickledir2 / Path(
-        "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[1]
-        + barspec_name
-    )
-    G2_unpert_qp100_nucl = read_pickle(unpertfile_nucleon_pos, nboot=pars.nboot, nbin=1)
-    G2_unpert_q000_sigma = read_pickle(unpertfile_sigma, nboot=pars.nboot, nbin=1)
-    unpert_ratio = G2_unpert_qp100_nucl/G2_unpert_q000_sigma
-    t_range0 = np.arange(4, 9)
-    unpert_fit = fit_value(unpert_ratio[:,:,0], t_range0)
-    # print(unpert_fit)
-    # print(np.shape(unpert_fit))
-
-    ### ----------------------------------------------------------------------
-    ### SD
-    filelist_SD1 = pickledir2 / Path(
-        "baryon-3pt_SU_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[2]
-        + barspec_name
-    )
-    filelist_SD3 = pickledir2 / Path(
-        "baryon-3pt_SU_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[2]
-        + barspec_name
-    )
-
-    G2_q100_SD_lmb = read_pickle(filelist_SD1, nboot=pars.nboot, nbin=1)
-    G2_q100_SD_lmb3 = read_pickle(filelist_SD3, nboot=pars.nboot, nbin=1)
-
-    ### ----------------------------------------------------------------------
-    ### DS
-    filelist_DS1 = pickledir / Path(
-        "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[0]
-        + barspec_name
-    )
-    filelist_DS3 = pickledir / Path(
-        "baryon-3pt_US_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[0]
-        + barspec_name
-    )
-
-    G2_q100_DS_lmb = read_pickle(filelist_DS1, nboot=pars.nboot, nbin=1)
-    G2_q100_DS_lmb3 = read_pickle(filelist_DS3, nboot=pars.nboot, nbin=1)
-
-    ### ----------------------------------------------------------------------
-    ### DD
-    filelist_DD2 = pickledir / Path(
-        # "baryon-3pt_DD_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040//lp0lp0__lp0lp0/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        "baryon-3pt_UU_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[2]
-        + barspec_name
-    )
-    filelist_DD4 = pickledir / Path(
-        "baryon-3pt_UU_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[2]
-        + barspec_name
-    )
-
-    G2_q100_DD_lmb2 = read_pickle(filelist_DD2, nboot=pars.nboot, nbin=1)
-    G2_q100_DD_lmb4 = read_pickle(filelist_DD4, nboot=pars.nboot, nbin=1)
-
-    ### ----------------------------------------------------------------------
-    ### SS
-    filelist_SS2 = pickledir2 / Path(
-        "baryon-3pt_SS_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[1]
-        + barspec_name
-    )
-    filelist_SS4 = pickledir2 / Path(
-        "baryon-3pt_SS_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[1]
-        + barspec_name
-    )
-
-    G2_q000_SS_lmb2 = read_pickle(filelist_SS2, nboot=pars.nboot, nbin=1)
-    G2_q000_SS_lmb4 = read_pickle(filelist_SS4, nboot=pars.nboot, nbin=1)
-    ### ----------------------------------------------------------------------
+    G2_nucl, G2_sigm = read_correlators(pars, pickledir, mom_strings)
 
     order0_fit = []
     order1_fit = []
     order2_fit = []
     order3_fit = []
 
-    # lambdas = [0.005, 0.02, 0.04, 0.08, 0.16, 0.32, 0.64]
-    # lambdas = [0.005, 0.04, 0.16]
-    # lambdas = np.array([
-    #     0.001,
-    #     0.005,
-    #     0.01,
-    #     0.02,
-    #     0.04,
-    #     0.06,
-    #     0.08,
-    #     0.10,
-    #     0.15,
-    #     0.2,
-    #     0.25,
-    #     0.3,
-    #     0.4,
-    #     0.5,
-    # ])
-    # lambdas = np.array([
-    #     0.001,
-    #     0.004,
-    #     0.008,
-    #     0.016,
-    #     0.032,
-    #     0.064,
-    #     0.128,
-    #     0.256,
-    #     0.512,
-    # ])
     lambdas = np.linspace(0,0.16,30)[1:]
-    # lambdas = np.linspace(0.12,0.16,20)
-    plotting = False
+    plotting = True
+    lmb_val = 0.06
+    # for lmb_val in lambdas:
+    time_choice_range = np.arange(2,15)
+    delta_t = 2
+    t_range = np.arange(4, 9)
 
-    print("\n HERE0\n")
-    
-    for lmb_val in lambdas:
+    for time_choice in time_choice_range:
         # Construct a correlation matrix for each order in lambda (skipping order 0)
-        matrix_1 = np.array(
-            [
-                [G2_unpert_qp100_nucl[:, :, 0], lmb_val * G2_q100_DS_lmb[:, :, 0]],
-                [lmb_val * G2_q100_SD_lmb[:, :, 0], G2_unpert_q000_sigma[:, :, 0]],
-            ]
-        )
-        matrix_2 = np.array(
-            [
-                [
-                    G2_unpert_qp100_nucl[:, :, 0]
-                    + lmb_val ** 2 * G2_q100_DD_lmb2[:, :, 0],
-                    lmb_val * G2_q100_DS_lmb[:, :, 0],
-                ],
-                [
-                    lmb_val * G2_q100_SD_lmb[:, :, 0],
-                    G2_unpert_q000_sigma[:, :, 0]
-                    + lmb_val ** 2 * G2_q000_SS_lmb2[:, :, 0],
-                ],
-            ]
-        )
-        matrix_3 = np.array(
-            [
-                [
-                    G2_unpert_qp100_nucl[:, :, 0]
-                    + lmb_val ** 2 * G2_q100_DD_lmb2[:, :, 0],
-                    lmb_val * G2_q100_DS_lmb[:, :, 0]
-                    + lmb_val ** 3 * G2_q100_DS_lmb3[:, :, 0],
-                ],
-                [
-                    lmb_val * G2_q100_SD_lmb[:, :, 0]
-                    + lmb_val ** 3 * G2_q100_SD_lmb3[:, :, 0],
-                    G2_unpert_q000_sigma[:, :, 0]
-                    + lmb_val ** 2 * G2_q000_SS_lmb2[:, :, 0],
-                ],
-            ]
-        )
-        matrix_4 = np.array(
-            [
-                [
-                    G2_unpert_qp100_nucl[:, :, 0]
-                    + (lmb_val ** 2) * G2_q100_DD_lmb2[:, :, 0]
-                    + (lmb_val ** 4) * G2_q100_DD_lmb4[:, :, 0],
-                    lmb_val * G2_q100_DS_lmb[:, :, 0]
-                    + (lmb_val ** 3) * G2_q100_DS_lmb3[:, :, 0],
-                ],
-                [
-                    lmb_val * G2_q100_SD_lmb[:, :, 0]
-                    + (lmb_val ** 3) * G2_q100_SD_lmb3[:, :, 0],
-                    G2_unpert_q000_sigma[:, :, 0]
-                    + (lmb_val ** 2) * G2_q000_SS_lmb2[:, :, 0]
-                    + (lmb_val ** 4) * G2_q000_SS_lmb4[:, :, 0],
-                ],
-            ]
-        )
+        matrix_1, matrix_2, matrix_3, matrix_4 = makematrices(G2_nucl, G2_sigm, lmb_val)
+
         ### ----------------------------------------------------------------------
-        # Test the magnitude of the order lambda^4 correlator
-        # test1 = np.average(G2_q100_DD_lmb4[:, :, 0], axis=0)
-        # test2 = np.average(G2_q100_DD_lmb2[:, :, 0], axis=0)
-        # test3 = np.average(G2_q000_SS_lmb4[:, :, 0], axis=0)
-        # print("\n\n", test1, test2, test3, "\n\n")
-        ### ----------------------------------------------------------------------
-        if plotting:
-            plotting_script_all(
-                matrix_1 / 1e39,
-                matrix_2 / 1e39,
-                matrix_3 / 1e39,
-                matrix_4 / 1e39,
-                lmb_val,
-                name="_l" + str(lmb_val),
-                show=False,
-            )
-
-            plotting_script_all_N(
-                matrix_1 / 1e39,
-                matrix_2 / 1e39,
-                matrix_3 / 1e39,
-                matrix_4 / 1e39,
-                lmb_val,
-                name="_l" + str(lmb_val),
-                show=False,
-            )
-
-        print(f"\n HERE {lmb_val}\n")
-
-        t_range = np.arange(4, 9)
-        time_choice = 4
-        delta_t = 2
-
+        print(f"\n HERE {time_choice}\n")
         Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
         effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
         effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
@@ -1175,16 +1118,6 @@ if __name__ == "__main__":
         # popt_4, pcov_4 = curve_fit(ff.constant, t_range, diffG4_avg, sigma=covmat)
         # print(popt_4)
 
-        # plotting_script_diff(
-        #     diffG1,
-        #     diffG2,
-        #     diffG3,
-        #     diffG3,
-        #     lmb_val,
-        #     name="_l" + str(lmb_val) + "_all",
-        #     show=True,
-        # )
-
         if plotting:
             plotting_script_diff_2(
                 diffG1,
@@ -1194,28 +1127,20 @@ if __name__ == "__main__":
                 [bootfit1, bootfit2, bootfit3, bootfit4],
                 t_range,
                 lmb_val,
-                name="_l" + str(lmb_val) + "_all",
+                name="_l" + str(lmb_val) + "_time_choice"+str(time_choice),
                 show=False,
             )
 
     print(f"\n\n\n END of LOOP \n\n")
 
-    # print("\n\n")
-    # print(np.shape(order0_fit))
-    # print(np.average(order0_fit, axis=1))
-    # print(np.std(order0_fit, axis=1))
-    # print("\n\n")
-    # print(np.average(order1_fit, axis=1))
-    # print(np.average(order2_fit, axis=1))
-    # print(np.average(order3_fit, axis=1))
 
-    with open(datadir / ("lambda_dep.pkl"), "wb") as file_out:
-        pickle.dump([lambdas,order0_fit, order1_fit,order2_fit,order3_fit],file_out)
+    with open(datadir / ("fit_data_time_choice"+str(time_choice_range[0])+"-"+str(time_choice_range[-1])+".pkl"), "wb") as file_out:
+        pickle.dump([time_choice_range,order0_fit, order1_fit,order2_fit,order3_fit],file_out)
         # pickle.dump(np.array([lambdas,order0_fit, order1_fit,order2_fit,order3_fit],dtype=object),file_out)
     
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
-        lambdas,
+        time_choice_range,
         np.average(order0_fit, axis=1),
         np.std(order0_fit, axis=1),
         fmt="s",
@@ -1226,7 +1151,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        lambdas+0.001,
+        time_choice_range+0.001,
         np.average(order1_fit, axis=1),
         np.std(order1_fit, axis=1),
         fmt="s",
@@ -1237,7 +1162,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        lambdas+0.002,
+        time_choice_range+0.002,
         np.average(order2_fit, axis=1),
         np.std(order2_fit, axis=1),
         fmt="s",
@@ -1248,7 +1173,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        lambdas+0.003,
+        time_choice_range+0.003,
         np.average(order3_fit, axis=1),
         np.std(order3_fit, axis=1),
         fmt="s",
@@ -1258,22 +1183,12 @@ if __name__ == "__main__":
         elinewidth=1,
         markerfacecolor="none",
     )
-    # pypl.errorbar(
-    #     lambdas,
-    #     np.average(order3_fit, axis=1),
-    #     np.std(order3_fit, axis=1),
-    #     fmt="s",
-    #     label="order 4",
-    # )
+
     pypl.legend(fontsize="x-small")
-    pypl.xlim(-0.01, 0.22)
-    pypl.ylim(0, 0.2)
-    pypl.xlabel("$\lambda$")
+    # pypl.xlim(-0.01, 0.22)
+    # pypl.ylim(0, 0.2)
+    pypl.xlabel("time choice")
     pypl.ylabel("$\Delta E$")
-    # pypl.plot(lambdas, np.average(order0_fit, axis=1))
-    # pypl.plot(lambdas, np.average(order1_fit, axis=1))
-    # pypl.plot(lambdas, np.average(order2_fit, axis=1))
-    # pypl.plot(lambdas, np.average(order3_fit, axis=1))
     pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    pypl.savefig(plotdir / ("lambda_dep.pdf"))
+    pypl.savefig(plotdir / ("time_choice_dep.pdf"))
     # pypl.show()
