@@ -50,54 +50,6 @@ def read_pickle(filename, nboot=200, nbin=1):
     return bsdata
 
 
-def plot_correlator(
-    corr, plotname, plotdir, ylim=None, log=False, xlim=30, fitparam=None, ylabel=None
-):
-    """Plot the correlator"""
-    time = np.arange(0, np.shape(corr)[1])
-    yavg = np.average(corr, axis=0)
-    ystd = np.std(corr, axis=0)
-
-    pypl.figure(figsize=(8, 6))
-    pypl.errorbar(
-        time[:xlim],
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color="b",
-        fmt="s",
-        markerfacecolor="none",
-    )
-    if log:
-        pypl.semilogy()
-    if fitparam:
-        pypl.plot(
-            fitparam["x"],
-            np.average(fitparam["y"], axis=0),
-            label=fitparam["label"],
-        )
-        pypl.fill_between(
-            fitparam["x"],
-            np.average(fitparam["y"], axis=0) - np.std(fitparam["y"], axis=0),
-            np.average(fitparam["y"], axis=0) + np.std(fitparam["y"], axis=0),
-            alpha=0.3,
-        )
-        pypl.legend()
-
-    pypl.xlabel(r"$\textrm{t/a}$", labelpad=14, fontsize=18)
-    pypl.ylabel(ylabel, labelpad=5, fontsize=18)
-    pypl.xlim(0, xlim)
-    pypl.ylim(ylim)
-    pypl.grid(True, alpha=0.4)
-    # metadata["Title"] = plotname.split("/")[-1][:-4]
-    metadata["Title"] = plotname
-    pypl.savefig(plotdir / (plotname + ".pdf"), metadata=metadata)
-    # pypl.show()
-    pypl.close()
-    return
-
-
 def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     """Solve the GEVP for a given correlation matrix
 
@@ -134,608 +86,6 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     # print(vl)
     # print(wr, vr)
     return Gt1, Gt2
-
-
-def plotting_script(corr_matrix, Gt1, Gt2, name="", show=False):
-    spacing = 2
-    xlim = 20
-    time = np.arange(0, np.shape(Gt1)[1])
-    efftime = time[:-spacing] + 0.5
-    effmassdata_1 = stats.bs_effmass(Gt1, time_axis=1, spacing=spacing)
-    yeffavg_1 = np.average(effmassdata_1, axis=0)
-    yeffstd_1 = np.std(effmassdata_1, axis=0)
-    effmassdata_2 = stats.bs_effmass(Gt2, time_axis=1, spacing=spacing)
-    yeffavg_2 = np.average(effmassdata_2, axis=0)
-    yeffstd_2 = np.std(effmassdata_2, axis=0)
-    f, axs = pypl.subplots(3, 2, figsize=(9, 12), sharex=True, sharey=True)
-    for i in range(4):
-        # print(int(i / 2), i % 2)
-        effmassdata = stats.bs_effmass(
-            corr_matrix[int(i / 2)][i % 2], time_axis=1, spacing=spacing
-        )
-        yeffavg = np.average(effmassdata, axis=0)
-        yeffstd = np.std(effmassdata, axis=0)
-
-        axs[int(i / 2)][i % 2].errorbar(
-            efftime[:xlim],
-            yeffavg[:xlim],
-            yeffstd[:xlim],
-            capsize=4,
-            elinewidth=1,
-            color="b",
-            fmt="s",
-            markerfacecolor="none",
-        )
-    axs[2][0].errorbar(
-        efftime[:xlim],
-        yeffavg_1[:xlim],
-        yeffstd_1[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color="b",
-        fmt="s",
-        markerfacecolor="none",
-    )
-    axs[2][1].errorbar(
-        efftime[:xlim],
-        yeffavg_2[:xlim],
-        yeffstd_2[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color="b",
-        fmt="s",
-        markerfacecolor="none",
-    )
-    pypl.setp(axs, xlim=(0, xlim), ylim=(0, 1))
-    pypl.savefig(plotdir / ("corr_matrix" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
-
-
-def plotting_script3(corr_matrix, Gt1, Gt2, name="", show=False):
-    spacing = 2
-    xlim = 20
-    time = np.arange(0, np.shape(Gt1)[1])
-    efftime = time[:-spacing] + 0.5
-    effmassdata_1 = stats.bs_effmass(Gt1, time_axis=1, spacing=spacing)
-    yeffavg_1 = np.average(effmassdata_1, axis=0)
-    yeffstd_1 = np.std(effmassdata_1, axis=0)
-    effmassdata_2 = stats.bs_effmass(Gt2, time_axis=1, spacing=spacing)
-    yeffavg_2 = np.average(effmassdata_2, axis=0)
-    yeffstd_2 = np.std(effmassdata_2, axis=0)
-    f, axs = pypl.subplots(2, 2, figsize=(9, 9), sharex=True, sharey=True)
-    for i in range(4):
-        print(int(i / 2), i % 2)
-        effmassdata = stats.bs_effmass(
-            corr_matrix[int(i / 2)][i % 2], time_axis=1, spacing=spacing
-        )
-        yeffavg = np.average(effmassdata, axis=0)
-        yeffstd = np.std(effmassdata, axis=0)
-
-        axs[int(i / 2)][i % 2].errorbar(
-            efftime[:xlim],
-            yeffavg[:xlim],
-            yeffstd[:xlim],
-            capsize=4,
-            elinewidth=1,
-            color="b",
-            fmt="s",
-            markerfacecolor="none",
-        )
-    # axs[2][0].errorbar(
-    #     efftime[:xlim],
-    #     yeffavg_1[:xlim],
-    #     yeffstd_1[:xlim],
-    #     capsize=4,
-    #     elinewidth=1,
-    #     color="b",
-    #     fmt="s",
-    #     markerfacecolor="none",
-    # )
-    # axs[2][1].errorbar(
-    #     efftime[:xlim],
-    #     yeffavg_2[:xlim],
-    #     yeffstd_2[:xlim],
-    #     capsize=4,
-    #     elinewidth=1,
-    #     color="b",
-    #     fmt="s",
-    #     markerfacecolor="none",
-    # )
-    pypl.setp(axs, xlim=(0, xlim), ylim=(0, 1))
-    pypl.savefig(plotdir / ("corr_matrix" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
-
-
-def plotting_script_nucl(corr_matrix, corr_matrix1, corr_matrix2, name="", show=False):
-    spacing = 2
-    xlim = 22
-    time = np.arange(0, np.shape(corr_matrix[0][0])[1])
-
-    f, axs = pypl.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
-    yavg = np.average(corr_matrix[0][0], axis=0)
-    ystd = np.std(corr_matrix[0][0], axis=0)
-    axs.errorbar(
-        time[:xlim],
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[0],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^0)$,",
-    )
-    yavg = np.average(corr_matrix1[0][0], axis=0)
-    ystd = np.std(corr_matrix1[0][0], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.3,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[1],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
-    )
-    yavg = np.average(corr_matrix2[0][0], axis=0)
-    ystd = np.std(corr_matrix2[0][0], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.6,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[2],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
-    )
-    pypl.semilogy()
-    pypl.legend(fontsize="small")
-    pypl.ylabel(r"$G_{nn}(t;\vec{p}=(1,0,0))$")
-    pypl.title("$\lambda=0.04$")
-    # pypl.xlabel(r"$\textrm{t/a}$")
-    pypl.xlabel(r"$t/a$")
-    pypl.savefig(plotdir / ("comp_plot_nucl_nucl" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
-
-
-def plotting_script_sigma(corr_matrix, corr_matrix1, corr_matrix2, name="", show=False):
-    spacing = 2
-    xlim = 22
-    time = np.arange(0, np.shape(corr_matrix[0][0])[1])
-
-    f, axs = pypl.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
-    yavg = np.average(corr_matrix[1][1], axis=0)
-    ystd = np.std(corr_matrix[1][1], axis=0)
-    axs.errorbar(
-        time[:xlim],
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[0],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^0)$,",
-    )
-    yavg = np.average(corr_matrix1[1][1], axis=0)
-    ystd = np.std(corr_matrix1[1][1], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.3,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[1],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
-    )
-    yavg = np.average(corr_matrix2[1][1], axis=0)
-    ystd = np.std(corr_matrix2[1][1], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.6,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[2],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
-    )
-    pypl.semilogy()
-    pypl.legend(fontsize="small")
-    pypl.ylabel(r"$G_{\Sigma\Sigma}(t;\vec{p}=(0,0,0))$")
-    pypl.title("$\lambda=0.04$")
-    # pypl.xlabel(r"$\textrm{t/a}$")
-    pypl.xlabel(r"$t/a$")
-    pypl.savefig(plotdir / ("comp_plot_sigma_sigma" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
-
-
-def plotting_script_nucl_sigma(corr_matrix, corr_matrix1, name="", show=False):
-    spacing = 2
-    xlim = 22
-    time = np.arange(0, np.shape(corr_matrix[0][0])[1])
-
-    f, axs = pypl.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
-    yavg = np.average(corr_matrix[0][1], axis=0)
-    ystd = np.std(corr_matrix[0][1], axis=0)
-    axs.errorbar(
-        time[:xlim],
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[0],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^1)$,",
-    )
-    yavg = np.average(corr_matrix1[0][1], axis=0)
-    ystd = np.std(corr_matrix1[0][1], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.3,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[1],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
-    )
-    pypl.semilogy()
-    pypl.legend(fontsize="small")
-    pypl.ylabel(r"$G_{n\Sigma}(t;\vec{p}=(0,0,0))$")
-    pypl.title("$\lambda=0.04$")
-    # pypl.xlabel(r"$\textrm{t/a}$")
-    pypl.xlabel(r"$t/a$")
-    pypl.savefig(plotdir / ("comp_plot_nucl_sigma" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
-
-
-def plotting_script_sigma_nucl(corr_matrix, corr_matrix1, name="", show=False):
-    spacing = 2
-    xlim = 22
-    time = np.arange(0, np.shape(corr_matrix[0][0])[1])
-
-    f, axs = pypl.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
-    yavg = np.average(corr_matrix[1][0], axis=0)
-    ystd = np.std(corr_matrix[1][0], axis=0)
-    axs.errorbar(
-        time[:xlim],
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[0],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^1)$,",
-    )
-    yavg = np.average(corr_matrix1[1][0], axis=0)
-    ystd = np.std(corr_matrix1[1][0], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.3,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[1],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
-    )
-    pypl.semilogy()
-    pypl.legend(fontsize="small")
-    pypl.ylabel(r"$G_{\Sigma n}(t;\vec{p}=(1,0,0))$")
-    pypl.title("$\lambda=0.04$")
-    # pypl.xlabel(r"$\textrm{t/a}$")
-    pypl.xlabel(r"$t/a$")
-    pypl.savefig(plotdir / ("comp_plot_sigma_nucl" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
-
-
-def plotting_script_all(
-    corr_matrix, corr_matrix1, corr_matrix2, corr_matrix3, lmb_val, name="", show=False
-):
-    spacing = 2
-    xlim = 16
-    time = np.arange(0, np.shape(corr_matrix[0][0])[1])
-
-    f, axs = pypl.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
-    yavg = np.average(corr_matrix[1][1], axis=0)
-    ystd = np.std(corr_matrix[1][1], axis=0)
-    axs.errorbar(
-        time[:xlim],
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[0],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$G_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0)$",
-    )
-    yavg = np.average(corr_matrix1[1][1], axis=0)
-    ystd = np.std(corr_matrix1[1][1], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.2,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[1],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$G_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
-    )
-    yavg = np.average(corr_matrix3[1][1], axis=0)
-    ystd = np.std(corr_matrix3[1][1], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.4,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[2],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$G_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
-    )
-
-    yavg = np.average(corr_matrix[1][0], axis=0)
-    ystd = np.std(corr_matrix[1][0], axis=0)
-    axs.errorbar(
-        time[:xlim],
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[3],
-        fmt="^",
-        markerfacecolor="none",
-        label=r"$G_{\Sigma N}(t),\ \mathcal{O}(\lambda^1)$",
-    )
-    yavg = np.average(corr_matrix2[1][0], axis=0)
-    ystd = np.std(corr_matrix2[1][0], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.2,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[4],
-        fmt="^",
-        markerfacecolor="none",
-        label=r"$G_{\Sigma N}(t),\ \mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
-    )
-
-    pypl.semilogy()
-    pypl.legend(fontsize="x-small")
-    # pypl.ylabel(r"$G_{nn}(t;\vec{p}=(1,0,0))$")
-    # pypl.title("$\lambda=0.04$")
-    pypl.title("$\lambda=" + str(lmb_val) + "$")
-    # pypl.xlabel(r"$\textrm{t/a}$")
-    pypl.xlabel(r"$t/a$")
-    pypl.savefig(plotdir / ("comp_plot_all_SS_" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
-
-
-def plotting_script_all_N(
-    corr_matrix, corr_matrix1, corr_matrix2, corr_matrix3, lmb_val, name="", show=False
-):
-    spacing = 2
-    xlim = 16
-    time = np.arange(0, np.shape(corr_matrix[0][0])[1])
-
-    f, axs = pypl.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
-    yavg = np.average(corr_matrix[0][0], axis=0)
-    ystd = np.std(corr_matrix[0][0], axis=0)
-    axs.errorbar(
-        time[:xlim],
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[0],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$G_{NN}(t),\ \mathcal{O}(\lambda^0)$",
-    )
-    yavg = np.average(corr_matrix1[0][0], axis=0)
-    ystd = np.std(corr_matrix1[0][0], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.2,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[1],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$G_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
-    )
-    yavg = np.average(corr_matrix3[0][0], axis=0)
-    ystd = np.std(corr_matrix3[0][0], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.4,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[2],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$G_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
-    )
-
-    yavg = np.average(corr_matrix[0][1], axis=0)
-    ystd = np.std(corr_matrix[0][1], axis=0)
-    axs.errorbar(
-        time[:xlim],
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[3],
-        fmt="^",
-        markerfacecolor="none",
-        label=r"$G_{N\Sigma}(t),\ \mathcal{O}(\lambda^1)$",
-    )
-    yavg = np.average(corr_matrix2[0][1], axis=0)
-    ystd = np.std(corr_matrix2[0][1], axis=0)
-    axs.errorbar(
-        time[:xlim] + 0.2,
-        yavg[:xlim],
-        ystd[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[4],
-        fmt="^",
-        markerfacecolor="none",
-        label=r"$G_{N\Sigma}(t),\ \mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
-    )
-
-    pypl.semilogy()
-    pypl.legend(fontsize="x-small")
-    # pypl.ylabel(r"$G_{nn}(t;\vec{p}=(1,0,0))$")
-    # pypl.title("$\lambda=0.04$")
-    pypl.title("$\lambda=" + str(lmb_val) + "$")
-    # pypl.xlabel(r"$\textrm{t/a}$")
-    pypl.xlabel(r"$t/a$")
-    pypl.savefig(plotdir / ("comp_plot_all_NN_" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
-
-
-def plotting_script2(diffG, name="", show=False):
-    spacing = 2
-    xlim = 17
-    time = np.arange(0, np.shape(diffG)[1])
-    efftime = time[:-spacing] + 0.5
-    yeffavg_1 = np.average(diffG, axis=0)
-    yeffstd_1 = np.std(diffG, axis=0)
-    f, axs = pypl.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
-    axs.errorbar(
-        efftime[:xlim],
-        yeffavg_1[:xlim],
-        yeffstd_1[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[0],
-        fmt="s",
-        markerfacecolor="none",
-    )
-    axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    pypl.setp(axs, xlim=(0, xlim), ylim=(-1, 4))
-    pypl.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
-    pypl.xlabel("$t/a$")
-    pypl.savefig(plotdir / ("diff_G" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
-
-
-def plotting_script_diff(diffG1, diffG2, diffG3, diffG4, lmb_val, name="", show=False):
-    spacing = 2
-    xlim = 15
-    time = np.arange(0, np.shape(diffG1)[1])
-    efftime = time[:-spacing] + 0.5
-    f, axs = pypl.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
-
-    yeffavg_1 = np.average(diffG1, axis=0)
-    yeffstd_1 = np.std(diffG1, axis=0)
-    axs.errorbar(
-        efftime[:xlim],
-        yeffavg_1[:xlim],
-        yeffstd_1[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[0],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^1)$",
-    )
-    yeffavg_2 = np.average(diffG2, axis=0)
-    yeffstd_2 = np.std(diffG2, axis=0)
-    axs.errorbar(
-        efftime[:xlim] + 0.2,
-        yeffavg_2[:xlim],
-        yeffstd_2[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[1],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^2)$",
-    )
-    yeffavg_3 = np.average(diffG3, axis=0)
-    yeffstd_3 = np.std(diffG3, axis=0)
-    axs.errorbar(
-        efftime[:xlim] + 0.4,
-        yeffavg_3[:xlim],
-        yeffstd_3[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[2],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^3)$",
-    )
-    yeffavg_4 = np.average(diffG4, axis=0)
-    yeffstd_4 = np.std(diffG4, axis=0)
-    axs.errorbar(
-        efftime[:xlim] + 0.6,
-        yeffavg_4[:xlim],
-        yeffstd_4[:xlim],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[3],
-        fmt="s",
-        markerfacecolor="none",
-        label=r"$\mathcal{O}(\lambda^4)$",
-    )
-
-    axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    pypl.setp(axs, xlim=(0, xlim), ylim=(-1, 4))
-    pypl.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
-    pypl.xlabel("$t/a$")
-    pypl.legend(fontsize="x-small")
-    pypl.title("$\lambda=" + str(lmb_val) + "$")
-    pypl.savefig(plotdir / ("diff_G" + name + ".pdf"))
-    if show:
-        pypl.show()
-    pypl.close()
-    return
 
 
 def plotting_script_diff_2(
@@ -866,6 +216,10 @@ def fit_value(diffG, t_range):
     return bootfit
 
 def read_correlators(pars, pickledir, mom_strings):
+    """Read the pickle files which contain the correlator data
+
+    The script will check the folders for available files and pick out the files with the highest number of configurations.
+    """
     ### ----------------------------------------------------------------------
     ### find the highest number of configurations available
     files = (
@@ -1033,11 +387,14 @@ if __name__ == "__main__":
     rcParams.update({"figure.autolayout": True})
 
     pars = params(0)
-    nboot = 200  # 700
+    # nboot = 500  # 700
     nbin = 1  # 10
 
     # Read in the directory data from the yaml file
-    config_file = "data_dir.yaml"
+    if len(sys.argv) == 2:
+        config_file = sys.argv[1]
+    else:
+        config_file = "data_dir.yaml"
     with open(config_file) as f:
         config = yaml.safe_load(f)
     # TODO: Set up a defaults.yaml file for when there is no input file
@@ -1053,96 +410,100 @@ if __name__ == "__main__":
 
     G2_nucl, G2_sigm = read_correlators(pars, pickledir, mom_strings)
 
-    order0_fit = []
-    order1_fit = []
-    order2_fit = []
-    order3_fit = []
-
     lambdas = np.linspace(0,0.16,30)[1:]
     plotting = True
-    lmb_val = 0.06
+    lmb_val = 0.06 #0.16
     # for lmb_val in lambdas:
+    # time_choice_range = np.arange(2,15)
     time_choice_range = np.arange(2,15)
-    delta_t = 2
+    # delta_t = 2
+    delta_t_range = np.arange(1,4)
     t_range = np.arange(4, 9)
 
-    for time_choice in time_choice_range:
-        # Construct a correlation matrix for each order in lambda (skipping order 0)
-        matrix_1, matrix_2, matrix_3, matrix_4 = makematrices(G2_nucl, G2_sigm, lmb_val)
 
-        ### ----------------------------------------------------------------------
-        print(f"\n HERE {time_choice}\n")
-        Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
-        effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
-        effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
-        diffG1 = (effmassdata_1 - effmassdata_2) / 2  # / lmb_val
-        # diffG1_avg = np.average(diffG1, axis=0)[t_range]
-        # covmat = np.diag(diffG1[t_range])
-        # popt_1, pcov_1 = curve_fit(ff.constant, t_range, diffG1_avg, sigma=covmat)
-        # print(popt_1)
-        bootfit1 = fit_value(diffG1, t_range)
-        order0_fit.append(bootfit1[:, 0])
+    order0_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
+    order1_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
+    order2_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
+    order3_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
 
-        Gt1_2, Gt2_2 = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
-        effmassdata_1 = stats.bs_effmass(Gt1_2, time_axis=1, spacing=1)
-        effmassdata_2 = stats.bs_effmass(Gt2_2, time_axis=1, spacing=1)
-        diffG2 = (effmassdata_1 - effmassdata_2) / 2  # / lmb_val
-        bootfit2 = fit_value(diffG2, t_range)
-        order1_fit.append(bootfit2[:, 0])
-        # diffG2_avg = np.average(diffG2, axis=0)[t_range]
-        # covmat = np.diag(diffG2[t_range])
-        # popt_2, pcov_2 = curve_fit(ff.constant, t_range, diffG2_avg, sigma=covmat)
-        # print(popt_2)
+    for i,time_choice in enumerate(time_choice_range):
+        for j,delta_t in enumerate(delta_t_range):
 
-        Gt1_3, Gt2_3 = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
-        effmassdata_1_3 = stats.bs_effmass(Gt1_3, time_axis=1, spacing=1)
-        effmassdata_2_3 = stats.bs_effmass(Gt2_3, time_axis=1, spacing=1)
-        diffG3 = (effmassdata_1_3 - effmassdata_2_3) / 2  # / lmb_val
-        bootfit3 = fit_value(diffG3, t_range)
-        order2_fit.append(bootfit3[:, 0])
-        # diffG3_avg = np.average(diffG3, axis=0)[t_range]
-        # covmat = np.diag(diffG3[t_range])
-        # popt_3, pcov_3 = curve_fit(ff.constant, t_range, diffG3_avg, sigma=covmat)
-        # print(popt_3)
-
-        Gt1_4, Gt2_4 = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
-        effmassdata_1_4 = stats.bs_effmass(Gt1_4, time_axis=1, spacing=1)
-        effmassdata_2_4 = stats.bs_effmass(Gt2_4, time_axis=1, spacing=1)
-        diffG4 = (effmassdata_1_4 - effmassdata_2_4) / 2  # / lmb_val
-        bootfit4 = fit_value(diffG4, t_range)
-        order3_fit.append(bootfit4[:, 0])
-        # print(np.average(diffG4, axis=0)[t_range])
-        # print("\n\n\n", np.average(bootfit4), np.std(bootfit4), "\n\n\n")
-        # diffG4_avg = np.average(diffG4, axis=0)[t_range]
-        # covmat = np.diag(diffG4[t_range])
-        # popt_4, pcov_4 = curve_fit(ff.constant, t_range, diffG4_avg, sigma=covmat)
-        # print(popt_4)
-
-        if plotting:
-            plotting_script_diff_2(
-                diffG1,
-                diffG2,
-                diffG3,
-                diffG4,
-                [bootfit1, bootfit2, bootfit3, bootfit4],
-                t_range,
-                lmb_val,
-                name="_l" + str(lmb_val) + "_time_choice"+str(time_choice),
-                show=False,
-            )
-
+            # Construct a correlation matrix for each order in lambda (skipping order 0)
+            matrix_1, matrix_2, matrix_3, matrix_4 = makematrices(G2_nucl, G2_sigm, lmb_val)
+            
+            ### ----------------------------------------------------------------------
+            print(f"\n HERE {time_choice}\n")
+            Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
+            effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
+            effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
+            diffG1 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
+            bootfit1 = fit_value(diffG1, t_range)
+            order0_fit[i,j] = bootfit1[:, 0]
+            # order0_fit.append(bootfit1[:, 0])
+            
+            Gt1_2, Gt2_2 = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
+            effmassdata_1 = stats.bs_effmass(Gt1_2, time_axis=1, spacing=1)
+            effmassdata_2 = stats.bs_effmass(Gt2_2, time_axis=1, spacing=1)
+            diffG2 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
+            bootfit2 = fit_value(diffG2, t_range)
+            order1_fit[i,j] = bootfit2[:, 0]
+            # order1_fit.append(bootfit2[:, 0])
+            
+            Gt1_3, Gt2_3 = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
+            effmassdata_1_3 = stats.bs_effmass(Gt1_3, time_axis=1, spacing=1)
+            effmassdata_2_3 = stats.bs_effmass(Gt2_3, time_axis=1, spacing=1)
+            diffG3 = np.abs(effmassdata_1_3 - effmassdata_2_3) / 2  # / lmb_val
+            bootfit3 = fit_value(diffG3, t_range)
+            order2_fit[i,j] = bootfit3[:, 0]
+            # order2_fit.append(bootfit3[:, 0])
+            
+            Gt1_4, Gt2_4 = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
+            effmassdata_1_4 = stats.bs_effmass(Gt1_4, time_axis=1, spacing=1)
+            effmassdata_2_4 = stats.bs_effmass(Gt2_4, time_axis=1, spacing=1)
+            diffG4 = np.abs(effmassdata_1_4 - effmassdata_2_4) / 2  # / lmb_val
+            bootfit4 = fit_value(diffG4, t_range)
+            order3_fit[i,j] = bootfit4[:, 0]
+            # order3_fit.append(bootfit4[:, 0])
+            
+            if plotting:
+                plotting_script_diff_2(
+                    diffG1,
+                    diffG2,
+                    diffG3,
+                    diffG4,
+                    [bootfit1, bootfit2, bootfit3, bootfit4],
+                    t_range,
+                    lmb_val,
+                    name="_l" + str(lmb_val) + "_time_choice"+str(time_choice),
+                    show=False,
+                )
+                
     print(f"\n\n\n END of LOOP \n\n")
 
 
-    with open(datadir / ("fit_data_time_choice"+str(time_choice_range[0])+"-"+str(time_choice_range[-1])+".pkl"), "wb") as file_out:
-        pickle.dump([time_choice_range,order0_fit, order1_fit,order2_fit,order3_fit],file_out)
-        # pickle.dump(np.array([lambdas,order0_fit, order1_fit,order2_fit,order3_fit],dtype=object),file_out)
+    all_data = {
+        "lambdas" : np.array([lmb_val]),
+        "order0_fit" : order0_fit, 
+        "order1_fit" : order1_fit,
+        "order2_fit" : order2_fit,
+        "order3_fit" : order3_fit,
+        "time_choice" : time_choice_range,
+        "delta_t" : delta_t_range
+    }
+
+    with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "wb") as file_out:
+        pickle.dump(all_data, file_out)
+
+    # with open(datadir / ("fit_data_time_choice"+str(time_choice_range[0])+"-"+str(time_choice_range[-1])+".pkl"), "wb") as file_out:
+    #     pickle.dump([time_choice_range, delta_t_range, order0_fit, order1_fit,order2_fit,order3_fit],file_out)
+    #     # pickle.dump(np.array([lambdas,order0_fit, order1_fit,order2_fit,order3_fit],dtype=object),file_out)
     
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
         time_choice_range,
-        np.average(order0_fit, axis=1),
-        np.std(order0_fit, axis=1),
+        np.average(order0_fit[:,0,:], axis=1),
+        np.std(order0_fit[:,0,:], axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^1)$",
         color=_colors[0],
@@ -1152,8 +513,8 @@ if __name__ == "__main__":
     )
     pypl.errorbar(
         time_choice_range+0.001,
-        np.average(order1_fit, axis=1),
-        np.std(order1_fit, axis=1),
+        np.average(order1_fit[:,0,:], axis=1),
+        np.std(order1_fit[:,0,:], axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^2)$",
         color=_colors[1],
@@ -1163,8 +524,8 @@ if __name__ == "__main__":
     )
     pypl.errorbar(
         time_choice_range+0.002,
-        np.average(order2_fit, axis=1),
-        np.std(order2_fit, axis=1),
+        np.average(order2_fit[:,0,:], axis=1),
+        np.std(order2_fit[:,0,:], axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^3)$",
         color=_colors[2],
@@ -1174,8 +535,8 @@ if __name__ == "__main__":
     )
     pypl.errorbar(
         time_choice_range+0.003,
-        np.average(order3_fit, axis=1),
-        np.std(order3_fit, axis=1),
+        np.average(order3_fit[:,0,:], axis=1),
+        np.std(order3_fit[:,0,:], axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^4)$",
         color=_colors[3],
@@ -1190,5 +551,5 @@ if __name__ == "__main__":
     pypl.xlabel("time choice")
     pypl.ylabel("$\Delta E$")
     pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    pypl.savefig(plotdir / ("time_choice_dep.pdf"))
+    pypl.savefig(plotdir / (f"time_choice_dep_l{lmb_val}.pdf"))
     # pypl.show()

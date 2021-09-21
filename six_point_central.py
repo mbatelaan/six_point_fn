@@ -852,18 +852,23 @@ def fit_value(diffG, t_range):
     t_range is an array of time values to fit over
     the function will return an array of fit parameters for each bootstrap
     """
-    diffG_avg = np.average(diffG, axis=0)[t_range]
-    covmat = np.diag(np.std(diffG, axis=0)[t_range] ** 2)
-    # covmat = np.cov(diffG[t_range])
+    data_set = diffG[:,t_range]
+    diffG_avg = np.average(data_set, axis=0)
+    covmat = np.cov(data_set.T)
+    diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     popt_avg, pcov_avg = curve_fit(ff.constant, t_range, diffG_avg, sigma=covmat)
+    chisq = ff.chisqfn(*popt_avg, ff.constant, t_range, diffG_avg, np.linalg.inv(covmat))
+    redchisq = chisq / len(t_range)
+    # print("popt", popt_avg)
+    # print("pcov", pcov_avg)
     bootfit = []
     for iboot, values in enumerate(diffG):
-        popt, pcov = curve_fit(ff.constant, t_range, values[t_range], sigma=covmat)
+        popt, pcov = curve_fit(ff.constant, t_range, values[t_range], sigma=diag_sigma)
         bootfit.append(popt)
     bootfit = np.array(bootfit)
     # print(popt_avg)
     # print(np.average(bootfit))
-    return bootfit
+    return bootfit, redchisq
 
 
 if __name__ == "__main__":
@@ -876,7 +881,11 @@ if __name__ == "__main__":
     nbin = 1  # 10
 
     # Read in the directory data from the yaml file
-    config_file = "data_dir.yaml"
+    if len(sys.argv) == 2:
+        config_file = sys.argv[1]
+    else:
+        config_file = "data_dir.yaml"
+    print(config_file)
     with open(config_file) as f:
         config = yaml.safe_load(f)
     # TODO: Set up a defaults.yaml file for when there is no input file
@@ -929,7 +938,7 @@ if __name__ == "__main__":
     G2_unpert_q000_sigma = read_pickle(unpertfile_sigma, nboot=pars.nboot, nbin=1)
     unpert_ratio = G2_unpert_qp100_nucl/G2_unpert_q000_sigma
     t_range0 = np.arange(4, 9)
-    unpert_fit = fit_value(unpert_ratio[:,:,0], t_range0)
+    unpert_fit, redchisq = fit_value(unpert_ratio[:,:,0], t_range0)
     # print(unpert_fit)
     # print(np.shape(unpert_fit))
 
@@ -1003,6 +1012,7 @@ if __name__ == "__main__":
     order1_fit = []
     order2_fit = []
     order3_fit = []
+    red_chisq_list = [[],[],[],[]]
 
     # lambdas = [0.005, 0.02, 0.04, 0.08, 0.16, 0.32, 0.64]
     # lambdas = [0.005, 0.04, 0.16]
@@ -1033,8 +1043,10 @@ if __name__ == "__main__":
     #     0.256,
     #     0.512,
     # ])
-    lambdas = np.linspace(0,0.16,30)[1:]
     # lambdas = np.linspace(0.12,0.16,20)
+    # lambdas = np.linspace(0,0.16,10)[1:]
+    # lambdas = np.linspace(0,0.04,30)[1:]
+    lambdas = np.linspace(0,0.16,30)[1:]
     plotting = False
 
     print("\n HERE0\n")
@@ -1126,64 +1138,48 @@ if __name__ == "__main__":
         print(f"\n HERE {lmb_val}\n")
 
         t_range = np.arange(4, 9)
-        time_choice = 4
+        time_choice = 2
         delta_t = 2
 
         Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
-        effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
-        effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
-        diffG1 = (effmassdata_1 - effmassdata_2) / 2  # / lmb_val
+        ratio1 = Gt1_1/Gt2_1
+        effmassdata_1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
+        # effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
+        # effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
+        # diffG1 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
+        diffG1 = effmassdata_1 / 2
         # diffG1_avg = np.average(diffG1, axis=0)[t_range]
         # covmat = np.diag(diffG1[t_range])
         # popt_1, pcov_1 = curve_fit(ff.constant, t_range, diffG1_avg, sigma=covmat)
         # print(popt_1)
-        bootfit1 = fit_value(diffG1, t_range)
+        bootfit1, redchisq1 = fit_value(diffG1, t_range)
         order0_fit.append(bootfit1[:, 0])
+        red_chisq_list[0].append(redchisq1)
+        print(redchisq1)
 
         Gt1_2, Gt2_2 = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
         effmassdata_1 = stats.bs_effmass(Gt1_2, time_axis=1, spacing=1)
         effmassdata_2 = stats.bs_effmass(Gt2_2, time_axis=1, spacing=1)
-        diffG2 = (effmassdata_1 - effmassdata_2) / 2  # / lmb_val
-        bootfit2 = fit_value(diffG2, t_range)
+        diffG2 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
+        bootfit2, redchisq2 = fit_value(diffG2, t_range)
         order1_fit.append(bootfit2[:, 0])
-        # diffG2_avg = np.average(diffG2, axis=0)[t_range]
-        # covmat = np.diag(diffG2[t_range])
-        # popt_2, pcov_2 = curve_fit(ff.constant, t_range, diffG2_avg, sigma=covmat)
-        # print(popt_2)
+        red_chisq_list[1].append(redchisq2)
 
         Gt1_3, Gt2_3 = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
         effmassdata_1_3 = stats.bs_effmass(Gt1_3, time_axis=1, spacing=1)
         effmassdata_2_3 = stats.bs_effmass(Gt2_3, time_axis=1, spacing=1)
-        diffG3 = (effmassdata_1_3 - effmassdata_2_3) / 2  # / lmb_val
-        bootfit3 = fit_value(diffG3, t_range)
+        diffG3 = np.abs(effmassdata_1_3 - effmassdata_2_3) / 2  # / lmb_val
+        bootfit3, redchisq3 = fit_value(diffG3, t_range)
         order2_fit.append(bootfit3[:, 0])
-        # diffG3_avg = np.average(diffG3, axis=0)[t_range]
-        # covmat = np.diag(diffG3[t_range])
-        # popt_3, pcov_3 = curve_fit(ff.constant, t_range, diffG3_avg, sigma=covmat)
-        # print(popt_3)
+        red_chisq_list[2].append(redchisq3)
 
         Gt1_4, Gt2_4 = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
         effmassdata_1_4 = stats.bs_effmass(Gt1_4, time_axis=1, spacing=1)
         effmassdata_2_4 = stats.bs_effmass(Gt2_4, time_axis=1, spacing=1)
-        diffG4 = (effmassdata_1_4 - effmassdata_2_4) / 2  # / lmb_val
-        bootfit4 = fit_value(diffG4, t_range)
+        diffG4 = np.abs(effmassdata_1_4 - effmassdata_2_4) / 2  # / lmb_val
+        bootfit4, redchisq4 = fit_value(diffG4, t_range)
         order3_fit.append(bootfit4[:, 0])
-        # print(np.average(diffG4, axis=0)[t_range])
-        # print("\n\n\n", np.average(bootfit4), np.std(bootfit4), "\n\n\n")
-        # diffG4_avg = np.average(diffG4, axis=0)[t_range]
-        # covmat = np.diag(diffG4[t_range])
-        # popt_4, pcov_4 = curve_fit(ff.constant, t_range, diffG4_avg, sigma=covmat)
-        # print(popt_4)
-
-        # plotting_script_diff(
-        #     diffG1,
-        #     diffG2,
-        #     diffG3,
-        #     diffG3,
-        #     lmb_val,
-        #     name="_l" + str(lmb_val) + "_all",
-        #     show=True,
-        # )
+        red_chisq_list[3].append(redchisq4)
 
         if plotting:
             plotting_script_diff_2(
@@ -1200,19 +1196,33 @@ if __name__ == "__main__":
 
     print(f"\n\n\n END of LOOP \n\n")
 
-    # print("\n\n")
-    # print(np.shape(order0_fit))
-    # print(np.average(order0_fit, axis=1))
-    # print(np.std(order0_fit, axis=1))
-    # print("\n\n")
-    # print(np.average(order1_fit, axis=1))
-    # print(np.average(order2_fit, axis=1))
-    # print(np.average(order3_fit, axis=1))
+    print(red_chisq_list)
+    red_chisq_list = np.array(red_chisq_list)
+    print(red_chisq_list)
 
-    with open(datadir / ("lambda_dep.pkl"), "wb") as file_out:
-        pickle.dump([lambdas,order0_fit, order1_fit,order2_fit,order3_fit],file_out)
+    all_data = {
+        "lambdas" : np.array(lambdas),
+        "order0_fit" : np.array(order0_fit),
+        "order1_fit" : np.array(order1_fit),
+        "order2_fit" : np.array(order2_fit),
+        "order3_fit" : np.array(order3_fit),
+        "redchisq" : red_chisq_list,
+        "time_choice" : np.array(time_choice),
+        "delta_t" : np.array(delta_t)
+    }
+    
+    with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"), "wb") as file_out:
+        pickle.dump(all_data, file_out)
+        # pickle.dump([lambdas,order0_fit, order1_fit,order2_fit,order3_fit, time_choice, delta_t],file_out)
         # pickle.dump(np.array([lambdas,order0_fit, order1_fit,order2_fit,order3_fit],dtype=object),file_out)
     
+    # print(red_chisq_list[0])
+    # print(red_chisq_list[0].ptp())
+    # scaled_z0 = (red_chisq_list[0] - red_chisq_list[0].min()) / red_chisq_list[0].ptp()
+    # print('scaled_z0', scaled_z0)
+    # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
+    # print('colors_0', colors_0)
+
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
         lambdas,
@@ -1270,10 +1280,7 @@ if __name__ == "__main__":
     pypl.ylim(0, 0.2)
     pypl.xlabel("$\lambda$")
     pypl.ylabel("$\Delta E$")
-    # pypl.plot(lambdas, np.average(order0_fit, axis=1))
-    # pypl.plot(lambdas, np.average(order1_fit, axis=1))
-    # pypl.plot(lambdas, np.average(order2_fit, axis=1))
-    # pypl.plot(lambdas, np.average(order3_fit, axis=1))
+    pypl.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")
     pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     pypl.savefig(plotdir / ("lambda_dep.pdf"))
     # pypl.show()
