@@ -146,9 +146,10 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.legend(fontsize="x-small")
-    # pypl.xlim(-0.01, 0.22)
-    pypl.xlim(-0.001, 0.045)
-    # pypl.ylim(0, 0.2)
+    pypl.xlim(-0.01, 0.22)
+    # pypl.ylim(0.03, 0.055)
+    # pypl.xlim(-0.001, 0.045)
+    pypl.ylim(0, 0.2)
     pypl.xlabel("$\lambda$")
     pypl.ylabel("$\Delta E / \lambda$")
     pypl.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")
@@ -191,7 +192,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        time_choice_range+0.001,
+        time_choice_range+0.03,
         np.average(order1_fit[:,delta_t_choice,:], axis=1),
         np.std(order1_fit[:,delta_t_choice,:], axis=1),
         fmt="s",
@@ -202,7 +203,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        time_choice_range+0.002,
+        time_choice_range+0.06,
         np.average(order2_fit[:,delta_t_choice,:], axis=1),
         np.std(order2_fit[:,delta_t_choice,:], axis=1),
         fmt="s",
@@ -213,7 +214,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        time_choice_range+0.003,
+        time_choice_range+0.09,
         np.average(order3_fit[:,delta_t_choice,:], axis=1),
         np.std(order3_fit[:,delta_t_choice,:], axis=1),
         fmt="s",
@@ -226,7 +227,8 @@ if __name__ == "__main__":
 
     pypl.legend(fontsize="x-small")
     # pypl.xlim(-0.01, 0.22)
-    pypl.ylim(0, 0.2)
+    # pypl.ylim(0, 0.06)
+    pypl.ylim(0.03, 0.055)
     pypl.xlabel("$t_{0}$")
     pypl.ylabel("$\Delta E$")
     pypl.title(rf"$\Delta t = {delta_t_range[delta_t_choice]}, \lambda = {lmb_val}$")
@@ -234,7 +236,7 @@ if __name__ == "__main__":
     pypl.savefig(plotdir / (f"time_choice_dep_l{lmb_val}.pdf"))
     # pypl.show()
 
-
+    # --------------------------------------------------------------------------------
     t0_choice = 0
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
@@ -249,7 +251,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        delta_t_range+0.001,
+        delta_t_range+0.03,
         np.average(order1_fit[t0_choice,:,:], axis=1),
         np.std(order1_fit[t0_choice,:,:], axis=1),
         fmt="s",
@@ -260,7 +262,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        delta_t_range+0.002,
+        delta_t_range+0.06,
         np.average(order2_fit[t0_choice,:,:], axis=1),
         np.std(order2_fit[t0_choice,:,:], axis=1),
         fmt="s",
@@ -271,7 +273,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        delta_t_range+0.003,
+        delta_t_range+0.09,
         np.average(order3_fit[t0_choice,:,:], axis=1),
         np.std(order3_fit[t0_choice,:,:], axis=1),
         fmt="s",
@@ -284,6 +286,7 @@ if __name__ == "__main__":
 
     pypl.legend(fontsize="x-small")
     # pypl.ylim(0, 0.2)
+    pypl.ylim(0.03, 0.055)
     pypl.xlabel("$\Delta t$")
     pypl.ylabel("$\Delta E$")
     pypl.title(rf"$t_{{0}} = {time_choice_range[t0_choice]}, \lambda = {lmb_val}$")
