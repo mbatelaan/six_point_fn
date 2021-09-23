@@ -34,14 +34,10 @@ _colors = [
     "#e41a1c",
     "#dede00",
 ]
-# _colors = ["r", "g", "b", "k", "y", "m", "k", "k"]
 _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
-# sys.stdout = open("output.txt", "wt")
 # From the theta tuning:
 m_N = 0.4179255
 m_S = 0.4641829
-
-
 
 def plotting_script_diff_2(
     diffG1, diffG2, diffG3, diffG4, fitvals, t_range, lmb_val, name="", show=False
@@ -155,7 +151,6 @@ if __name__ == "__main__":
     rcParams.update({"figure.autolayout": True})
 
     pars = params(0)
-
     # Read in the directory data from the yaml file
     if len(sys.argv) == 2:
         config_file = sys.argv[1]
@@ -173,18 +168,14 @@ if __name__ == "__main__":
 
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
 
-    G2_nucl, G2_sigm = read_correlators(pars, pickledir, mom_strings)
+    G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
 
     lambdas = np.linspace(0,0.16,30)[1:]
-    plotting = True
-    lmb_val = 0.06 #0.16
-    # for lmb_val in lambdas:
-    # time_choice_range = np.arange(2,15)
-    time_choice_range = np.arange(2,15)
-    # delta_t = 2
-    delta_t_range = np.arange(1,4)
     t_range = np.arange(4, 9)
-
+    lmb_val = 0.06 #0.16
+    time_choice_range = np.arange(2,15)
+    delta_t_range = np.arange(1,4)
+    plotting = True
 
     order0_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
     order1_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
@@ -200,43 +191,39 @@ if __name__ == "__main__":
             
             ### ----------------------------------------------------------------------
             Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
-            effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
-            effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
-            diffG1 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
-            bootfit1, redchisq1 = fit_value(diffG1, t_range)
+            ratio1 = Gt1_1/Gt2_1
+            effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) / 2
+            bootfit1, redchisq1 = fit_value(effmass_ratio1, t_range)
             order0_fit[i,j] = bootfit1[:, 0]
             red_chisq_list[0,i,j] = redchisq1
             
             Gt1_2, Gt2_2 = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
-            effmassdata_1 = stats.bs_effmass(Gt1_2, time_axis=1, spacing=1)
-            effmassdata_2 = stats.bs_effmass(Gt2_2, time_axis=1, spacing=1)
-            diffG2 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
-            bootfit2, redchisq2 = fit_value(diffG2, t_range)
+            ratio2 = Gt1_2/Gt2_2
+            effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) / 2
+            bootfit2, redchisq2 = fit_value(effmass_ratio2, t_range)
             order1_fit[i,j] = bootfit2[:, 0]
             red_chisq_list[1,i,j] = redchisq2
             
             Gt1_3, Gt2_3 = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
-            effmassdata_1_3 = stats.bs_effmass(Gt1_3, time_axis=1, spacing=1)
-            effmassdata_2_3 = stats.bs_effmass(Gt2_3, time_axis=1, spacing=1)
-            diffG3 = np.abs(effmassdata_1_3 - effmassdata_2_3) / 2  # / lmb_val
-            bootfit3, redchisq3 = fit_value(diffG3, t_range)
+            ratio3 = Gt1_3/Gt2_3
+            effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) / 2
+            bootfit3, redchisq3 = fit_value(effmass_ratio3, t_range)
             order2_fit[i,j] = bootfit3[:, 0]
             red_chisq_list[2,i,j] = redchisq3
             
             Gt1_4, Gt2_4 = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
-            effmassdata_1_4 = stats.bs_effmass(Gt1_4, time_axis=1, spacing=1)
-            effmassdata_2_4 = stats.bs_effmass(Gt2_4, time_axis=1, spacing=1)
-            diffG4 = np.abs(effmassdata_1_4 - effmassdata_2_4) / 2  # / lmb_val
-            bootfit4, redchisq4 = fit_value(diffG4, t_range)
+            ratio4 = Gt1_4/Gt2_4
+            effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) / 2
+            bootfit4, redchisq4 = fit_value(effmass_ratio4, t_range)
             order3_fit[i,j] = bootfit4[:, 0]
             red_chisq_list[3,i,j] = redchisq4
             
             if plotting:
                 plotting_script_diff_2(
-                    diffG1,
-                    diffG2,
-                    diffG3,
-                    diffG4,
+                    effmass_ratio1,
+                    effmass_ratio2,
+                    effmass_ratio3,
+                    effmass_ratio4,
                     [bootfit1, bootfit2, bootfit3, bootfit4],
                     t_range,
                     lmb_val,
@@ -258,13 +245,13 @@ if __name__ == "__main__":
         "delta_t" : delta_t_range
     }
 
+    #----------------------------------------------------------------------
+    # Save the fit data to a pickle file
     with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "wb") as file_out:
         pickle.dump(all_data, file_out)
 
-    # with open(datadir / ("fit_data_time_choice"+str(time_choice_range[0])+"-"+str(time_choice_range[-1])+".pkl"), "wb") as file_out:
-    #     pickle.dump([time_choice_range, delta_t_range, order0_fit, order1_fit,order2_fit,order3_fit],file_out)
-    #     # pickle.dump(np.array([lambdas,order0_fit, order1_fit,order2_fit,order3_fit],dtype=object),file_out)
-    
+    #----------------------------------------------------------------------
+    # Make a plot of the dependence of the energy shift on the time parameters in the GEVP
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
         time_choice_range,

@@ -72,7 +72,7 @@ def fit_value(diffG, t_range):
 
     return bootfit, redchisq
 
-def read_correlators(pars, pickledir, mom_strings):
+def read_correlators(pars, pickledir, pickledir2, mom_strings):
     """Read the pickle files which contain the correlator data
 
     The script will check the folders for available files and pick out the files with the highest number of configurations.
