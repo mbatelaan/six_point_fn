@@ -60,41 +60,33 @@ if __name__ == "__main__":
     datadir.mkdir(parents=True, exist_ok=True)
 
     print(datadir / ("lambda_dep.pkl"))
-    # with open(datadir / ("lambda_dep_t4_dt2.pkl"), "rb") as file_in:
     time_choice = 2
     delta_t = 2
     with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"), "rb") as file_in:
         data = pickle.load(file_in)
-    # [lambdas, order0_fit, order1_fit, order2_fit, order3_fit] = data
-    # [lambdas, order0_fit, order1_fit, order2_fit, order3_fit] = data
-    lambdas = np.array(data["lambdas"])
-    order0_fit = np.array(data["order0_fit"])
-    order1_fit = np.array(data["order1_fit"])
-    order2_fit = np.array(data["order2_fit"])
-    order3_fit = np.array(data["order3_fit"])
+    lambdas = data["lambdas"]
+    order0_fit = data["order0_fit"]
+    order1_fit = data["order1_fit"]
+    order2_fit = data["order2_fit"]
+    order3_fit = data["order3_fit"]
     redchisq = data["redchisq"]
     time_choice = data["time_choice"]
     delta_t = data["delta_t"]
 
-    print(lambdas)
-    # print(np.array(order0_fit))
+    chisq_tol = 1.7
+    order0_fit = order0_fit[np.where(redchisq[0]<=chisq_tol)]
+    lambdas0 = lambdas[np.where(redchisq[0]<=chisq_tol)]
+    order1_fit = order1_fit[np.where(redchisq[1]<=chisq_tol)]
+    lambdas1 = lambdas[np.where(redchisq[1]<=chisq_tol)]
+    order2_fit = order2_fit[np.where(redchisq[2]<=chisq_tol)]
+    lambdas2 = lambdas[np.where(redchisq[2]<=chisq_tol)]
+    order3_fit = order3_fit[np.where(redchisq[3]<=chisq_tol)]
+    lambdas3 = lambdas[np.where(redchisq[3]<=chisq_tol)]
+
     print(np.shape(order0_fit))
-    print(np.shape(order0_fit[0]))
-    print(np.shape(lambdas))
-
-    # order0_fit = np.einsum("ij,i->ij", order0_fit,lambdas**(-1))
-    # order1_fit = np.einsum("ij,i->ij", order1_fit,lambdas**(-1))
-    # order2_fit = np.einsum("ij,i->ij", order2_fit,lambdas**(-1))
-    # order3_fit = np.einsum("ij,i->ij", order3_fit,lambdas**(-1))
-
-    order0_fit = order0_fit[np.where(redchisq[0]<=1.5)]
-    lambdas0 = lambdas[np.where(redchisq[0]<=1.5)]
-    order1_fit = order1_fit[np.where(redchisq[1]<=1.5)]
-    lambdas1 = lambdas[np.where(redchisq[1]<=1.5)]
-    order2_fit = order2_fit[np.where(redchisq[2]<=1.5)]
-    lambdas2 = lambdas[np.where(redchisq[2]<=1.5)]
-    order3_fit = order3_fit[np.where(redchisq[3]<=1.5)]
-    lambdas3 = lambdas[np.where(redchisq[3]<=1.5)]
+    print(np.shape(order1_fit))
+    print(np.shape(order2_fit))
+    print(np.shape(order3_fit))
 
     # scaled_z0 = (redchisq[0] - redchisq[0].min()) / redchisq[0].ptp()
     # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
@@ -113,7 +105,7 @@ if __name__ == "__main__":
     )
     # pypl.scatter(lambdas, np.average(order0_fit, axis=1),label=r"$\mathcal{O}(\lambda^1)$", edgecolors=colors_0, s=150, marker='x', linewidths=4)
     pypl.errorbar(
-        lambdas1+0.0001,
+        lambdas1+0.001,
         np.average(order1_fit, axis=1),
         np.std(order1_fit, axis=1),
         fmt="s",
@@ -124,7 +116,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        lambdas+0.0002,
+        lambdas2+0.002,
         np.average(order2_fit, axis=1),
         np.std(order2_fit, axis=1),
         fmt="s",
@@ -135,7 +127,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        lambdas+0.0003,
+        lambdas3+0.003,
         np.average(order3_fit, axis=1),
         np.std(order3_fit, axis=1),
         fmt="s",
@@ -149,7 +141,7 @@ if __name__ == "__main__":
     pypl.xlim(-0.01, 0.22)
     # pypl.ylim(0.03, 0.055)
     # pypl.xlim(-0.001, 0.045)
-    pypl.ylim(0, 0.2)
+    pypl.ylim(0, 0.15)
     pypl.xlabel("$\lambda$")
     pypl.ylabel("$\Delta E / \lambda$")
     pypl.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")
@@ -174,9 +166,6 @@ if __name__ == "__main__":
     order3_fit = data["order3_fit"]
     time_choice_range = data["time_choice"]
     delta_t_range = data["delta_t"]
-
-    # [time_choice_range, delta_t_range, order0_fit, order1_fit,order2_fit,order3_fit] = data
-
 
     delta_t_choice = 0
     pypl.figure(figsize=(6, 6))

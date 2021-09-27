@@ -323,12 +323,71 @@ def plotting_script_diff_2(
     pypl.close()
     return
 
+def plot_lmb_dep(all_data):
+    """Make a plot of the lambda dependence of the energy shift"""
+    pypl.figure(figsize=(6, 6))
+    pypl.errorbar(
+        all_data["lambdas"],
+        np.average(all_data["order0_fit"], axis=1),
+        np.std(all_data["order0_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    pypl.errorbar(
+        all_data["lambdas"]+0.001,
+        np.average(all_data["order1_fit"], axis=1),
+        np.std(all_data["order1_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    pypl.errorbar(
+        all_data["lambdas"]+0.002,
+        np.average(all_data["order2_fit"], axis=1),
+        np.std(all_data["order2_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    pypl.errorbar(
+        all_data["lambdas"]+0.003,
+        np.average(all_data["order3_fit"], axis=1),
+        np.std(all_data["order3_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    pypl.legend(fontsize="x-small")
+    pypl.xlim(-0.01, 0.22)
+    pypl.ylim(0, 0.2)
+    pypl.xlabel("$\lambda$")
+    pypl.ylabel("$\Delta E$")
+    pypl.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    pypl.savefig(plotdir / ("lambda_dep.pdf"))
+    # pypl.show()
+
+
 if __name__ == "__main__":
     pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     pypl.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})
 
     pars = params(0)
+
     # Read in the directory data from the yaml file if one is given
     if len(sys.argv) == 2:
         config_file = sys.argv[1]
@@ -346,14 +405,13 @@ if __name__ == "__main__":
     datadir.mkdir(parents=True, exist_ok=True)
 
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
-
     G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
 
     # lambdas = np.linspace(0.12,0.16,20)
     # lambdas = np.linspace(0,0.16,10)[1:]
     # lambdas = np.linspace(0,0.04,30)[1:]
     lambdas = np.linspace(0,0.16,30) #[1:]
-    t_range = np.arange(4, 9)
+    t_range = np.arange(5, 11)
     time_choice = 2
     delta_t = 2
     plotting = True
@@ -380,21 +438,21 @@ if __name__ == "__main__":
         ratio2 = Gt1_2/Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) / 2
         bootfit2, redchisq2 = fit_value(effmass_ratio2, t_range)
-        order1_fit[i] = bootfit1[:, 0]
+        order1_fit[i] = bootfit2[:, 0]
         red_chisq_list[1,i] = redchisq2
 
         Gt1_3, Gt2_3 = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
         ratio3 = Gt1_3/Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) / 2
         bootfit3, redchisq3 = fit_value(effmass_ratio3, t_range)
-        order2_fit[i] = bootfit1[:, 0]
+        order2_fit[i] = bootfit3[:, 0]
         red_chisq_list[2,i] = redchisq3
 
         Gt1_4, Gt2_4 = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
         ratio4 = Gt1_4/Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) / 2
         bootfit4, redchisq4 = fit_value(effmass_ratio4, t_range)
-        order3_fit[i] = bootfit3[:, 0]
+        order3_fit[i] = bootfit4[:, 0]
         red_chisq_list[3,i] = redchisq4
 
         if plotting:
@@ -428,8 +486,10 @@ if __name__ == "__main__":
                 show=False,
             )
 
+    #----------------------------------------------------------------------
+    # Save the fit data to a pickle file
     all_data = {
-        "lambdas" : np.array([lmb_val]),
+        "lambdas" : lambdas,
         "order0_fit" : order0_fit, 
         "order1_fit" : order1_fit,
         "order2_fit" : order2_fit,
@@ -438,65 +498,64 @@ if __name__ == "__main__":
         "time_choice" : time_choice,
         "delta_t" : delta_t
     }
-
-    #----------------------------------------------------------------------
-    # Save the fit data to a pickle file
     with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"), "wb") as file_out:
         pickle.dump(all_data, file_out)
 
     #----------------------------------------------------------------------
     # Make a plot of the lambda dependence of the energy shift
-    pypl.figure(figsize=(6, 6))
-    pypl.errorbar(
-        lambdas,
-        np.average(order0_fit, axis=1),
-        np.std(order0_fit, axis=1),
-        fmt="s",
-        label=r"$\mathcal{O}(\lambda^1)$",
-        color=_colors[0],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    pypl.errorbar(
-        lambdas+0.001,
-        np.average(order1_fit, axis=1),
-        np.std(order1_fit, axis=1),
-        fmt="s",
-        label=r"$\mathcal{O}(\lambda^2)$",
-        color=_colors[1],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    pypl.errorbar(
-        lambdas+0.002,
-        np.average(order2_fit, axis=1),
-        np.std(order2_fit, axis=1),
-        fmt="s",
-        label=r"$\mathcal{O}(\lambda^3)$",
-        color=_colors[2],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    pypl.errorbar(
-        lambdas+0.003,
-        np.average(order3_fit, axis=1),
-        np.std(order3_fit, axis=1),
-        fmt="s",
-        label=r"$\mathcal{O}(\lambda^4)$",
-        color=_colors[3],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    pypl.legend(fontsize="x-small")
-    pypl.xlim(-0.01, 0.22)
-    pypl.ylim(0, 0.2)
-    pypl.xlabel("$\lambda$")
-    pypl.ylabel("$\Delta E$")
-    pypl.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")
-    pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    pypl.savefig(plotdir / ("lambda_dep.pdf"))
-    # pypl.show()
+    plot_lmb_dep(all_data)
+
+    # pypl.figure(figsize=(6, 6))
+    # pypl.errorbar(
+    #     lambdas,
+    #     np.average(order0_fit, axis=1),
+    #     np.std(order0_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^1)$",
+    #     color=_colors[0],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     lambdas+0.001,
+    #     np.average(order1_fit, axis=1),
+    #     np.std(order1_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^2)$",
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     lambdas+0.002,
+    #     np.average(order2_fit, axis=1),
+    #     np.std(order2_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^3)$",
+    #     color=_colors[2],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     lambdas+0.003,
+    #     np.average(order3_fit, axis=1),
+    #     np.std(order3_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^4)$",
+    #     color=_colors[3],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.legend(fontsize="x-small")
+    # pypl.xlim(-0.01, 0.22)
+    # pypl.ylim(0, 0.2)
+    # pypl.xlabel("$\lambda$")
+    # pypl.ylabel("$\Delta E$")
+    # pypl.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")
+    # pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    # pypl.savefig(plotdir / ("lambda_dep.pdf"))
+    # # pypl.show()

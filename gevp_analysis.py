@@ -185,9 +185,9 @@ if __name__ == "__main__":
 
     for i,time_choice in enumerate(time_choice_range):
         for j,delta_t in enumerate(delta_t_range):
-            print(f"t_0 =  {time_choice}\t\t Delta t = {delta_t}\n")
+            print(f"t_0 =  {time_choice}\tDelta t = {delta_t}\n")
             # Construct a correlation matrix for each order in lambda (skipping order 0)
-            matrix_1, matrix_2, matrix_3, matrix_4 = makematrices(G2_nucl, G2_sigm, lmb_val)
+            matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
             
             ### ----------------------------------------------------------------------
             Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
@@ -231,9 +231,8 @@ if __name__ == "__main__":
                     show=False,
                 )
                 
-    print(f"\n\n\n END of LOOP \n\n")
-
-
+    #----------------------------------------------------------------------
+    # Save the fit data to a pickle file
     all_data = {
         "lambdas" : np.array([lmb_val]),
         "order0_fit" : order0_fit, 
@@ -244,9 +243,6 @@ if __name__ == "__main__":
         "time_choice" : time_choice_range,
         "delta_t" : delta_t_range
     }
-
-    #----------------------------------------------------------------------
-    # Save the fit data to a pickle file
     with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "wb") as file_out:
         pickle.dump(all_data, file_out)
 
