@@ -380,6 +380,110 @@ def plot_lmb_dep(all_data):
     pypl.savefig(plotdir / ("lambda_dep.pdf"))
     # pypl.show()
 
+def plot_lmb_dep_fit(all_data, fit_data, fitfunction):
+    """Make a plot of the lambda dependence of the energy shift"""
+    pypl.figure(figsize=(6, 6))
+    pypl.errorbar(
+        all_data["lambdas"],
+        np.average(all_data["order0_fit"], axis=1),
+        np.std(all_data["order0_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    pypl.errorbar(
+        all_data["lambdas"]+0.001,
+        np.average(all_data["order1_fit"], axis=1),
+        np.std(all_data["order1_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    pypl.errorbar(
+        all_data["lambdas"]+0.002,
+        np.average(all_data["order2_fit"], axis=1),
+        np.std(all_data["order2_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    pypl.errorbar(
+        all_data["lambdas"]+0.003,
+        np.average(all_data["order3_fit"], axis=1),
+        np.std(all_data["order3_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    params = np.average(fit_data,axis=0)
+    fit_ydata = fitfunction(lambdas, *params)
+    print(fit_ydata)
+    pypl.plot(lambdas, fit_ydata, color='k')
+    # axs.fill_between(
+    #     t_range,
+    #     np.average(fitvals[1]) - np.std(fitvals[1]),
+    #     np.average(fitvals[1]) + np.std(fitvals[1]),
+    #     alpha=0.3,
+    #     color=_colors[1],
+    # )
+
+    pypl.legend(fontsize="x-small")
+    pypl.xlim(-0.01, 0.22)
+    pypl.ylim(0, 0.2)
+    pypl.xlabel("$\lambda$")
+    pypl.ylabel("$\Delta E$")
+    pypl.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    pypl.savefig(plotdir / ("lambda_dep_fit.pdf"))
+    # pypl.show()
+
+def fitfunction(lmb,pars):
+    deltaE = 0.5*(pars[0]+pars[1]) - 0.5*np.sqrt((pars[0]-pars[1])**2 + 4*lmb**2*pars[2]**2)
+    return deltaE
+
+def fitfunction2(lmb, pars0, pars1, pars2):
+    deltaE = 0.5*(pars0+pars1) - 0.5*np.sqrt((pars0-pars1)**2 + 4*lmb**2*pars2**2)
+    return deltaE
+
+def fit_lmb(ydata, function, lambdas):
+    """Fit the lambda dependence
+
+    data is a correlator with tht bootstraps on the first index and the time on the second
+    lambdas is an array of time values to fit over
+    the function will return an array of fit parameters for each bootstrap
+    """
+    # order0_fit[i] = bootfit1[:, 0]
+    ydata = ydata.T
+    data_set = ydata
+    ydata_avg = np.average(data_set, axis=0)
+    print(ydata_avg)
+    print(lambdas)
+    covmat = np.cov(data_set.T)
+    diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
+    popt_avg, pcov_avg = curve_fit(function, lambdas, ydata_avg, sigma=covmat)
+    chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, np.linalg.inv(covmat))
+    redchisq = chisq / len(lambdas)
+    bootfit = []
+    for iboot, values in enumerate(ydata):
+        popt, pcov = curve_fit(function, lambdas, values, sigma=covmat)
+        bootfit.append(popt)
+    bootfit = np.array(bootfit)
+
+    return bootfit, redchisq
+
 
 if __name__ == "__main__":
     pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
@@ -411,7 +515,8 @@ if __name__ == "__main__":
     # lambdas = np.linspace(0,0.16,10)[1:]
     # lambdas = np.linspace(0,0.04,30)[1:]
     lambdas = np.linspace(0,0.16,30) #[1:]
-    t_range = np.arange(5, 11)
+    # lambdas = np.linspace(0,0.16,10) #[1:]
+    t_range = np.arange(4, 10)
     time_choice = 2
     delta_t = 2
     plotting = True
@@ -498,12 +603,18 @@ if __name__ == "__main__":
         "time_choice" : time_choice,
         "delta_t" : delta_t
     }
-    with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"), "wb") as file_out:
+    with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"), "wb") as file_out:
         pickle.dump(all_data, file_out)
+
+    
+    # bootfit, redchisq = fit_lmb(order0_fit, fitfunction2, lambdas)
+    # print(bootfit)
+    # print(redchisq)
 
     #----------------------------------------------------------------------
     # Make a plot of the lambda dependence of the energy shift
     plot_lmb_dep(all_data)
+    # plot_lmb_dep_fit(all_data, bootfit, fitfunction2)
 
     # pypl.figure(figsize=(6, 6))
     # pypl.errorbar(

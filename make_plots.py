@@ -33,6 +33,43 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
+pars1 = 0
+
+def fitfunction2(lmb, pars0, pars1, pars2):
+    deltaE = 0.5*(pars0+pars1) + 0.5*np.sqrt((pars0-pars1)**2 + 4*lmb**2*pars2**2)
+    return deltaE
+
+def fitfunction3(lmb, pars0, pars2):
+    deltaE = 0.5*(pars0+pars1) + 0.5*np.sqrt((pars0-pars1)**2 + 4*lmb**2*pars2**2)
+    return deltaE
+
+def fit_lmb(ydata, function, lambdas, p0=None):
+    """Fit the lambda dependence
+
+    data is a correlator with tht bootstraps on the first index and the time on the second
+    lambdas is an array of time values to fit over
+    the function will return an array of fit parameters for each bootstrap
+    """
+    # order0_fit[i] = bootfit1[:, 0]
+    ydata = ydata.T
+    print(np.shape(ydata))
+    data_set = ydata
+    ydata_avg = np.average(data_set, axis=0)
+    print(ydata_avg)
+    print(lambdas)
+    covmat = np.cov(data_set.T)
+    diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
+    popt_avg, pcov_avg = curve_fit(function, lambdas, ydata_avg, sigma=diag_sigma, p0=p0)
+    chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, np.linalg.inv(diag_sigma))
+    print('popt_avg', popt_avg)
+    redchisq = chisq / len(lambdas)
+    bootfit = []
+    for iboot, values in enumerate(ydata):
+        popt, pcov = curve_fit(function, lambdas, values, sigma=diag_sigma)
+        bootfit.append(popt)
+    bootfit = np.array(bootfit)
+    print(np.average(bootfit,axis=0))
+    return bootfit, redchisq
 
 
 if __name__ == "__main__":
@@ -62,7 +99,8 @@ if __name__ == "__main__":
     print(datadir / ("lambda_dep.pkl"))
     time_choice = 2
     delta_t = 2
-    with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"), "rb") as file_in:
+    t_range = np.arange(4, 10)
+    with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"), "rb") as file_in:
         data = pickle.load(file_in)
     lambdas = data["lambdas"]
     order0_fit = data["order0_fit"]
@@ -87,6 +125,23 @@ if __name__ == "__main__":
     print(np.shape(order1_fit))
     print(np.shape(order2_fit))
     print(np.shape(order3_fit))
+
+    print('\n')
+    # Fit the quadratic behaviourin lambda
+    # pars1 = np.average(order1_fit, axis=1)[0]
+    # print(pars1)
+    # print(np.average(order1_fit, axis=1))
+    p0 = (0.01, 0.01, 0.006)
+    fitlim = 18
+    bootfit0, redchisq0 = fit_lmb(order0_fit, fitfunction2, lambdas0, p0=p0)
+    print("redchisq",redchisq0,'\n')
+    bootfit1, redchisq1 = fit_lmb(order1_fit[:fitlim], fitfunction2, lambdas1[:fitlim], p0=p0)
+    print("redchisq",redchisq1,'\n')
+    bootfit2, redchisq2 = fit_lmb(order2_fit[:fitlim], fitfunction2, lambdas2[:fitlim], p0=p0)
+    print("redchisq",redchisq2,'\n')
+    bootfit3, redchisq3 = fit_lmb(order3_fit, fitfunction2, lambdas3, p0=p0)
+    print("redchisq",redchisq3,'\n')
+
 
     # scaled_z0 = (redchisq[0] - redchisq[0].min()) / redchisq[0].ptp()
     # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
@@ -137,6 +192,57 @@ if __name__ == "__main__":
         elinewidth=1,
         markerfacecolor="none",
     )
+
+    # params0 = np.average(bootfit0,axis=0)
+    # pypl.plot(lambdas0, fitfunction2(lambdas0, *params0), color=_colors[0])
+    # params1 = np.average(bootfit1,axis=0)
+    # pypl.plot(lambdas1, fitfunction2(lambdas1, *params1), color=_colors[1])
+    # params2 = np.average(bootfit2,axis=0)
+    # pypl.plot(lambdas2, fitfunction2(lambdas2, *params2), color=_colors[2])
+    # params3 = np.average(bootfit3,axis=0)
+    # pypl.plot(lambdas3, fitfunction2(lambdas3, *params3), color=_colors[3])
+
+    fitBS0 = np.array([fitfunction2(lambdas0, *bf) for bf in bootfit0])
+    print(np.std(fitBS0,axis=0))
+    pypl.fill_between(
+        lambdas0,
+        np.average(fitBS0,axis=0) - np.std(fitBS0,axis=0),
+        np.average(fitBS0,axis=0) + np.std(fitBS0,axis=0),
+        alpha=0.3,
+        color=_colors[0],
+        label = f"{redchisq0:0.2}",
+    )
+    fitBS1 = np.array([fitfunction2(lambdas1[:fitlim], *bf) for bf in bootfit1])
+    print(np.std(fitBS1,axis=0))
+    pypl.fill_between(
+        lambdas1[:fitlim],
+        np.average(fitBS1,axis=0) - np.std(fitBS1,axis=0),
+        np.average(fitBS1,axis=0) + np.std(fitBS1,axis=0),
+        alpha=0.3,
+        color=_colors[1],
+        label = f"{redchisq1:0.2}",
+    )
+    fitBS2 = np.array([fitfunction2(lambdas2[:fitlim], *bf) for bf in bootfit2])
+    print(np.std(fitBS2,axis=0))
+    pypl.fill_between(
+        lambdas2[:fitlim],
+        np.average(fitBS2,axis=0) - np.std(fitBS2,axis=0),
+        np.average(fitBS2,axis=0) + np.std(fitBS2,axis=0),
+        alpha=0.3,
+        color=_colors[2],
+        label = f"{redchisq2:0.2}",
+    )
+    fitBS3 = np.array([fitfunction2(lambdas3, *bf) for bf in bootfit3])
+    print(np.std(fitBS3,axis=0))
+    pypl.fill_between(
+        lambdas3,
+        np.average(fitBS3,axis=0) - np.std(fitBS3,axis=0),
+        np.average(fitBS3,axis=0) + np.std(fitBS3,axis=0),
+        alpha=0.3,
+        color=_colors[3],
+        label = f"{redchisq3:0.2}",
+    )
+
     pypl.legend(fontsize="x-small")
     pypl.xlim(-0.01, 0.22)
     # pypl.ylim(0.03, 0.055)
@@ -149,6 +255,14 @@ if __name__ == "__main__":
     # pypl.savefig(plotdir / ("Energy_over_lambda.pdf"))
     pypl.savefig(plotdir / ("lambda_dep.pdf"))
     # pypl.show()
+
+    pypl.xlim(-0.005, 0.08)
+    # pypl.ylim(0.03, 0.055)
+    # pypl.xlim(-0.001, 0.045)
+    pypl.ylim(0.015, 0.065)
+    pypl.savefig(plotdir / ("lambda_dep_zoom.pdf"))
+
+    pypl.close()
     
     ### ----------------------------------------------------------------------
     lmb_val = 0.06 #0.16
