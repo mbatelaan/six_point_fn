@@ -88,7 +88,7 @@ def read_correlators(pars, pickledir, pickledir2, mom_strings):
     # Strip the conf number from the file names
     conf_num_list = np.array([int("".join(filter(str.isdigit, l.name))) for l in list(files)])
     print(conf_num_list)
-    # conf_num_list = [50] # hard code a choice
+    conf_num_list = [100] # hard code a choice
     conf_num = conf_num_list[np.argmax(conf_num_list)]
     barspec_name = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
 
