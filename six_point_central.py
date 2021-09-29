@@ -513,13 +513,16 @@ if __name__ == "__main__":
 
     # lambdas = np.linspace(0.12,0.16,20)
     # lambdas = np.linspace(0,0.16,10)[1:]
-    # lambdas = np.linspace(0,0.04,30)[1:]
-    lambdas = np.linspace(0,0.16,30) #[1:]
+    lambdas = np.linspace(0,0.04,30)
+    # lambdas = np.linspace(0,0.16,30) #[1:]
     # lambdas = np.linspace(0,0.16,10) #[1:]
-    t_range = np.arange(4, 10)
-    time_choice = 2
-    delta_t = 2
+    t_range = np.arange(config["t_range0"], config["t_range1"])
+    time_choice = config["time_choice"]
+    delta_t = config["delta_t"]
     plotting = True
+    # t_range = np.arange(4, 10)
+    # time_choice = 3
+    # delta_t = 1
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))

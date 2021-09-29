@@ -217,7 +217,8 @@ if __name__ == "__main__":
             bootfit4, redchisq4 = fit_value(effmass_ratio4, t_range)
             order3_fit[i,j] = bootfit4[:, 0]
             red_chisq_list[3,i,j] = redchisq4
-            
+ 
+           
             if plotting:
                 plotting_script_diff_2(
                     effmass_ratio1,

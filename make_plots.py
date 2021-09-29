@@ -97,10 +97,16 @@ if __name__ == "__main__":
     datadir.mkdir(parents=True, exist_ok=True)
 
     print(datadir / ("lambda_dep.pkl"))
-    time_choice = 2
-    delta_t = 2
-    t_range = np.arange(4, 10)
+    # time_choice = 2
+    # delta_t = 2
+    # t_range = np.arange(4, 10)
+    t_range = np.arange(config["t_range0"], config["t_range1"])
+    time_choice = config["time_choice"]
+    delta_t = config["delta_t"]
+
+
     with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"), "rb") as file_in:
+        # with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"), "rb") as file_in:
         data = pickle.load(file_in)
     lambdas = data["lambdas"]
     order0_fit = data["order0_fit"]
@@ -139,7 +145,7 @@ if __name__ == "__main__":
     print("redchisq",redchisq1,'\n')
     bootfit2, redchisq2 = fit_lmb(order2_fit[:fitlim], fitfunction2, lambdas2[:fitlim], p0=p0)
     print("redchisq",redchisq2,'\n')
-    bootfit3, redchisq3 = fit_lmb(order3_fit, fitfunction2, lambdas3, p0=p0)
+    bootfit3, redchisq3 = fit_lmb(order3_fit[:fitlim], fitfunction2, lambdas3[:fitlim], p0=p0)
     print("redchisq",redchisq3,'\n')
 
 
@@ -160,7 +166,7 @@ if __name__ == "__main__":
     )
     # pypl.scatter(lambdas, np.average(order0_fit, axis=1),label=r"$\mathcal{O}(\lambda^1)$", edgecolors=colors_0, s=150, marker='x', linewidths=4)
     pypl.errorbar(
-        lambdas1+0.001,
+        lambdas1+0.0001,
         np.average(order1_fit, axis=1),
         np.std(order1_fit, axis=1),
         fmt="s",
@@ -171,7 +177,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        lambdas2+0.002,
+        lambdas2+0.0002,
         np.average(order2_fit, axis=1),
         np.std(order2_fit, axis=1),
         fmt="s",
@@ -182,7 +188,7 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        lambdas3+0.003,
+        lambdas3+0.0003,
         np.average(order3_fit, axis=1),
         np.std(order3_fit, axis=1),
         fmt="s",
@@ -192,6 +198,17 @@ if __name__ == "__main__":
         elinewidth=1,
         markerfacecolor="none",
     )
+
+    pypl.legend(fontsize="x-small")
+    # pypl.xlim(-0.01, 0.22)
+    # pypl.ylim(0, 0.15)
+    pypl.xlim(-0.001, 0.045)
+    pypl.ylim(-0.002, 0.035)
+    pypl.xlabel("$\lambda$")
+    pypl.ylabel("$\Delta E$")
+    pypl.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")
+    pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    pypl.savefig(plotdir / ("lambda_dep.pdf"))
 
     # params0 = np.average(bootfit0,axis=0)
     # pypl.plot(lambdas0, fitfunction2(lambdas0, *params0), color=_colors[0])
@@ -244,22 +261,16 @@ if __name__ == "__main__":
     )
 
     pypl.legend(fontsize="x-small")
+    # pypl.xlim(-0.01, 0.22)
+    # pypl.ylim(0, 0.15)
     pypl.xlim(-0.01, 0.22)
-    # pypl.ylim(0.03, 0.055)
-    # pypl.xlim(-0.001, 0.045)
-    pypl.ylim(0, 0.15)
-    pypl.xlabel("$\lambda$")
-    pypl.ylabel("$\Delta E / \lambda$")
-    pypl.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")
-    pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    # pypl.savefig(plotdir / ("Energy_over_lambda.pdf"))
-    pypl.savefig(plotdir / ("lambda_dep.pdf"))
-    # pypl.show()
+    pypl.ylim(-0.01, 0.1)
+    pypl.savefig(plotdir / ("lambda_dep_fit.pdf"))
 
+    # pypl.xlim(-0.005, 0.08)
+    # pypl.ylim(0.015, 0.065)
     pypl.xlim(-0.005, 0.08)
-    # pypl.ylim(0.03, 0.055)
-    # pypl.xlim(-0.001, 0.045)
-    pypl.ylim(0.015, 0.065)
+    pypl.ylim(-0.01, 0.065)
     pypl.savefig(plotdir / ("lambda_dep_zoom.pdf"))
 
     pypl.close()
