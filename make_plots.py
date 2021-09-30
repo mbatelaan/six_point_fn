@@ -55,20 +55,21 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     print(np.shape(ydata))
     data_set = ydata
     ydata_avg = np.average(data_set, axis=0)
-    print(ydata_avg)
-    print(lambdas)
+    print('ydata_avg',ydata_avg)
+    print('lambdas',lambdas)
     covmat = np.cov(data_set.T)
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
-    popt_avg, pcov_avg = curve_fit(function, lambdas, ydata_avg, sigma=diag_sigma, p0=p0)
-    chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, np.linalg.inv(diag_sigma))
+    popt_avg, pcov_avg = curve_fit(function, lambdas, ydata_avg, sigma=diag_sigma, p0=p0, maxfev=2000)
+    chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, np.linalg.inv(covmat))
     print('popt_avg', popt_avg)
     redchisq = chisq / len(lambdas)
     bootfit = []
     for iboot, values in enumerate(ydata):
-        popt, pcov = curve_fit(function, lambdas, values, sigma=diag_sigma)
+        popt, pcov = curve_fit(function, lambdas, values, sigma=diag_sigma, maxfev=2000) #, p0=popt_avg)
+        # print(popt)
         bootfit.append(popt)
     bootfit = np.array(bootfit)
-    print(np.average(bootfit,axis=0))
+    print('bootfit',np.average(bootfit,axis=0))
     return bootfit, redchisq
 
 
@@ -132,23 +133,6 @@ if __name__ == "__main__":
     print(np.shape(order2_fit))
     print(np.shape(order3_fit))
 
-    print('\n')
-    # Fit the quadratic behaviourin lambda
-    # pars1 = np.average(order1_fit, axis=1)[0]
-    # print(pars1)
-    # print(np.average(order1_fit, axis=1))
-    p0 = (0.01, 0.01, 0.006)
-    fitlim = 18
-    bootfit0, redchisq0 = fit_lmb(order0_fit, fitfunction2, lambdas0, p0=p0)
-    print("redchisq",redchisq0,'\n')
-    bootfit1, redchisq1 = fit_lmb(order1_fit[:fitlim], fitfunction2, lambdas1[:fitlim], p0=p0)
-    print("redchisq",redchisq1,'\n')
-    bootfit2, redchisq2 = fit_lmb(order2_fit[:fitlim], fitfunction2, lambdas2[:fitlim], p0=p0)
-    print("redchisq",redchisq2,'\n')
-    bootfit3, redchisq3 = fit_lmb(order3_fit[:fitlim], fitfunction2, lambdas3[:fitlim], p0=p0)
-    print("redchisq",redchisq3,'\n')
-
-
     # scaled_z0 = (redchisq[0] - redchisq[0].min()) / redchisq[0].ptp()
     # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
 
@@ -210,6 +194,21 @@ if __name__ == "__main__":
     pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     pypl.savefig(plotdir / ("lambda_dep.pdf"))
 
+    print('\n')
+    # Fit the quadratic behaviour in lambda
+    # pars1 = np.average(order1_fit, axis=1)[0]
+    # print(pars1)
+    # print(np.average(order1_fit, axis=1))
+    p0 = (0.01, 0.01, 0.006)
+    fitlim = 18
+    bootfit0, redchisq0 = fit_lmb(order0_fit, fitfunction2, lambdas0, p0=p0)
+    print("redchisq",redchisq0,'\n')
+    bootfit1, redchisq1 = fit_lmb(order1_fit[:fitlim], fitfunction2, lambdas1[:fitlim], p0=p0)
+    print("redchisq",redchisq1,'\n')
+    bootfit2, redchisq2 = fit_lmb(order2_fit[:fitlim], fitfunction2, lambdas2[:fitlim], p0=p0)
+    print("redchisq",redchisq2,'\n')
+    bootfit3, redchisq3 = fit_lmb(order3_fit[:fitlim], fitfunction2, lambdas3[:fitlim], p0=p0)
+    print("redchisq",redchisq3,'\n')
     # params0 = np.average(bootfit0,axis=0)
     # pypl.plot(lambdas0, fitfunction2(lambdas0, *params0), color=_colors[0])
     # params1 = np.average(bootfit1,axis=0)
@@ -263,14 +262,14 @@ if __name__ == "__main__":
     pypl.legend(fontsize="x-small")
     # pypl.xlim(-0.01, 0.22)
     # pypl.ylim(0, 0.15)
-    pypl.xlim(-0.01, 0.22)
-    pypl.ylim(-0.01, 0.1)
+    pypl.xlim(-0.001, 0.045)
+    pypl.ylim(-0.002, 0.035)
     pypl.savefig(plotdir / ("lambda_dep_fit.pdf"))
 
     # pypl.xlim(-0.005, 0.08)
     # pypl.ylim(0.015, 0.065)
-    pypl.xlim(-0.005, 0.08)
-    pypl.ylim(-0.01, 0.065)
+    pypl.xlim(-0.0001, 0.025)
+    pypl.ylim(-0.0002, 0.015)
     pypl.savefig(plotdir / ("lambda_dep_zoom.pdf"))
 
     pypl.close()
