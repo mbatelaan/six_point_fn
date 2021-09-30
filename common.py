@@ -149,7 +149,7 @@ def read_correlators(pars, pickledir, pickledir2, mom_strings):
     ### US & UU
     filelist_US1 = pickledir / Path(
         "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[0]
+        + mom_strings[1]
         + barspec_name
     )
     filelist_UU2 = pickledir / Path(
@@ -159,7 +159,7 @@ def read_correlators(pars, pickledir, pickledir2, mom_strings):
     )
     filelist_US3 = pickledir / Path(
         "baryon-3pt_US_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[0]
+        + mom_strings[1]
         + barspec_name
     )
     filelist_UU4 = pickledir / Path(
@@ -257,7 +257,7 @@ def read_correlators2(pars, pickledir, pickledir2, mom_strings):
     ### US & UU
     filelist_US1 = pickledir / Path(
         "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[0]
+        + mom_strings[1]
         + barspec_name
     )
     filelist_UU2 = pickledir / Path(
@@ -267,7 +267,7 @@ def read_correlators2(pars, pickledir, pickledir2, mom_strings):
     )
     filelist_US3 = pickledir / Path(
         "baryon-3pt_US_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[0]
+        + mom_strings[1]
         + barspec_name
     )
     filelist_UU4 = pickledir / Path(
