@@ -834,7 +834,7 @@ def plotting_script_diff_2(
 
     axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     pypl.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
-    pypl.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
+    pypl.ylabel(r"$\Delta E_{\textrm{eff}}$")
     pypl.xlabel("$t/a$")
     pypl.legend(fontsize="x-small")
     pypl.title("$\lambda=" + str(lmb_val) + "$")
@@ -918,7 +918,7 @@ if __name__ == "__main__":
 
     conf_num_list = np.array([int("".join(filter(str.isdigit, l.name))) for l in list(files)])
     print(conf_num_list)
-    # conf_num_list = [50]
+    conf_num_list = [100]
     conf_num = conf_num_list[np.argmax(conf_num_list)]
     barspec_name = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
 
@@ -1045,9 +1045,9 @@ if __name__ == "__main__":
     # ])
     # lambdas = np.linspace(0.12,0.16,20)
     # lambdas = np.linspace(0,0.16,10)[1:]
-    # lambdas = np.linspace(0,0.04,30)[1:]
-    lambdas = np.linspace(0,0.16,30)[1:]
-    plotting = False
+    lambdas = np.linspace(0,0.04,30)[1:]
+    # lambdas = np.linspace(0,0.16,30)[1:]
+    plotting = True
 
     print("\n HERE0\n")
     
@@ -1143,11 +1143,11 @@ if __name__ == "__main__":
 
         Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
         ratio1 = Gt1_1/Gt2_1
-        effmassdata_1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
-        # effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
-        # effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
-        # diffG1 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
-        diffG1 = effmassdata_1 / 2
+        # effmassdata_1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
+        effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
+        effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
+        diffG1 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
+        # diffG1 = effmassdata_1 / 2
         # diffG1_avg = np.average(diffG1, axis=0)[t_range]
         # covmat = np.diag(diffG1[t_range])
         # popt_1, pcov_1 = curve_fit(ff.constant, t_range, diffG1_avg, sigma=covmat)
