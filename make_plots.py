@@ -100,50 +100,118 @@ if __name__ == "__main__":
     # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
 
     pypl.figure(figsize=(6, 6))
-    pypl.errorbar(
+    # pypl.figure(figsize=(6, 6))
+    # pypl.errorbar(
+    #     lambdas0,
+    #     np.average(order0_fit, axis=1),
+    #     np.std(order0_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^1)$",
+    #     color=_colors[0],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # # pypl.scatter(lambdas, np.average(order0_fit, axis=1),label=r"$\mathcal{O}(\lambda^1)$", edgecolors=colors_0, s=150, marker='x', linewidths=4)
+    # pypl.errorbar(
+    #     lambdas1+0.0001,
+    #     np.average(order1_fit, axis=1),
+    #     np.std(order1_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^2)$",
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     lambdas+0.0002,
+    #     np.average(order2_fit, axis=1),
+    #     np.std(order2_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^3)$",
+    #     color=_colors[2],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     lambdas+0.0003,
+    #     np.average(order3_fit, axis=1),
+    #     np.std(order3_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^4)$",
+    #     color=_colors[3],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+
+    pypl.plot(
         lambdas0,
         np.average(order0_fit, axis=1),
-        np.std(order0_fit, axis=1),
-        fmt="s",
         label=r"$\mathcal{O}(\lambda^1)$",
         color=_colors[0],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
+        linewidth=1,
     )
-    # pypl.scatter(lambdas, np.average(order0_fit, axis=1),label=r"$\mathcal{O}(\lambda^1)$", edgecolors=colors_0, s=150, marker='x', linewidths=4)
-    pypl.errorbar(
-        lambdas1+0.0001,
+    pypl.plot(
+        lambdas1,
         np.average(order1_fit, axis=1),
-        np.std(order1_fit, axis=1),
-        fmt="s",
         label=r"$\mathcal{O}(\lambda^2)$",
         color=_colors[1],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
+        linewidth=1,
     )
-    pypl.errorbar(
-        lambdas+0.0002,
+    pypl.plot(
+        lambdas2,
         np.average(order2_fit, axis=1),
-        np.std(order2_fit, axis=1),
-        fmt="s",
         label=r"$\mathcal{O}(\lambda^3)$",
         color=_colors[2],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
+        linewidth=1,
     )
-    pypl.errorbar(
-        lambdas+0.0003,
+    pypl.plot(
+        lambdas3,
         np.average(order3_fit, axis=1),
-        np.std(order3_fit, axis=1),
-        fmt="s",
         label=r"$\mathcal{O}(\lambda^4)$",
         color=_colors[3],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
+        linewidth=1,
+    )
+
+
+    pypl.fill_between(
+        lambdas0,
+        np.average(order0_fit, axis=1) - np.std(order0_fit, axis=1),
+        np.average(order0_fit, axis=1) + np.std(order0_fit, axis=1),
+        # label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        linewidth=0,
+        alpha=0.3
+    )
+    pypl.fill_between(
+        lambdas1,
+        np.average(order1_fit, axis=1) - np.std(order1_fit, axis=1),
+        np.average(order1_fit, axis=1) + np.std(order1_fit, axis=1),
+        # label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        linewidth=0,
+        alpha=0.3
+    )
+    pypl.fill_between(
+        lambdas2,
+        np.average(order2_fit, axis=1) - np.std(order2_fit, axis=1),
+        np.average(order2_fit, axis=1) + np.std(order2_fit, axis=1),
+        # label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        linewidth=0,
+        alpha=0.3
+    )
+    pypl.fill_between(
+        lambdas3,
+        np.average(order3_fit, axis=1) - np.std(order3_fit, axis=1),
+        np.average(order3_fit, axis=1) + np.std(order3_fit, axis=1),
+        # label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
     )
     pypl.legend(fontsize="x-small")
     # pypl.xlim(-0.01, 0.22)
