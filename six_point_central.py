@@ -520,9 +520,6 @@ if __name__ == "__main__":
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
     plotting = True
-    # t_range = np.arange(4, 10)
-    # time_choice = 3
-    # delta_t = 1
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))

@@ -185,22 +185,6 @@ def read_correlators2(pars, pickledir, pickledir2, mom_strings):
 
     The script will check the folders for available files and pick out the files with the highest number of configurations.
     """
-    ### ----------------------------------------------------------------------
-    ### find the highest number of configurations available
-    # print(pickledir/ Path("baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/p+0+0+0/"))
-    # files = (
-    #      pickledir
-    #     / Path(
-    #         "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/p+0+0+0/"
-    #     )
-    # ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
-    # # Strip the conf number from the file names
-    # conf_num_list = np.array([int("".join(filter(str.isdigit, l.name))) for l in list(files)])
-    # print(conf_num_list)
-    # # conf_num_list = [100] # hard code a choice
-    # conf_num = conf_num_list[np.argmax(conf_num_list)]
-    # barspec_name = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
-
 
     ### ----------------------------------------------------------------------
     G2_nucl = []
@@ -213,6 +197,7 @@ def read_correlators2(pars, pickledir, pickledir2, mom_strings):
     )).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
     conf_num_list = np.array([int("".join(filter(str.isdigit, l.name))) for l in list(fileup)])
     conf_num = conf_num_list[np.argmax(conf_num_list)]
+    print('conf_numU:',conf_num)
     barspec_nameU = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
 
     filestrange = (pickledir2 / Path(
@@ -221,6 +206,7 @@ def read_correlators2(pars, pickledir, pickledir2, mom_strings):
     )).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
     conf_num_list = np.array([int("".join(filter(str.isdigit, l.name))) for l in list(filestrange)])
     conf_num = conf_num_list[np.argmax(conf_num_list)]
+    print('conf_numS:',conf_num)
     barspec_nameS = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
 
     unpertfile_nucleon_pos = pickledir / Path(
