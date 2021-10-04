@@ -303,7 +303,6 @@ def plotratio(ratio, plotname, plotdir, ylim=None, fitparam=None, ylabel=None):
     pypl.legend(fontsize="x-small")
     pypl.ylim(ylim)
     pypl.xlim(0, 28)
-    pypl.grid(True, alpha=0.4)
     _metadata["Title"] = plotname
     pypl.savefig(plotdir / ("effmass_NN_" + plotname + ".pdf"), metadata=_metadata)
     # pypl.savefig(plotdir / (plotname + ".pdf"), metadata=metadata)
