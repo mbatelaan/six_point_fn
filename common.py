@@ -352,21 +352,25 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
 def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     """Solve the GEVP for a given correlation matrix
 
-    corr_matrix has the matrix indices as the first two, then the bootstrap and then the time index
+    corr_matrix has the matrix indices as the first two, then the bootstrap index and then the time index
     time_choice is the timeslice on which the GEVP will be set
     delta_t is the size of the time evolution which will be used to solve the GEVP
     """
-    # time_choice = 10
-    # delta_t = 1
     mat_0 = np.average(corr_matrix[:, :, :, time_choice], axis=2)
     mat_1 = np.average(corr_matrix[:, :, :, time_choice + delta_t], axis=2)
 
-    # wl, vl = np.linalg.eig(mat_0.T)
-    # wr, vr = np.linalg.eig(mat_0)
     wl, vl = np.linalg.eig(np.matmul(mat_1, np.linalg.inv(mat_0)).T)
     wr, vr = np.linalg.eig(np.matmul(np.linalg.inv(mat_0), mat_1))
-    # print(wl, vl)
-    # print(wr, vr)
+    
+    # Ordering of the eigenvalues
+    if wl[0] > wl[1] or wr[0] > wr[1]:
+        wl = wl[::-1]
+        vl = vl[::-1]
+        wr = wr[::-1]
+        vr = vr[::-1]
+
+    print('eigenvalues left:', wl, vl)
+    print('eigenvalues right:', wr, vr)
 
     Gt1 = np.einsum("i,ijkl,j->kl", vl[:, 0], corr_matrix, vr[:, 0])
     # print(np.shape(Gt1))
