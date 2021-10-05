@@ -466,7 +466,7 @@ def plot_lmb_dep(all_data):
     )
     pypl.legend(fontsize="x-small")
     pypl.xlim(-0.01, 0.22)
-    pypl.ylim(0.18, 0.4)
+    pypl.ylim(0.0, 0.4)
     pypl.xlabel("$\lambda$")
     pypl.ylabel("$\Delta E$")
     pypl.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")

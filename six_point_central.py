@@ -533,11 +533,11 @@ if __name__ == "__main__":
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
 
         Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
-        # ratio1 = Gt1_1/Gt2_1
-        # effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) / 2
-        effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
-        effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
-        effmass_ratio1 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
+        ratio1 = Gt1_1/Gt2_1
+        effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) / 2
+        # effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
+        # effmassdata_2 = stats.bs_effmass(Gt2_1, time_axis=1, spacing=1)
+        # effmass_ratio1 = np.abs(effmassdata_1 - effmassdata_2) / 2  # / lmb_val
         bootfit1, redchisq1 = fit_value(effmass_ratio1, t_range)
         order0_fit[i] = bootfit1[:, 0]
         red_chisq_list[0,i] = redchisq1
