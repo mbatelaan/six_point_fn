@@ -186,10 +186,11 @@ if __name__ == "__main__":
     pypl.legend(fontsize="x-small")
     # pypl.xlim(-0.01, 0.22)
     # pypl.ylim(0, 0.15)
-    # pypl.xlim(-0.001, 0.045)
-    # pypl.ylim(-0.002, 0.035)
-    pypl.xlim(-0.01, 0.22)
-    pypl.ylim(0.2, 0.35)
+    # pypl.ylim(-0.003, 0.08)
+    pypl.ylim(-0.002, 0.035)
+    # pypl.xlim(-0.01, 0.22)
+    pypl.xlim(-0.001, 0.045)
+    # pypl.ylim(0.2, 0.35)
     pypl.xlabel("$\lambda$")
     pypl.ylabel("$\Delta E$")
     pypl.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")
@@ -205,12 +206,16 @@ if __name__ == "__main__":
     fitlim = 18
     bootfit0, redchisq0 = fit_lmb(order0_fit, fitfunction2, lambdas0, p0=p0)
     print("redchisq",redchisq0,'\n')
+    print("fit",np.average(bootfit0,axis=0),'\n')
     bootfit1, redchisq1 = fit_lmb(order1_fit[:fitlim], fitfunction2, lambdas1[:fitlim], p0=p0)
     print("redchisq",redchisq1,'\n')
+    print("fit",np.average(bootfit1,axis=0),'\n')
     bootfit2, redchisq2 = fit_lmb(order2_fit[:fitlim], fitfunction2, lambdas2[:fitlim], p0=p0)
     print("redchisq",redchisq2,'\n')
+    print("fit",np.average(bootfit2,axis=0),'\n')
     bootfit3, redchisq3 = fit_lmb(order3_fit[:fitlim], fitfunction2, lambdas3[:fitlim], p0=p0)
     print("redchisq",redchisq3,'\n')
+    print("fit",np.average(bootfit3,axis=0),'\n')
     # params0 = np.average(bootfit0,axis=0)
     # pypl.plot(lambdas0, fitfunction2(lambdas0, *params0), color=_colors[0])
     # params1 = np.average(bootfit1,axis=0)
@@ -222,13 +227,21 @@ if __name__ == "__main__":
 
     fitBS0 = np.array([fitfunction2(lambdas0, *bf) for bf in bootfit0])
     print(np.std(fitBS0,axis=0))
+    print(np.average(bootfit0,axis=0)[2], np.std(bootfit0,axis=0)[2])
+    m_e_0 = err_brackets(np.average(bootfit0,axis=0)[2], np.std(bootfit0,axis=0)[2])
+    m_e_1 = err_brackets(np.average(bootfit1,axis=0)[2], np.std(bootfit1,axis=0)[2])
+    m_e_2 = err_brackets(np.average(bootfit2,axis=0)[2], np.std(bootfit2,axis=0)[2])
+    m_e_3 = err_brackets(np.average(bootfit3,axis=0)[2], np.std(bootfit3,axis=0)[2])
+    print(m_e_0)
     pypl.fill_between(
         lambdas0,
         np.average(fitBS0,axis=0) - np.std(fitBS0,axis=0),
         np.average(fitBS0,axis=0) + np.std(fitBS0,axis=0),
         alpha=0.3,
         color=_colors[0],
-        label = f"{redchisq0:0.2}",
+        # label = rf"$t_{{0}}={redchisq0}, \Delta t=$",
+        label = rf"$\chi_{{\textrm{{dof}} }} = {redchisq0:0.2}$"+"\n"+rf"$\textrm{{M.E.}}={m_e_0}$",
+        #label = rf"$\textrm{{M.E.}}={m_e_0}$"+"\n"+rf"$\chi_{{\textrm{{dof}} }} = {redchisq0:0.2}$",
     )
     fitBS1 = np.array([fitfunction2(lambdas1[:fitlim], *bf) for bf in bootfit1])
     print(np.std(fitBS1,axis=0))
@@ -238,7 +251,8 @@ if __name__ == "__main__":
         np.average(fitBS1,axis=0) + np.std(fitBS1,axis=0),
         alpha=0.3,
         color=_colors[1],
-        label = f"{redchisq1:0.2}",
+        label = rf"$\chi_{{\textrm{{dof}} }} = {redchisq1:0.2}$"+"\n"+rf"$\textrm{{M.E.}}={m_e_1}$",
+        # label = f"{redchisq1:0.2}",
     )
     fitBS2 = np.array([fitfunction2(lambdas2[:fitlim], *bf) for bf in bootfit2])
     print(np.std(fitBS2,axis=0))
@@ -248,7 +262,8 @@ if __name__ == "__main__":
         np.average(fitBS2,axis=0) + np.std(fitBS2,axis=0),
         alpha=0.3,
         color=_colors[2],
-        label = f"{redchisq2:0.2}",
+        label = rf"$\chi_{{\textrm{{dof}} }} = {redchisq2:0.2}$"+"\n"+rf"$\textrm{{M.E.}}={m_e_2}$",
+        # label = f"{redchisq2:0.2}",
     )
     fitBS3 = np.array([fitfunction2(lambdas3, *bf) for bf in bootfit3])
     print(np.std(fitBS3,axis=0))
@@ -258,11 +273,12 @@ if __name__ == "__main__":
         np.average(fitBS3,axis=0) + np.std(fitBS3,axis=0),
         alpha=0.3,
         color=_colors[3],
-        label = f"{redchisq3:0.2}",
+        label = rf"$\chi_{{\textrm{{dof}} }} = {redchisq3:0.2}$"+"\n"+rf"$\textrm{{M.E.}}={m_e_3}$",
+        # label = f"{redchisq3:0.2}",
     )
 
     pypl.legend(fontsize="x-small")
-    # pypl.xlim(-0.01, 0.22)
+    # pypl.xlim(-0.01, 0.16)
     # pypl.ylim(0, 0.15)
     pypl.xlim(-0.001, 0.045)
     pypl.ylim(-0.002, 0.035)
