@@ -51,6 +51,8 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     the function will return an array of fit parameters for each bootstrap
     """
     # order0_fit[i] = bootfit1[:, 0]
+    # bounds = [(-np.inf,np.inf), (-np.inf,np.inf),(0,np.inf)]
+    bounds = ([-np.inf,-np.inf,0], [np.inf,np.inf,np.inf])
     ydata = ydata.T
     print(np.shape(ydata))
     data_set = ydata
@@ -59,13 +61,13 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     print('lambdas',lambdas)
     covmat = np.cov(data_set.T)
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
-    popt_avg, pcov_avg = curve_fit(function, lambdas, ydata_avg, sigma=diag_sigma, p0=p0, maxfev=2000)
+    popt_avg, pcov_avg = curve_fit(function, lambdas, ydata_avg, sigma=diag_sigma, p0=p0, maxfev=2000, bounds=bounds)
     chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, np.linalg.inv(covmat))
     print('popt_avg', popt_avg)
     redchisq = chisq / len(lambdas)
     bootfit = []
     for iboot, values in enumerate(ydata):
-        popt, pcov = curve_fit(function, lambdas, values, sigma=diag_sigma, maxfev=2000) #, p0=popt_avg)
+        popt, pcov = curve_fit(function, lambdas, values, sigma=diag_sigma, maxfev=2000, bounds=bounds) #, p0=popt_avg)
         # print(popt)
         bootfit.append(popt)
     bootfit = np.array(bootfit)
@@ -137,57 +139,123 @@ if __name__ == "__main__":
     # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
 
     pypl.figure(figsize=(6, 6))
-    pypl.errorbar(
+
+    # pypl.errorbar(
+    #     lambdas0,
+    #     np.average(order0_fit, axis=1),
+    #     np.std(order0_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^1)$",
+    #     color=_colors[0],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # # pypl.scatter(lambdas, np.average(order0_fit, axis=1),label=r"$\mathcal{O}(\lambda^1)$", edgecolors=colors_0, s=150, marker='x', linewidths=4)
+    # pypl.errorbar(
+    #     lambdas1+0.0001,
+    #     np.average(order1_fit, axis=1),
+    #     np.std(order1_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^2)$",
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     lambdas2+0.0002,
+    #     np.average(order2_fit, axis=1),
+    #     np.std(order2_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^3)$",
+    #     color=_colors[2],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     lambdas3+0.0003,
+    #     np.average(order3_fit, axis=1),
+    #     np.std(order3_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^4)$",
+    #     color=_colors[3],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+
+    pypl.plot(
         lambdas0,
         np.average(order0_fit, axis=1),
-        np.std(order0_fit, axis=1),
-        fmt="s",
         label=r"$\mathcal{O}(\lambda^1)$",
         color=_colors[0],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
+        linewidth=1,
     )
-    # pypl.scatter(lambdas, np.average(order0_fit, axis=1),label=r"$\mathcal{O}(\lambda^1)$", edgecolors=colors_0, s=150, marker='x', linewidths=4)
-    pypl.errorbar(
-        lambdas1+0.0001,
+    pypl.plot(
+        lambdas1,
         np.average(order1_fit, axis=1),
-        np.std(order1_fit, axis=1),
-        fmt="s",
         label=r"$\mathcal{O}(\lambda^2)$",
         color=_colors[1],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
+        linewidth=1,
     )
-    pypl.errorbar(
-        lambdas2+0.0002,
+    pypl.plot(
+        lambdas2,
         np.average(order2_fit, axis=1),
-        np.std(order2_fit, axis=1),
-        fmt="s",
         label=r"$\mathcal{O}(\lambda^3)$",
         color=_colors[2],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
+        linewidth=1,
     )
-    pypl.errorbar(
-        lambdas3+0.0003,
+    pypl.plot(
+        lambdas3,
         np.average(order3_fit, axis=1),
-        np.std(order3_fit, axis=1),
-        fmt="s",
         label=r"$\mathcal{O}(\lambda^4)$",
         color=_colors[3],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
+        linewidth=1,
+    )
+    pypl.fill_between(
+        lambdas0,
+        np.average(order0_fit, axis=1) - np.std(order0_fit, axis=1),
+        np.average(order0_fit, axis=1) + np.std(order0_fit, axis=1),
+        # label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        linewidth=0,
+        alpha=0.3
+    )
+    pypl.fill_between(
+        lambdas1,
+        np.average(order1_fit, axis=1) - np.std(order1_fit, axis=1),
+        np.average(order1_fit, axis=1) + np.std(order1_fit, axis=1),
+        # label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        linewidth=0,
+        alpha=0.3
+    )
+    pypl.fill_between(
+        lambdas2,
+        np.average(order2_fit, axis=1) - np.std(order2_fit, axis=1),
+        np.average(order2_fit, axis=1) + np.std(order2_fit, axis=1),
+        # label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        linewidth=0,
+        alpha=0.3
+    )
+    pypl.fill_between(
+        lambdas3,
+        np.average(order3_fit, axis=1) - np.std(order3_fit, axis=1),
+        np.average(order3_fit, axis=1) + np.std(order3_fit, axis=1),
+        # label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
     )
 
     pypl.legend(fontsize="x-small")
     # pypl.xlim(-0.01, 0.22)
     # pypl.ylim(0, 0.15)
     # pypl.ylim(-0.003, 0.08)
-    pypl.ylim(-0.002, 0.035)
+    pypl.ylim(-0.003, 0.035)
     # pypl.xlim(-0.01, 0.22)
     pypl.xlim(-0.001, 0.045)
     # pypl.ylim(0.2, 0.35)
@@ -202,7 +270,7 @@ if __name__ == "__main__":
     # pars1 = np.average(order1_fit, axis=1)[0]
     # print(pars1)
     # print(np.average(order1_fit, axis=1))
-    p0 = (0.01, 0.01, 0.006)
+    p0 = (0.01, 0.01, 0.7)
     fitlim = 18
     bootfit0, redchisq0 = fit_lmb(order0_fit, fitfunction2, lambdas0, p0=p0)
     print("redchisq",redchisq0,'\n')
@@ -281,7 +349,7 @@ if __name__ == "__main__":
     # pypl.xlim(-0.01, 0.16)
     # pypl.ylim(0, 0.15)
     pypl.xlim(-0.001, 0.045)
-    pypl.ylim(-0.002, 0.035)
+    pypl.ylim(-0.003, 0.035)
     pypl.savefig(plotdir / ("lambda_dep_fit.pdf"))
 
     # pypl.xlim(-0.005, 0.08)
