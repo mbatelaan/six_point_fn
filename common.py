@@ -369,8 +369,8 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
         wr = wr[::-1]
         vr = vr[::-1]
 
-    print('eigenvalues left:', wl, vl)
-    print('eigenvalues right:', wr, vr)
+    # print('eigenvalues left:', wl, vl)
+    # print('eigenvalues right:', wr, vr)
 
     Gt1 = np.einsum("i,ijkl,j->kl", vl[:, 0], corr_matrix, vr[:, 0])
     # print(np.shape(Gt1))

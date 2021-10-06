@@ -107,7 +107,6 @@ if __name__ == "__main__":
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
 
-
     with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"), "rb") as file_in:
         # with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"), "rb") as file_in:
         data = pickle.load(file_in)
@@ -255,10 +254,10 @@ if __name__ == "__main__":
     # pypl.xlim(-0.01, 0.22)
     # pypl.ylim(0, 0.15)
     # pypl.ylim(-0.003, 0.08)
-    pypl.ylim(-0.003, 0.035)
+    # pypl.ylim(-0.003, 0.035)
+    pypl.ylim(-0.003, 0.055)
     # pypl.xlim(-0.01, 0.22)
     pypl.xlim(-0.001, 0.045)
-    # pypl.ylim(0.2, 0.35)
     pypl.xlabel("$\lambda$")
     pypl.ylabel("$\Delta E$")
     pypl.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")

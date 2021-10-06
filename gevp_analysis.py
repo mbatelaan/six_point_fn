@@ -16,6 +16,7 @@ from analysis import fitfunc as ff
 from common import read_pickle
 from common import fit_value
 from common import read_correlators
+from common import read_correlators2
 from common import make_matrices
 from common import gevp
 
@@ -168,8 +169,10 @@ if __name__ == "__main__":
 
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
 
-    G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
-
+    if config["onlytwist"]:
+        G2_nucl, G2_sigm = read_correlators2(pars, pickledir, pickledir2, mom_strings)
+    else: 
+        G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
     lambdas = np.linspace(0,0.16,30)[1:]
     t_range = np.arange(4, 9)
     lmb_val = 0.06 #0.16
