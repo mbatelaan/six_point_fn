@@ -365,14 +365,14 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     print('left:', eval_left, evec_left)
     print('right:', eval_right, evec_right)
     # Ordering of the eigenvalues
-    if eval_left[0] < eval_left[1]:
+    if eval_left[0] > eval_left[1]:
         print("sort left")
-        eval_left = eval_left[::-1]
-        evec_left = evec_left[::-1]
-    if eval_right[0] < eval_right[1]:
+        eval_left = eval_left.T[::-1].T
+        evec_left = evec_left.T[::-1].T
+    if eval_right[0] > eval_right[1]:
         print("sort right")
-        eval_right = eval_right[::-1]
-        evec_right = evec_right[::-1]
+        eval_right = eval_right.T[::-1].T
+        evec_right = evec_right.T[::-1].T
     print('left:', eval_left, evec_left)
     print('right:', eval_right, evec_right)
 
@@ -383,5 +383,5 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
         stats.ploteffmass(Gt1, "eig_1" + name, plotdir, show=True)
         stats.ploteffmass(Gt2, "eig_2" + name, plotdir, show=True)
 
-    return Gt1, Gt2
+    return Gt1, Gt2, eval_left
 
