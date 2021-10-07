@@ -359,34 +359,29 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     mat_0 = np.average(corr_matrix[:, :, :, time_choice], axis=2)
     mat_1 = np.average(corr_matrix[:, :, :, time_choice + delta_t], axis=2)
 
-    wl, vl = np.linalg.eig(np.matmul(mat_1, np.linalg.inv(mat_0)).T)
-    wr, vr = np.linalg.eig(np.matmul(np.linalg.inv(mat_0), mat_1))
+    eval_left, evec_left = np.linalg.eig(np.matmul(mat_1, np.linalg.inv(mat_0)).T)
+    eval_right, evec_right = np.linalg.eig(np.matmul(np.linalg.inv(mat_0), mat_1))
     
+    print('left:', eval_left, evec_left)
+    print('right:', eval_right, evec_right)
     # Ordering of the eigenvalues
-    if wl[0] > wl[1] or wr[0] > wr[1]:
-        wl = wl[::-1]
-        vl = vl[::-1]
-        wr = wr[::-1]
-        vr = vr[::-1]
+    if eval_left[0] < eval_left[1]:
+        print("sort left")
+        eval_left = eval_left[::-1]
+        evec_left = evec_left[::-1]
+    if eval_right[0] < eval_right[1]:
+        print("sort right")
+        eval_right = eval_right[::-1]
+        evec_right = evec_right[::-1]
+    print('left:', eval_left, evec_left)
+    print('right:', eval_right, evec_right)
 
-    # print('eigenvalues left:', wl, vl)
-    # print('eigenvalues right:', wr, vr)
-
-    Gt1 = np.einsum("i,ijkl,j->kl", vl[:, 0], corr_matrix, vr[:, 0])
-    # print(np.shape(Gt1))
-    Gt2 = np.einsum("i,ijkl,j->kl", vl[:, 1], corr_matrix, vr[:, 1])
-    # print(np.shape(Gt2))
+    Gt1 = np.einsum("i,ijkl,j->kl", evec_left[:, 0], corr_matrix, evec_right[:, 0])
+    Gt2 = np.einsum("i,ijkl,j->kl", evec_left[:, 1], corr_matrix, evec_right[:, 1])
 
     if show:
         stats.ploteffmass(Gt1, "eig_1" + name, plotdir, show=True)
         stats.ploteffmass(Gt2, "eig_2" + name, plotdir, show=True)
 
-    # print(f"{np.shape(mat)=}")
-    # print(mat)
-    # wl, vl = np.linalg.eig(mat.T)
-    # wr, vr = np.linalg.eig(mat)
-    # print(wl)
-    # print(vl)
-    # print(wr, vr)
     return Gt1, Gt2
 
