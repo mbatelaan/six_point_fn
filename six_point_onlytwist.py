@@ -629,7 +629,7 @@ if __name__ == "__main__":
         # Construct a correlation matrix for each order in lambda(skipping order 0)
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
 
-        Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
+        Gt1_1, Gt2_1, evals = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
         ratio1 = Gt1_1/Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) / 2
         # effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
@@ -639,21 +639,21 @@ if __name__ == "__main__":
         order0_fit[i] = bootfit1[:, 0]
         red_chisq_list[0,i] = redchisq1
 
-        Gt1_2, Gt2_2 = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
+        Gt1_2, Gt2_2, evals = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
         ratio2 = Gt1_2/Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) / 2
         bootfit2, redchisq2 = fit_value(effmass_ratio2, t_range)
         order1_fit[i] = bootfit2[:, 0]
         red_chisq_list[1,i] = redchisq2
 
-        Gt1_3, Gt2_3 = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
+        Gt1_3, Gt2_3, evals = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
         ratio3 = Gt1_3/Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) / 2
         bootfit3, redchisq3 = fit_value(effmass_ratio3, t_range)
         order2_fit[i] = bootfit3[:, 0]
         red_chisq_list[2,i] = redchisq3
 
-        Gt1_4, Gt2_4 = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
+        Gt1_4, Gt2_4, evals = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
         ratio4 = Gt1_4/Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) / 2
         bootfit4, redchisq4 = fit_value(effmass_ratio4, t_range)

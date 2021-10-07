@@ -16,6 +16,7 @@ from analysis import fitfunc as ff
 from common import read_pickle
 from common import fit_value
 from common import read_correlators
+from common import read_correlators2
 from common import make_matrices
 from common import gevp
 
@@ -371,8 +372,12 @@ def plot_lmb_dep(all_data):
         markerfacecolor="none",
     )
     pypl.legend(fontsize="x-small")
-    pypl.xlim(-0.01, 0.22)
-    pypl.ylim(0, 0.2)
+    # pypl.ylim(0, 0.2)
+    # pypl.ylim(-0.003, 0.035)
+    # pypl.xlim(-0.01, 0.22)
+    pypl.xlim(-0.01, lambdas[-1]*1.1)
+    pypl.ylim(-0.005, np.average(all_data["order3_fit"],axis=1)[-1]*1.3)
+
     pypl.xlabel("$\lambda$")
     pypl.ylabel("$\Delta E$")
     pypl.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
@@ -508,13 +513,17 @@ if __name__ == "__main__":
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
 
+
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
-    G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
+    if "onlytwist" in config and config["onlytwist"]:
+        G2_nucl, G2_sigm = read_correlators2(pars, pickledir, pickledir2, mom_strings)
+    else: 
+        G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
 
     # lambdas = np.linspace(0.12,0.16,20)
     # lambdas = np.linspace(0,0.16,10)[1:]
-    lambdas = np.linspace(0,0.04,30)
-    # lambdas = np.linspace(0,0.16,30) #[1:]
+    # lambdas = np.linspace(0,0.04,30)
+    lambdas = np.linspace(0,0.16,30) #[1:]
     # lambdas = np.linspace(0,0.16,10) #[1:]
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
@@ -532,7 +541,7 @@ if __name__ == "__main__":
         # Construct a correlation matrix for each order in lambda(skipping order 0)
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
 
-        Gt1_1, Gt2_1 = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
+        Gt1_1, Gt2_1, evals = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
         ratio1 = Gt1_1/Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) / 2
         # effmassdata_1 = stats.bs_effmass(Gt1_1, time_axis=1, spacing=1)
@@ -542,21 +551,21 @@ if __name__ == "__main__":
         order0_fit[i] = bootfit1[:, 0]
         red_chisq_list[0,i] = redchisq1
 
-        Gt1_2, Gt2_2 = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
+        Gt1_2, Gt2_2, evals = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
         ratio2 = Gt1_2/Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) / 2
         bootfit2, redchisq2 = fit_value(effmass_ratio2, t_range)
         order1_fit[i] = bootfit2[:, 0]
         red_chisq_list[1,i] = redchisq2
 
-        Gt1_3, Gt2_3 = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
+        Gt1_3, Gt2_3, evals = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
         ratio3 = Gt1_3/Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) / 2
         bootfit3, redchisq3 = fit_value(effmass_ratio3, t_range)
         order2_fit[i] = bootfit3[:, 0]
         red_chisq_list[2,i] = redchisq3
 
-        Gt1_4, Gt2_4 = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
+        Gt1_4, Gt2_4, evals = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
         ratio4 = Gt1_4/Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) / 2
         bootfit4, redchisq4 = fit_value(effmass_ratio4, t_range)
