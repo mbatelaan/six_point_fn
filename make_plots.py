@@ -33,7 +33,7 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
-pars1 = 0
+# pars1 = 0
 
 def fitfunction2(lmb, pars0, pars1, pars2):
     deltaE = 0.5*(pars0+pars1) + 0.5*np.sqrt((pars0-pars1)**2 + 4*lmb**2*pars2**2)
@@ -61,13 +61,13 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     print('lambdas',lambdas)
     covmat = np.cov(data_set.T)
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
-    popt_avg, pcov_avg = curve_fit(function, lambdas, ydata_avg, sigma=diag_sigma, p0=p0, maxfev=2000, bounds=bounds)
+    popt_avg, pcov_avg = curve_fit(function, lambdas, ydata_avg, sigma=diag_sigma, p0=p0, maxfev=4000, bounds=bounds)
     chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, np.linalg.inv(covmat))
     print('popt_avg', popt_avg)
     redchisq = chisq / len(lambdas)
     bootfit = []
     for iboot, values in enumerate(ydata):
-        popt, pcov = curve_fit(function, lambdas, values, sigma=diag_sigma, maxfev=2000, bounds=bounds) #, p0=popt_avg)
+        popt, pcov = curve_fit(function, lambdas, values, sigma=diag_sigma, maxfev=4000, bounds=bounds) #, p0=popt_avg)
         # print(popt)
         bootfit.append(popt)
     bootfit = np.array(bootfit)
@@ -227,12 +227,10 @@ if __name__ == "__main__":
     datadir.mkdir(parents=True, exist_ok=True)
 
     print(datadir / ("lambda_dep.pkl"))
-    # time_choice = 2
-    # delta_t = 2
-    # t_range = np.arange(4, 10)
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
+    lmb_val = config["lmb_val"]
 
     with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"), "rb") as file_in:
         # with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"), "rb") as file_in:
@@ -283,12 +281,14 @@ if __name__ == "__main__":
 
     print('\n')
     # Fit the quadratic behaviour in lambda
-    p0 = (0.01, 0.01, 0.7)
-    fitlim = 18
+    # p0 = (0.01, 0.01, 0.7)
+    p0 = (1, 1, 0.7)
+    fitlim = 14
     try:
         bootfit0, redchisq0 = fit_lmb(order0_fit, fitfunction2, lambdas0, p0=p0)
         print("redchisq",redchisq0,'\n')
         print("fit",np.average(bootfit0,axis=0),'\n')
+        p0 = np.average(bootfit0,axis=0)
         bootfit1, redchisq1 = fit_lmb(order1_fit[:fitlim], fitfunction2, lambdas1[:fitlim], p0=p0)
         print("redchisq",redchisq1,'\n')
         print("fit",np.average(bootfit1,axis=0),'\n')
@@ -310,13 +310,15 @@ if __name__ == "__main__":
             "redchisq2" : redchisq2,
             "redchisq3" : redchisq3,
         }
-    except RuntimeError:
+    except RuntimeError as e:
+        print("====================\nFitting Failed\n====================")
+        print(e)
         fit_data = None
 
     plot_lmb_dep(all_data, fit_data)
 
     ### ----------------------------------------------------------------------
-    lmb_val = 0.06 #0.16
+    # lmb_val = 0.06 #0.16
     time_choice_range = np.arange(5,10)
     delta_t_range = np.arange(1,4)
     t_range = np.arange(4, 9)
@@ -331,8 +333,8 @@ if __name__ == "__main__":
     order3_fit = data["order3_fit"]
     time_choice_range = data["time_choice"]
     delta_t_range = data["delta_t"]
+    delta_t_choice = np.where(delta_t_range==config["delta_t"])[0][0]
 
-    delta_t_choice = 0
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
         time_choice_range,
@@ -391,7 +393,11 @@ if __name__ == "__main__":
     # pypl.show()
 
     # --------------------------------------------------------------------------------
-    t0_choice = 0
+    # t0_choice = 0
+
+    t0_choice = np.where(time_choice_range==config["time_choice"])[0][0]
+    # t0_choice = config["time_choice"]
+
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
         delta_t_range,
