@@ -5,3 +5,4 @@ time_choice : 3
 delta_t : 1
 t_range0 : 4
 t_range1 : 10
+lmb_val : 0.04
