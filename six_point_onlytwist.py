@@ -16,6 +16,7 @@ from analysis import fitfunc as ff
 from common import read_pickle
 from common import fit_value
 from common import read_correlators
+from common import read_correlators2
 from common import make_matrices
 from common import gevp
 
@@ -39,7 +40,7 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
-def plotting_script_all(
+def plotting_script_all_S(
     corr_matrix, corr_matrix1, corr_matrix2, corr_matrix3, lmb_val, name="", show=False
 ):
     spacing = 2
@@ -216,6 +217,99 @@ def plotting_script_all_N(
     pypl.close()
     return
 
+def plotratio(ratio, plotname, plotdir, ylim=None, fitparam=None, ylabel=None):
+    """Plot the effective mass of the ratio of correlators for both lambdas and plot their fits"""
+    spacing = 2
+    time = np.arange(0, np.shape(ratio[0][0])[1])
+    efftime = time[:-spacing] + 0.5
+    xlim = 30
+
+    ratio1 = ratio[0][0]
+    effmassdata1 = stats.bs_effmass(ratio1, time_axis=1, spacing=spacing)
+    yeffavg1 = np.average(effmassdata1, axis=0)
+    yeffstd1 = np.std(effmassdata1, axis=0)
+    ratio2 = ratio[0][1]
+    effmassdata2 = stats.bs_effmass(ratio2, time_axis=1, spacing=spacing)
+    yeffavg2 = np.average(effmassdata2, axis=0)
+    yeffstd2 = np.std(effmassdata2, axis=0)
+    ratio3 = ratio[1][0]
+    effmassdata3 = stats.bs_effmass(ratio3, time_axis=1, spacing=spacing)
+    yeffavg3 = np.average(effmassdata3, axis=0)
+    yeffstd3 = np.std(effmassdata3, axis=0)
+    ratio4 = ratio[1][1]
+    effmassdata4 = stats.bs_effmass(ratio4, time_axis=1, spacing=spacing)
+    yeffavg4 = np.average(effmassdata4, axis=0)
+    yeffstd4 = np.std(effmassdata4, axis=0)
+
+    pypl.figure(figsize=(7, 6))
+    pypl.errorbar(
+        efftime[:xlim],
+        yeffavg1[:xlim],
+        yeffstd1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        label="NN",
+    )
+    pypl.errorbar(
+        efftime[:xlim],
+        yeffavg2[:xlim],
+        yeffstd2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        label="NS",
+    )
+    pypl.errorbar(
+        efftime[:xlim],
+        yeffavg3[:xlim],
+        yeffstd3[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt="s",
+        markerfacecolor="none",
+        label="SN",
+    )
+    pypl.errorbar(
+        efftime[:xlim],
+        yeffavg4[:xlim],
+        yeffstd4[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[3],
+        fmt="s",
+        markerfacecolor="none",
+        label="SS",
+    )
+
+    if fitparam:
+        pypl.plot(fitparam[0], np.average(fitparam[1], axis=0))
+        pypl.fill_between(
+            fitparam[0],
+            np.average(fitparam[1], axis=0) - np.std(fitparam[1], axis=0),
+            np.average(fitparam[1], axis=0) + np.std(fitparam[1], axis=0),
+            alpha=0.3,
+        )
+
+    pypl.xlabel(r"$\textrm{t/a}$", labelpad=14, fontsize=18)
+    pypl.ylabel(ylabel, labelpad=5, fontsize=18)
+    # pypl.ylabel(r'$\Delta E/\lambda$',labelpad=5,fontsize=18)
+    # pypl.title(r'Energy shift '+pars.momfold[pars.momentum][:-1]+r', $\gamma_{'+op[1:]+r'}$')
+    pypl.legend(fontsize="x-small")
+    pypl.ylim(ylim)
+    pypl.xlim(0, 28)
+    _metadata["Title"] = plotname
+    pypl.savefig(plotdir / ("effmass_NN_" + plotname + ".pdf"), metadata=_metadata)
+    # pypl.savefig(plotdir / (plotname + ".pdf"), metadata=metadata)
+    pypl.close()
+    return
+
+
 def plotting_script_diff_2(
     diffG1, diffG2, diffG3, diffG4, fitvals, t_range, lmb_val, name="", show=False
 ):
@@ -372,7 +466,7 @@ def plot_lmb_dep(all_data):
     )
     pypl.legend(fontsize="x-small")
     pypl.xlim(-0.01, 0.22)
-    pypl.ylim(0, 0.2)
+    pypl.ylim(0.0, 0.4)
     pypl.xlabel("$\lambda$")
     pypl.ylabel("$\Delta E$")
     pypl.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
@@ -509,7 +603,7 @@ if __name__ == "__main__":
     datadir.mkdir(parents=True, exist_ok=True)
 
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
-    G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
+    G2_nucl, G2_sigm = read_correlators2(pars, pickledir, pickledir2, mom_strings)
 
     # lambdas = np.linspace(0.12,0.16,20)
     # lambdas = np.linspace(0,0.16,10)[1:]
@@ -520,6 +614,9 @@ if __name__ == "__main__":
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
     plotting = True
+    # t_range = np.arange(4, 10)
+    # time_choice = 3
+    # delta_t = 1
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))
@@ -564,7 +661,8 @@ if __name__ == "__main__":
         red_chisq_list[3,i] = redchisq4
 
         if plotting:
-            plotting_script_all(
+            plotratio(matrix_1, "_l"+str(lmb_val), plotdir, ylim=None, fitparam=None, ylabel=None)
+            plotting_script_all_S(
                 matrix_1 / 1e39,
                 matrix_2 / 1e39,
                 matrix_3 / 1e39,
