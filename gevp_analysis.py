@@ -40,6 +40,7 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
+
 def plotting_script_diff_2(
     diffG1, diffG2, diffG3, diffG4, fitvals, t_range, lmb_val, name="", show=False
 ):
@@ -145,7 +146,8 @@ def plotting_script_diff_2(
         pypl.show()
     pypl.close()
     return
-    
+
+
 if __name__ == "__main__":
     pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     pypl.rc("text", usetex=True)
@@ -172,58 +174,67 @@ if __name__ == "__main__":
 
     if "onlytwist" in config and config["onlytwist"]:
         G2_nucl, G2_sigm = read_correlators2(pars, pickledir, pickledir2, mom_strings)
-    else: 
+    else:
         G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
-    lambdas = np.linspace(0,0.16,30)[1:]
+    lambdas = np.linspace(0, 0.16, 30)[1:]
     t_range = np.arange(4, 9)
     # lmb_val = 0.06 #0.16
     # lmb_val = 0.04 #0.16
-    time_choice_range = np.arange(2,15)
-    delta_t_range = np.arange(1,4)
+    time_choice_range = np.arange(2, 15)
+    delta_t_range = np.arange(1, 4)
     plotting = True
 
-    order0_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
-    order1_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
-    order2_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
-    order3_fit = np.zeros((len(time_choice_range),len(delta_t_range), pars.nboot))
-    red_chisq_list = np.zeros((4,len(time_choice_range),len(delta_t_range)))
+    order0_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
+    order1_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
+    order2_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
+    order3_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
+    red_chisq_list = np.zeros((4, len(time_choice_range), len(delta_t_range)))
 
-    for i,time_choice in enumerate(time_choice_range):
-        for j,delta_t in enumerate(delta_t_range):
+    for i, time_choice in enumerate(time_choice_range):
+        for j, delta_t in enumerate(delta_t_range):
             print(f"t_0 =  {time_choice}\tDelta t = {delta_t}\n")
             # Construct a correlation matrix for each order in lambda (skipping order 0)
-            matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
-            
+            matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
+                G2_nucl, G2_sigm, lmb_val
+            )
+
             ### ----------------------------------------------------------------------
-            Gt1_1, Gt2_1, evals = gevp(matrix_1, time_choice, delta_t, name="_test", show=False)
-            ratio1 = Gt1_1/Gt2_1
+            Gt1_1, Gt2_1, evals = gevp(
+                matrix_1, time_choice, delta_t, name="_test", show=False
+            )
+            ratio1 = Gt1_1 / Gt2_1
             effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) / 2
             bootfit1, redchisq1 = fit_value(effmass_ratio1, t_range)
-            order0_fit[i,j] = bootfit1[:, 0]
-            red_chisq_list[0,i,j] = redchisq1
-            
-            Gt1_2, Gt2_2, evals = gevp(matrix_2, time_choice, delta_t, name="_test", show=False)
-            ratio2 = Gt1_2/Gt2_2
+            order0_fit[i, j] = bootfit1[:, 0]
+            red_chisq_list[0, i, j] = redchisq1
+
+            Gt1_2, Gt2_2, evals = gevp(
+                matrix_2, time_choice, delta_t, name="_test", show=False
+            )
+            ratio2 = Gt1_2 / Gt2_2
             effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) / 2
             bootfit2, redchisq2 = fit_value(effmass_ratio2, t_range)
-            order1_fit[i,j] = bootfit2[:, 0]
-            red_chisq_list[1,i,j] = redchisq2
-            
-            Gt1_3, Gt2_3, evals = gevp(matrix_3, time_choice, delta_t, name="_test", show=False)
-            ratio3 = Gt1_3/Gt2_3
+            order1_fit[i, j] = bootfit2[:, 0]
+            red_chisq_list[1, i, j] = redchisq2
+
+            Gt1_3, Gt2_3, evals = gevp(
+                matrix_3, time_choice, delta_t, name="_test", show=False
+            )
+            ratio3 = Gt1_3 / Gt2_3
             effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) / 2
             bootfit3, redchisq3 = fit_value(effmass_ratio3, t_range)
-            order2_fit[i,j] = bootfit3[:, 0]
-            red_chisq_list[2,i,j] = redchisq3
-            
-            Gt1_4, Gt2_4, evals = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
-            ratio4 = Gt1_4/Gt2_4
+            order2_fit[i, j] = bootfit3[:, 0]
+            red_chisq_list[2, i, j] = redchisq3
+
+            Gt1_4, Gt2_4, evals = gevp(
+                matrix_4, time_choice, delta_t, name="_test", show=False
+            )
+            ratio4 = Gt1_4 / Gt2_4
             effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) / 2
             bootfit4, redchisq4 = fit_value(effmass_ratio4, t_range)
-            order3_fit[i,j] = bootfit4[:, 0]
-            red_chisq_list[3,i,j] = redchisq4
- 
-           
+            order3_fit[i, j] = bootfit4[:, 0]
+            red_chisq_list[3, i, j] = redchisq4
+
             if plotting:
                 plotting_script_diff_2(
                     effmass_ratio1,
@@ -233,32 +244,32 @@ if __name__ == "__main__":
                     [bootfit1, bootfit2, bootfit3, bootfit4],
                     t_range,
                     lmb_val,
-                    name="_l" + str(lmb_val) + "_time_choice"+str(time_choice),
+                    name="_l" + str(lmb_val) + "_time_choice" + str(time_choice),
                     show=False,
                 )
-                
-    #----------------------------------------------------------------------
+
+    # ----------------------------------------------------------------------
     # Save the fit data to a pickle file
     all_data = {
-        "lambdas" : np.array([lmb_val]),
-        "order0_fit" : order0_fit, 
-        "order1_fit" : order1_fit,
-        "order2_fit" : order2_fit,
-        "order3_fit" : order3_fit,
-        "redchisq" : red_chisq_list,
-        "time_choice" : time_choice_range,
-        "delta_t" : delta_t_range
+        "lambdas": np.array([lmb_val]),
+        "order0_fit": order0_fit,
+        "order1_fit": order1_fit,
+        "order2_fit": order2_fit,
+        "order3_fit": order3_fit,
+        "redchisq": red_chisq_list,
+        "time_choice": time_choice_range,
+        "delta_t": delta_t_range,
     }
     with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "wb") as file_out:
         pickle.dump(all_data, file_out)
 
-    #----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
     # Make a plot of the dependence of the energy shift on the time parameters in the GEVP
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
         time_choice_range,
-        np.average(order0_fit[:,0,:], axis=1),
-        np.std(order0_fit[:,0,:], axis=1),
+        np.average(order0_fit[:, 0, :], axis=1),
+        np.std(order0_fit[:, 0, :], axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^1)$",
         color=_colors[0],
@@ -267,9 +278,9 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        time_choice_range+0.001,
-        np.average(order1_fit[:,0,:], axis=1),
-        np.std(order1_fit[:,0,:], axis=1),
+        time_choice_range + 0.001,
+        np.average(order1_fit[:, 0, :], axis=1),
+        np.std(order1_fit[:, 0, :], axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^2)$",
         color=_colors[1],
@@ -278,9 +289,9 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        time_choice_range+0.002,
-        np.average(order2_fit[:,0,:], axis=1),
-        np.std(order2_fit[:,0,:], axis=1),
+        time_choice_range + 0.002,
+        np.average(order2_fit[:, 0, :], axis=1),
+        np.std(order2_fit[:, 0, :], axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^3)$",
         color=_colors[2],
@@ -289,9 +300,9 @@ if __name__ == "__main__":
         markerfacecolor="none",
     )
     pypl.errorbar(
-        time_choice_range+0.003,
-        np.average(order3_fit[:,0,:], axis=1),
-        np.std(order3_fit[:,0,:], axis=1),
+        time_choice_range + 0.003,
+        np.average(order3_fit[:, 0, :], axis=1),
+        np.std(order3_fit[:, 0, :], axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^4)$",
         color=_colors[3],
