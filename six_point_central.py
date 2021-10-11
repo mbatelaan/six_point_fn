@@ -652,8 +652,8 @@ if __name__ == "__main__":
 
     # lambdas = np.linspace(0.12,0.16,20)
     # lambdas = np.linspace(0,0.16,10)[1:]
-    # lambdas = np.linspace(0,0.04,30)
-    lambdas = np.linspace(0, 0.16, 30)  # [1:]
+    lambdas = np.linspace(0,0.06,30)
+    # lambdas = np.linspace(0, 0.16, 30)  # [1:]
     # lambdas = np.linspace(0,0.16,10) #[1:]
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
@@ -713,7 +713,7 @@ if __name__ == "__main__":
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) 
         bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function, norm=1)
-        order0_fit[i] = bootfit1[:, 1]
+        order0_fit[i] = bootfit1[:, 1]/2
         red_chisq_list[0, i] = redchisq1
         print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
 
@@ -723,7 +723,7 @@ if __name__ == "__main__":
         ratio2 = Gt1_2 / Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) 
         bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function, norm=1)
-        order1_fit[i] = bootfit2[:, 1]
+        order1_fit[i] = bootfit2[:, 1]/2
         red_chisq_list[1, i] = redchisq2
 
         Gt1_3, Gt2_3, evals = gevp(
@@ -732,7 +732,7 @@ if __name__ == "__main__":
         ratio3 = Gt1_3 / Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) 
         bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
-        order2_fit[i] = bootfit3[:, 1]
+        order2_fit[i] = bootfit3[:, 1]/2
         red_chisq_list[2, i] = redchisq3
 
         Gt1_4, Gt2_4, evals = gevp(
@@ -741,7 +741,7 @@ if __name__ == "__main__":
         ratio4 = Gt1_4 / Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) 
         bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
-        order3_fit[i] = bootfit4[:, 1]
+        order3_fit[i] = bootfit4[:, 1]/2
         red_chisq_list[3, i] = redchisq4
 
         if plotting:

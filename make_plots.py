@@ -241,7 +241,7 @@ def plot_lmb_dep(all_data, fit_data=None):
             + rf"$\textrm{{M.E.}}={m_e_3}$",
         )
 
-        pypl.legend(fontsize="x-small")
+        pypl.legend(fontsize="xx-small")
         # pypl.xlim(-0.01, 0.16)
         # pypl.ylim(0, 0.15)
         # pypl.xlim(-0.001, 0.045)
