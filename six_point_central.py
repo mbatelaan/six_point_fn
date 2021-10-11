@@ -15,6 +15,7 @@ from analysis import fitfunc as ff
 
 from common import read_pickle
 from common import fit_value
+from common import fit_value3
 from common import read_correlators
 from common import read_correlators2
 from common import make_matrices
@@ -326,6 +327,122 @@ def plotting_script_diff_2(
     pypl.close()
     return
 
+def plotting_script_unpert(
+    correlator1, correlator2, ratio, fitvals1, fitvals2, fitvals, t_range12, t_range, name="", show=False
+):
+    spacing = 2
+    xlim = 20
+    time = np.arange(0, np.shape(correlator1)[1])
+    efftime = time[:-spacing] + 0.5
+    correlator1 = stats.bs_effmass(correlator1, time_axis=1, spacing=1) 
+    correlator2 = stats.bs_effmass(correlator2, time_axis=1, spacing=1) 
+    effratio = stats.bs_effmass(ratio, time_axis=1, spacing=1) 
+    yavg_1 = np.average(correlator1, axis=0)
+    ystd_1 = np.std(correlator1, axis=0)
+    yavg_2 = np.average(correlator2, axis=0)
+    ystd_2 = np.std(correlator2, axis=0)
+    yavg_ratio = np.average(ratio, axis=0)
+    ystd_ratio = np.std(ratio, axis=0)
+    yavg_effratio = np.average(effratio, axis=0)
+    ystd_effratio = np.std(effratio, axis=0)
+
+
+    pypl.figure(figsize=(6, 6))
+    pypl.errorbar(
+        efftime[:xlim],
+        yavg_effratio[:xlim],
+        ystd_effratio[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+    )
+    pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    pypl.ylim(-0.2,0.4)
+    pypl.savefig(plotdir / ("Testtttt.pdf"))
+
+
+    f, axs = pypl.subplots(2, 1, figsize=(6, 6), sharex=True)
+    f.tight_layout()
+    axs[0].errorbar(
+        efftime[:xlim],
+        yavg_1[:xlim],
+        ystd_1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$N$",
+    )
+    axs[0].errorbar(
+        efftime[:xlim],
+        yavg_2[:xlim],
+        ystd_2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$\Sigma$",
+    )
+    axs[0].plot(t_range12, len(t_range12) * [np.average(fitvals1)], color=_colors[0])
+    axs[0].fill_between(
+        t_range12,
+        np.average(fitvals1) - np.std(fitvals1),
+        np.average(fitvals1) + np.std(fitvals1),
+        alpha=0.3,
+        color=_colors[0],
+        label=rf"$E_N$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
+    )
+    axs[0].plot(t_range12, len(t_range12) * [np.average(fitvals2)], color=_colors[1])
+    axs[0].fill_between(
+        t_range12,
+        np.average(fitvals2) - np.std(fitvals2),
+        np.average(fitvals2) + np.std(fitvals2),
+        alpha=0.3,
+        color=_colors[1],
+        label=rf"$E_{{\Sigma}}$ = {err_brackets(np.average(fitvals2),np.std(fitvals2))}",
+    )
+
+    axs[0].legend(fontsize="x-small")
+
+    axs[1].errorbar(
+        time[:xlim],
+        yavg_ratio[:xlim],
+        ystd_ratio[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$G_{N}/G_{\Sigma}$",
+    )
+    axs[1].plot(t_range, len(t_range) * [np.average(fitvals)], color=_colors[0])
+    axs[1].fill_between(
+        t_range,
+        np.average(fitvals) - np.std(fitvals),
+        np.average(fitvals) + np.std(fitvals),
+        alpha=0.3,
+        color=_colors[2],
+        label=rf"Fit = {err_brackets(np.average(fitvals),np.std(fitvals))}",
+    )
+
+    # axs[0].axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    # pypl.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
+    pypl.setp(axs, xlim=(0, xlim))
+    axs[0].set_ylabel(r"$\textrm{Effective energy}$")
+    axs[1].set_ylabel(r"$G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})$")
+    pypl.xlabel("$t/a$")
+    axs[1].legend(fontsize="x-small")
+    # pypl.title("$\lambda=" + str(lmb_val) + "$")
+    pypl.savefig(plotdir / ("unpert_ratio" + name + ".pdf"))
+    if show:
+        pypl.show()
+    pypl.close()
+    return
+
 
 def plot_lmb_dep(all_data):
     """Make a plot of the lambda dependence of the energy shift"""
@@ -342,7 +459,7 @@ def plot_lmb_dep(all_data):
         markerfacecolor="none",
     )
     pypl.errorbar(
-        all_data["lambdas"] + 0.001,
+        all_data["lambdas"] +  0.0001,
         np.average(all_data["order1_fit"], axis=1),
         np.std(all_data["order1_fit"], axis=1),
         fmt="s",
@@ -353,7 +470,7 @@ def plot_lmb_dep(all_data):
         markerfacecolor="none",
     )
     pypl.errorbar(
-        all_data["lambdas"] + 0.002,
+        all_data["lambdas"] + 0.0002,
         np.average(all_data["order2_fit"], axis=1),
         np.std(all_data["order2_fit"], axis=1),
         fmt="s",
@@ -364,7 +481,7 @@ def plot_lmb_dep(all_data):
         markerfacecolor="none",
     )
     pypl.errorbar(
-        all_data["lambdas"] + 0.003,
+        all_data["lambdas"]+ 0.0003,
         np.average(all_data["order3_fit"], axis=1),
         np.std(all_data["order3_fit"], axis=1),
         fmt="s",
@@ -404,7 +521,7 @@ def plot_lmb_dep_fit(all_data, fit_data, fitfunction):
         markerfacecolor="none",
     )
     pypl.errorbar(
-        all_data["lambdas"] + 0.001,
+        all_data["lambdas"] + 0.0001,
         np.average(all_data["order1_fit"], axis=1),
         np.std(all_data["order1_fit"], axis=1),
         fmt="s",
@@ -415,7 +532,7 @@ def plot_lmb_dep_fit(all_data, fit_data, fitfunction):
         markerfacecolor="none",
     )
     pypl.errorbar(
-        all_data["lambdas"] + 0.002,
+        all_data["lambdas"]+ 0.0002,
         np.average(all_data["order2_fit"], axis=1),
         np.std(all_data["order2_fit"], axis=1),
         fmt="s",
@@ -426,7 +543,7 @@ def plot_lmb_dep_fit(all_data, fit_data, fitfunction):
         markerfacecolor="none",
     )
     pypl.errorbar(
-        all_data["lambdas"] + 0.003,
+        all_data["lambdas"] +0.0003,
         np.average(all_data["order3_fit"], axis=1),
         np.std(all_data["order3_fit"], axis=1),
         fmt="s",
@@ -526,6 +643,7 @@ if __name__ == "__main__":
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
 
+    # Read the correlator data from the pickle files
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
     if "onlytwist" in config and config["onlytwist"]:
         G2_nucl, G2_sigm = read_correlators2(pars, pickledir, pickledir2, mom_strings)
@@ -547,7 +665,41 @@ if __name__ == "__main__":
     order2_fit = np.zeros((len(lambdas), pars.nboot))
     order3_fit = np.zeros((len(lambdas), pars.nboot))
     red_chisq_list = np.zeros((4, len(lambdas)))
+    
+    aexp_function = ff.initffncs("Aexp")
+    # aexp_eval = aexp_function.eval
+    print(aexp_function.label)
 
+    # Fit to the energy gap
+    fit_range = np.arange(5,14)
+    fit_range12 = np.arange(5,18)
+    ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:,:,0]
+    bootfit1, redchisq1 = fit_value3(G2_nucl[0][:,:,0], fit_range12, aexp_function, norm=1)
+    bootfit2, redchisq2 = fit_value3(G2_sigm[0][:,:,0], fit_range12, aexp_function, norm=1)
+    bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, fit_range)
+    print(f"redchisq = {redchisq_ratio}")
+    print(f"fit = {np.average(bootfit1,axis=0)}")
+    print(f"fit = {np.average(bootfit2,axis=0)}")
+    print(f"fit = {np.average(bootfit_ratio,axis=0)}")
+    diff = bootfit1[:,1]-bootfit2[:,1]
+    print(f"diff = {np.average(diff,axis=0)}")
+    print(f"diff = {err_brackets(np.average(diff),np.std(diff))}")
+    plotting_script_unpert(
+        G2_nucl[0][:, :, 0],
+        G2_sigm[0][:,:,0],
+        ratio_unpert,
+        bootfit1[:, 1],
+        bootfit2[:, 1],
+        bootfit_ratio[:, 0],
+        fit_range12,
+        fit_range,
+        name="_unpert_ratio",
+        show=False,
+    )
+    # order0_fit[i] = bootfit1[:, 1]
+    # red_chisq_list[0, i] = redchisq1
+    
+    
     for i, lmb_val in enumerate(lambdas):
         print(f"Lambda = {lmb_val}\n")
         # Construct a correlation matrix for each order in lambda(skipping order 0)
@@ -559,36 +711,37 @@ if __name__ == "__main__":
             matrix_1, time_choice, delta_t, name="_test", show=False
         )
         ratio1 = Gt1_1 / Gt2_1
-        effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) / 2
-        bootfit1, redchisq1 = fit_value(effmass_ratio1, t_range)
-        order0_fit[i] = bootfit1[:, 0]
+        effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) 
+        bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function, norm=1)
+        order0_fit[i] = bootfit1[:, 1]
         red_chisq_list[0, i] = redchisq1
+        print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
 
         Gt1_2, Gt2_2, evals = gevp(
             matrix_2, time_choice, delta_t, name="_test", show=False
         )
         ratio2 = Gt1_2 / Gt2_2
-        effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) / 2
-        bootfit2, redchisq2 = fit_value(effmass_ratio2, t_range)
-        order1_fit[i] = bootfit2[:, 0]
+        effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) 
+        bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function, norm=1)
+        order1_fit[i] = bootfit2[:, 1]
         red_chisq_list[1, i] = redchisq2
 
         Gt1_3, Gt2_3, evals = gevp(
             matrix_3, time_choice, delta_t, name="_test", show=False
         )
         ratio3 = Gt1_3 / Gt2_3
-        effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) / 2
-        bootfit3, redchisq3 = fit_value(effmass_ratio3, t_range)
-        order2_fit[i] = bootfit3[:, 0]
+        effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) 
+        bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
+        order2_fit[i] = bootfit3[:, 1]
         red_chisq_list[2, i] = redchisq3
 
         Gt1_4, Gt2_4, evals = gevp(
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
         ratio4 = Gt1_4 / Gt2_4
-        effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) / 2
-        bootfit4, redchisq4 = fit_value(effmass_ratio4, t_range)
-        order3_fit[i] = bootfit4[:, 0]
+        effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) 
+        bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
+        order3_fit[i] = bootfit4[:, 1]
         red_chisq_list[3, i] = redchisq4
 
         if plotting:
@@ -615,7 +768,7 @@ if __name__ == "__main__":
                 effmass_ratio2,
                 effmass_ratio3,
                 effmass_ratio4,
-                [bootfit1, bootfit2, bootfit3, bootfit4],
+                [bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1], bootfit4[:, 1]],
                 t_range,
                 lmb_val,
                 name="_l" + str(lmb_val) + "_all",
