@@ -71,7 +71,7 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     """
 
     # bounds = ([0, 0, 0], [np.inf, np.inf, np.inf])
-    bounds = ([-np.inf, 0], [np.inf, np.inf])
+    bounds = ([0, 0], [np.inf, np.inf])
     ydata = ydata.T
     print(np.shape(ydata))
     data_set = ydata
@@ -98,7 +98,7 @@ def fit_lmb(ydata, function, lambdas, p0=None):
         # print(iboot)
         popt, pcov = curve_fit(
             function, lambdas, values, sigma=diag_sigma, 
-            maxfev=4000,
+            # maxfev=4000,
             p0 = p0,
             bounds=bounds
         )  # , p0=popt_avg)
