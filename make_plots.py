@@ -37,7 +37,7 @@ m_S = 0.4641829
 
 
 def fitfunction2(lmb, E_nucl_p, E_sigma_p, matrix_element):
-    deltaE = 0.5 * (E_nucl_p + E_sigma_p) + 0.5 * np.sqrt(
+    deltaE = 0.5 * (E_nucl_p + E_sigma_p) - 0.5 * np.sqrt(
         (E_nucl_p - E_sigma_p) ** 2 + 4 * lmb ** 2 * matrix_element ** 2
     )
     return deltaE
@@ -49,6 +49,12 @@ def fitfunction3(lmb, pars0, pars2):
     )
     return deltaE
 
+def fitfunction4(lmb, E_nucl_p, E_sigma_p, matrix_element):
+    deltaE = 0.5 * np.sqrt(
+        (E_nucl_p - E_sigma_p) ** 2 + 4 * lmb ** 2 * matrix_element ** 2
+    )
+    return deltaE
+
 
 def fit_lmb(ydata, function, lambdas, p0=None):
     """Fit the lambda dependence
@@ -57,9 +63,8 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     lambdas is an array of time values to fit over
     the function will return an array of fit parameters for each bootstrap
     """
-    # order0_fit[i] = bootfit1[:, 0]
-    # bounds = [(-np.inf,np.inf), (-np.inf,np.inf),(0,np.inf)]
-    bounds = ([-np.inf, -np.inf, 0], [np.inf, np.inf, np.inf])
+
+    bounds = ([0, 0, 0], [np.inf, np.inf, np.inf])
     ydata = ydata.T
     print(np.shape(ydata))
     data_set = ydata
@@ -79,12 +84,16 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     )
     chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, np.linalg.inv(covmat))
     print("popt_avg", popt_avg)
+    p0 = popt_avg
     redchisq = chisq / len(lambdas)
     bootfit = []
     for iboot, values in enumerate(ydata):
-        print(iboot)
+        # print(iboot)
         popt, pcov = curve_fit(
-            function, lambdas, values, sigma=diag_sigma, maxfev=4000, bounds=bounds
+            function, lambdas, values, sigma=diag_sigma, 
+            # maxfev=4000,
+            p0 = p0,
+            bounds=bounds
         )  # , p0=popt_avg)
         # print(popt)
         bootfit.append(popt)
@@ -108,7 +117,7 @@ def plot_lmb_dep(all_data, fit_data=None):
         markerfacecolor="none",
     )
     pypl.errorbar(
-        all_data["lambdas1"] + 0.001,
+        all_data["lambdas1"] + 0.0001,
         np.average(all_data["order1_fit"], axis=1),
         np.std(all_data["order1_fit"], axis=1),
         fmt="s",
@@ -119,7 +128,7 @@ def plot_lmb_dep(all_data, fit_data=None):
         markerfacecolor="none",
     )
     pypl.errorbar(
-        all_data["lambdas2"] + 0.002,
+        all_data["lambdas2"] + 0.0002,
         np.average(all_data["order2_fit"], axis=1),
         np.std(all_data["order2_fit"], axis=1),
         fmt="s",
@@ -130,7 +139,7 @@ def plot_lmb_dep(all_data, fit_data=None):
         markerfacecolor="none",
     )
     pypl.errorbar(
-        all_data["lambdas3"] + 0.003,
+        all_data["lambdas3"] + 0.0003,
         np.average(all_data["order3_fit"], axis=1),
         np.std(all_data["order3_fit"], axis=1),
         fmt="s",
@@ -154,7 +163,7 @@ def plot_lmb_dep(all_data, fit_data=None):
     pypl.savefig(plotdir / ("lambda_dep.pdf"))
 
     if fit_data:
-        fitBS0 = np.array([fitfunction2(lambdas0, *bf) for bf in fit_data["bootfit0"]])
+        fitBS0 = np.array([fitfunction4(lambdas0, *bf) for bf in fit_data["bootfit0"]])
         print(np.std(fitBS0, axis=0))
         print(
             np.average(fit_data["bootfit0"], axis=0)[2],
@@ -172,6 +181,8 @@ def plot_lmb_dep(all_data, fit_data=None):
             np.average(fit_data["bootfit2"], axis=0)[2],
             np.std(fit_data["bootfit2"], axis=0)[2],
         )
+        print(np.std(fit_data["bootfit3"], axis=0))
+        print(np.std(fit_data["bootfit3"], axis=0)[2])
         m_e_3 = err_brackets(
             np.average(fit_data["bootfit3"], axis=0)[2],
             np.std(fit_data["bootfit3"], axis=0)[2],
@@ -189,7 +200,7 @@ def plot_lmb_dep(all_data, fit_data=None):
             + rf"$\textrm{{M.E.}}={m_e_0}$",
         )
         fitBS1 = np.array(
-            [fitfunction2(lambdas1[:fitlim], *bf) for bf in fit_data["bootfit1"]]
+            [fitfunction4(lambdas1[:fitlim], *bf) for bf in fit_data["bootfit1"]]
         )
         print(np.std(fitBS1, axis=0))
 
@@ -204,7 +215,7 @@ def plot_lmb_dep(all_data, fit_data=None):
             + rf"$\textrm{{M.E.}}={m_e_1}$",
         )
         fitBS2 = np.array(
-            [fitfunction2(lambdas2[:fitlim], *bf) for bf in fit_data["bootfit2"]]
+            [fitfunction4(lambdas2[:fitlim], *bf) for bf in fit_data["bootfit2"]]
         )
         print(np.std(fitBS2, axis=0))
         pypl.fill_between(
@@ -217,7 +228,7 @@ def plot_lmb_dep(all_data, fit_data=None):
             + "\n"
             + rf"$\textrm{{M.E.}}={m_e_2}$",
         )
-        fitBS3 = np.array([fitfunction2(lambdas3, *bf) for bf in fit_data["bootfit3"]])
+        fitBS3 = np.array([fitfunction4(lambdas3, *bf) for bf in fit_data["bootfit3"]])
         print(np.std(fitBS3, axis=0))
         pypl.fill_between(
             lambdas3,
@@ -233,8 +244,10 @@ def plot_lmb_dep(all_data, fit_data=None):
         pypl.legend(fontsize="x-small")
         # pypl.xlim(-0.01, 0.16)
         # pypl.ylim(0, 0.15)
-        pypl.xlim(-0.001, 0.045)
-        pypl.ylim(-0.003, 0.035)
+        # pypl.xlim(-0.001, 0.045)
+        # pypl.ylim(-0.003, 0.035)
+        pypl.xlim(-0.01, lambdas3[-1] * 1.1)
+        pypl.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
         pypl.savefig(plotdir / ("lambda_dep_fit.pdf"))
 
         # pypl.xlim(-0.005, 0.08)
@@ -331,27 +344,32 @@ if __name__ == "__main__":
     # Fit the quadratic behaviour in lambda
     # p0 = (0.01, 0.01, 0.7)
     p0 = (1, 1, 0.7)
-    fitlim = 14
+    fitlim = 30
     try:
-        bootfit0, redchisq0 = fit_lmb(order0_fit, fitfunction2, lambdas0, p0=p0)
+        bootfit0, redchisq0 = fit_lmb(order0_fit, fitfunction4, lambdas0, p0=p0)
         print("redchisq", redchisq0, "\n")
         print("fit", np.average(bootfit0, axis=0), "\n")
         p0 = np.average(bootfit0, axis=0)
+        print(p0)
+
         bootfit1, redchisq1 = fit_lmb(
-            order1_fit[:fitlim], fitfunction2, lambdas1[:fitlim], p0=p0
+            order1_fit[:fitlim], fitfunction4, lambdas1[:fitlim], p0=p0
         )
         print("redchisq", redchisq1, "\n")
         print("fit", np.average(bootfit1, axis=0), "\n")
+
         bootfit2, redchisq2 = fit_lmb(
-            order2_fit[:fitlim], fitfunction2, lambdas2[:fitlim], p0=p0
+            order2_fit[:fitlim], fitfunction4, lambdas2[:fitlim], p0=p0
         )
         print("redchisq", redchisq2, "\n")
         print("fit", np.average(bootfit2, axis=0), "\n")
+
         bootfit3, redchisq3 = fit_lmb(
-            order3_fit[:fitlim], fitfunction2, lambdas3[:fitlim], p0=p0
+            order3_fit[:fitlim], fitfunction4, lambdas3[:fitlim], p0=p0
         )
         print("redchisq", redchisq3, "\n")
         print("fit", np.average(bootfit3, axis=0), "\n")
+        print("fit std", np.std(bootfit3, axis=0), "\n")
 
         fit_data = {
             "fitlim": fitlim,
