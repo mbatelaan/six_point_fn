@@ -652,8 +652,8 @@ if __name__ == "__main__":
 
     # lambdas = np.linspace(0.12,0.16,20)
     # lambdas = np.linspace(0,0.16,10)[1:]
-    lambdas = np.linspace(0,0.06,30)
-    # lambdas = np.linspace(0, 0.16, 30)  # [1:]
+    # lambdas = np.linspace(0,0.06,30)
+    lambdas = np.linspace(0, 0.16, 30)  # [1:]
     # lambdas = np.linspace(0,0.16,10) #[1:]
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
