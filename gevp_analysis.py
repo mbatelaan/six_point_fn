@@ -14,7 +14,7 @@ from analysis.formatting import err_brackets
 from analysis import fitfunc as ff
 
 from common import read_pickle
-from common import fit_value
+from common import fit_value3
 from common import read_correlators
 from common import read_correlators2
 from common import make_matrices
@@ -190,6 +190,10 @@ if __name__ == "__main__":
     order3_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
     red_chisq_list = np.zeros((4, len(time_choice_range), len(delta_t_range)))
 
+    aexp_function = ff.initffncs("Aexp")
+    # aexp_eval = aexp_function.eval
+    print(aexp_function.label)
+
     for i, time_choice in enumerate(time_choice_range):
         for j, delta_t in enumerate(delta_t_range):
             print(f"t_0 =  {time_choice}\tDelta t = {delta_t}\n")
@@ -204,8 +208,8 @@ if __name__ == "__main__":
             )
             ratio1 = Gt1_1 / Gt2_1
             effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) / 2
-            bootfit1, redchisq1 = fit_value(effmass_ratio1, t_range)
-            order0_fit[i, j] = bootfit1[:, 0]
+            bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function)
+            order0_fit[i, j] = bootfit1[:, 1]
             red_chisq_list[0, i, j] = redchisq1
 
             Gt1_2, Gt2_2, evals = gevp(
@@ -213,8 +217,8 @@ if __name__ == "__main__":
             )
             ratio2 = Gt1_2 / Gt2_2
             effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) / 2
-            bootfit2, redchisq2 = fit_value(effmass_ratio2, t_range)
-            order1_fit[i, j] = bootfit2[:, 0]
+            bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function)
+            order1_fit[i, j] = bootfit2[:, 1]
             red_chisq_list[1, i, j] = redchisq2
 
             Gt1_3, Gt2_3, evals = gevp(
@@ -222,8 +226,8 @@ if __name__ == "__main__":
             )
             ratio3 = Gt1_3 / Gt2_3
             effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) / 2
-            bootfit3, redchisq3 = fit_value(effmass_ratio3, t_range)
-            order2_fit[i, j] = bootfit3[:, 0]
+            bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function)
+            order2_fit[i, j] = bootfit3[:, 1]
             red_chisq_list[2, i, j] = redchisq3
 
             Gt1_4, Gt2_4, evals = gevp(
@@ -231,8 +235,8 @@ if __name__ == "__main__":
             )
             ratio4 = Gt1_4 / Gt2_4
             effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) / 2
-            bootfit4, redchisq4 = fit_value(effmass_ratio4, t_range)
-            order3_fit[i, j] = bootfit4[:, 0]
+            bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function)
+            order3_fit[i, j] = bootfit4[:, 1]
             red_chisq_list[3, i, j] = redchisq4
 
             if plotting:
@@ -241,7 +245,8 @@ if __name__ == "__main__":
                     effmass_ratio2,
                     effmass_ratio3,
                     effmass_ratio4,
-                    [bootfit1, bootfit2, bootfit3, bootfit4],
+                    [bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1], bootfit4[:, 1]],
+                    # [bootfit1, bootfit2, bootfit3, bootfit4],
                     t_range,
                     lmb_val,
                     name="_l" + str(lmb_val) + "_time_choice" + str(time_choice),

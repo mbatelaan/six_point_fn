@@ -53,7 +53,7 @@ def read_pickle(filename, nboot=200, nbin=1):
 def fit_value(diffG, t_range):
     """Fit a constant function to the diffG correlator
 
-    diffG is a correlator with tht bootstraps on the first index and the time on the second
+    diffG is a correlator with the bootstraps on the first index and the time on the second
     t_range is an array of time values to fit over
     the function will return an array of fit parameters for each bootstrap
     """
@@ -72,6 +72,65 @@ def fit_value(diffG, t_range):
         bootfit.append(popt)
     bootfit = np.array(bootfit)
 
+    return bootfit, redchisq
+
+
+def fit_value2(diffG, t_range, function):
+    """Fit a function to the diffG correlator
+
+    diffG is a correlator with tht bootstraps on the first index and the time on the second
+    t_range is an array of time values to fit over
+    the function will return an array of fit parameters for each bootstrap
+    """
+    data_set = diffG[:, t_range]
+    diffG_avg = np.average(data_set, axis=0)
+    covmat = np.cov(data_set.T)
+    diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
+    function.initparfnc(diffG, timeslice=8)
+    fitparam = stats.fit_bootstrap(function.eval, function.initpar, t_range, data_set, bounds=None, time=False, fullcov=False)
+    # print(fitparam)
+
+    # popt_avg, pcov_avg = curve_fit(function.eval_2, t_range, diffG_avg, sigma=diag_sigma, p0=function.initpar)
+    # chisq = ff.chisqfn(
+    #     *popt_avg, function.eval_2, t_range, diffG_avg, np.linalg.inv(covmat)
+    # )
+    # redchisq = chisq / len(t_range)
+    # bootfit = []
+    # for iboot, values in enumerate(diffG):
+    #     popt, pcov = curve_fit(function.eval_2, t_range, values[t_range], sigma=diag_sigma, p0=function.initpar)
+    #     bootfit.append(popt)
+    # bootfit = np.array(bootfit)
+    bootfit = fitparam["param"]
+    return bootfit, fitparam["redchisq"]
+
+def fit_value3(diffG, t_range, function, norm=1):
+    """Fit a function to the diffG correlator
+
+    diffG is a correlator with tht bootstraps on the first index and the time on the second
+    t_range is an array of time values to fit over
+    the function will return an array of fit parameters for each bootstrap
+    """
+    diffG = diffG/norm
+    data_set = diffG[:, t_range]
+    diffG_avg = np.average(data_set, axis=0)
+    # print(f"diffG_avg = {diffG}")
+    covmat = np.cov(data_set.T)
+    diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
+    function.initparfnc(diffG, timeslice=7)
+    print("initpar",function.initpar)
+    # fitparam = stats.fit_bootstrap(function.eval, function.initpar, t_range, data_set, bounds=None, time=False, fullcov=False)
+    # print(fitparam)
+    popt_avg, pcov_avg = curve_fit(function.eval_2, t_range, diffG_avg, sigma=diag_sigma, p0=function.initpar)
+    print(f"popt_avg = {popt_avg}")
+    chisq = ff.chisqfn2(
+        popt_avg, function.eval_2, t_range, diffG_avg, np.linalg.inv(covmat)
+    )
+    redchisq = chisq / len(t_range)
+    bootfit = []
+    for iboot, values in enumerate(diffG):
+        popt, pcov = curve_fit(function.eval_2, t_range, values[t_range], sigma=diag_sigma, p0=function.initpar)
+        bootfit.append(popt)
+    bootfit = np.array(bootfit)
     return bootfit, redchisq
 
 
@@ -377,19 +436,17 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     eval_left, evec_left = np.linalg.eig(np.matmul(mat_1, np.linalg.inv(mat_0)).T)
     eval_right, evec_right = np.linalg.eig(np.matmul(np.linalg.inv(mat_0), mat_1))
 
-    print("left:", eval_left, evec_left)
-    print("right:", eval_right, evec_right)
+    # print("left:", eval_left, evec_left)
+    # print("right:", eval_right, evec_right)
     # Ordering of the eigenvalues
     if eval_left[0] > eval_left[1]:
-        print("sort left")
         eval_left = eval_left.T[::-1].T
         evec_left = evec_left.T[::-1].T
     if eval_right[0] > eval_right[1]:
-        print("sort right")
         eval_right = eval_right.T[::-1].T
         evec_right = evec_right.T[::-1].T
-    print("left:", eval_left, evec_left)
-    print("right:", eval_right, evec_right)
+    # print("left:", eval_left, evec_left)
+    # print("right:", eval_right, evec_right)
 
     Gt1 = np.einsum("i,ijkl,j->kl", evec_left[:, 0], corr_matrix, evec_right[:, 0])
     Gt2 = np.einsum("i,ijkl,j->kl", evec_left[:, 1], corr_matrix, evec_right[:, 1])
