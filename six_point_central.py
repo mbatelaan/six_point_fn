@@ -316,7 +316,7 @@ def plotting_script_diff_2(
 
     axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # pypl.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
-    pypl.setp(axs, xlim=(0, xlim), ylim=(-0.01, 0.4))
+    pypl.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.4))
     pypl.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
     pypl.xlabel("$t/a$")
     pypl.legend(fontsize="x-small")
@@ -347,7 +347,7 @@ def plotting_script_unpert(
     ystd_effratio = np.std(effratio, axis=0)
 
 
-    pypl.figure(figsize=(6, 6))
+    pypl.figure(figsize=(5, 5))
     pypl.errorbar(
         efftime[:xlim],
         yavg_effratio[:xlim],
@@ -358,9 +358,11 @@ def plotting_script_unpert(
         fmt="s",
         markerfacecolor="none",
     )
+    pypl.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})]$")
+    pypl.xlabel(r"$t/a$")
     pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     pypl.ylim(-0.2,0.4)
-    pypl.savefig(plotdir / ("Testtttt.pdf"))
+    pypl.savefig(plotdir / ("unpert_effmass.pdf"))
 
 
     f, axs = pypl.subplots(2, 1, figsize=(6, 6), sharex=True)
@@ -394,7 +396,7 @@ def plotting_script_unpert(
         np.average(fitvals1) + np.std(fitvals1),
         alpha=0.3,
         color=_colors[0],
-        label=rf"$E_N$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
+        label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
     )
     axs[0].plot(t_range12, len(t_range12) * [np.average(fitvals2)], color=_colors[1])
     axs[0].fill_between(
@@ -403,7 +405,7 @@ def plotting_script_unpert(
         np.average(fitvals2) + np.std(fitvals2),
         alpha=0.3,
         color=_colors[1],
-        label=rf"$E_{{\Sigma}}$ = {err_brackets(np.average(fitvals2),np.std(fitvals2))}",
+        label=rf"$E_{{\Sigma}}(\mathbf{{0}})$ = {err_brackets(np.average(fitvals2),np.std(fitvals2))}",
     )
 
     axs[0].legend(fontsize="x-small")
@@ -652,13 +654,16 @@ if __name__ == "__main__":
 
     # lambdas = np.linspace(0.12,0.16,20)
     # lambdas = np.linspace(0,0.16,10)[1:]
-    lambdas = np.linspace(0,0.06,30)
+    # lambdas = np.linspace(0,0.06,30)
+    lambdas = np.linspace(0,0.08,30)
+    # lambdas = np.linspace(0,0.02,30)
+    # lambdas = np.linspace(0,0.007,30)
     # lambdas = np.linspace(0, 0.16, 30)  # [1:]
     # lambdas = np.linspace(0,0.16,10) #[1:]
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
-    plotting = True
+    plotting = False
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))
@@ -716,6 +721,7 @@ if __name__ == "__main__":
         order0_fit[i] = bootfit1[:, 1]/2
         red_chisq_list[0, i] = redchisq1
         print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
+        print(f"redchisq1 = {redchisq1}")
 
         Gt1_2, Gt2_2, evals = gevp(
             matrix_2, time_choice, delta_t, name="_test", show=False
@@ -725,6 +731,7 @@ if __name__ == "__main__":
         bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function, norm=1)
         order1_fit[i] = bootfit2[:, 1]/2
         red_chisq_list[1, i] = redchisq2
+        print(f"redchisq2 = {redchisq2}")
 
         Gt1_3, Gt2_3, evals = gevp(
             matrix_3, time_choice, delta_t, name="_test", show=False
@@ -734,6 +741,7 @@ if __name__ == "__main__":
         bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
         order2_fit[i] = bootfit3[:, 1]/2
         red_chisq_list[2, i] = redchisq3
+        print(f"redchisq3 = {redchisq3}")
 
         Gt1_4, Gt2_4, evals = gevp(
             matrix_4, time_choice, delta_t, name="_test", show=False
@@ -743,6 +751,7 @@ if __name__ == "__main__":
         bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
         order3_fit[i] = bootfit4[:, 1]/2
         red_chisq_list[3, i] = redchisq4
+        print(f"redchisq4 = {redchisq4}")
 
         if plotting:
             plotting_script_all(
