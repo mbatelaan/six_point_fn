@@ -180,7 +180,7 @@ if __name__ == "__main__":
     t_range = np.arange(4, 9)
     # lmb_val = 0.06 #0.16
     # lmb_val = 0.04 #0.16
-    time_choice_range = np.arange(2, 15)
+    time_choice_range = np.arange(2, 12)
     delta_t_range = np.arange(1, 4)
     plotting = True
 
