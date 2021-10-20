@@ -281,6 +281,207 @@ def plot_lmb_dep(all_data, fit_data=None):
     pypl.close()
     return
 
+def plot_lmb_depR(all_data, fit_data=None):
+    """Make a plot of the lambda dependence of the energy shift"""
+    pypl.figure(figsize=(6, 6))
+
+    pypl.fill_between(
+        all_data["lambdas0"],
+        np.average(all_data["order0_fit"], axis=1) - np.std(all_data["order0_fit"], axis=1),
+        np.average(all_data["order0_fit"], axis=1) + np.std(all_data["order0_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        linewidth=0,
+        alpha=0.3
+    )
+    pypl.fill_between(
+        all_data["lambdas1"],
+        np.average(all_data["order1_fit"], axis=1) - np.std(all_data["order1_fit"], axis=1),
+        np.average(all_data["order1_fit"], axis=1) + np.std(all_data["order1_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        linewidth=0,
+        alpha=0.3
+    )
+    pypl.fill_between(
+        all_data["lambdas2"],
+        np.average(all_data["order2_fit"], axis=1) - np.std(all_data["order2_fit"], axis=1),
+        np.average(all_data["order2_fit"], axis=1) + np.std(all_data["order2_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        linewidth=0,
+        alpha=0.3
+    )
+    pypl.fill_between(
+        all_data["lambdas3"],
+        np.average(all_data["order3_fit"], axis=1) - np.std(all_data["order3_fit"], axis=1),
+        np.average(all_data["order3_fit"], axis=1) + np.std(all_data["order3_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3
+    )
+
+    # pypl.errorbar(
+    #     all_data["lambdas0"],
+    #     np.average(all_data["order0_fit"], axis=1),
+    #     np.std(all_data["order0_fit"], axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^1)$",
+    #     color=_colors[0],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     all_data["lambdas1"] + 0.0001,
+    #     np.average(all_data["order1_fit"], axis=1),
+    #     np.std(all_data["order1_fit"], axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^2)$",
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     all_data["lambdas2"] + 0.0002,
+    #     np.average(all_data["order2_fit"], axis=1),
+    #     np.std(all_data["order2_fit"], axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^3)$",
+    #     color=_colors[2],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # pypl.errorbar(
+    #     all_data["lambdas3"] + 0.0003,
+    #     np.average(all_data["order3_fit"], axis=1),
+    #     np.std(all_data["order3_fit"], axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^4)$",
+    #     color=_colors[3],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    pypl.legend(fontsize="x-small")
+    # pypl.ylim(0, 0.2)
+    # pypl.ylim(-0.003, 0.035)
+    # pypl.xlim(-0.01, 0.22)
+    pypl.xlim(-0.01, lambdas3[-1] * 1.1)
+    pypl.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
+
+    pypl.xlabel("$\lambda$")
+    pypl.ylabel("$\Delta E$")
+    pypl.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    pypl.savefig(plotdir / ("lambda_dep.pdf"))
+
+    if fit_data:
+        lmb_range = fit_data["lmb_range"]
+        fitBS0 = np.array([fitfunction5(lambdas0[lmb_range], *bf) for bf in fit_data["bootfit0"]])
+        # print(np.std(fitBS0, axis=0))
+        # print(
+        #     np.average(fit_data["bootfit0"], axis=0)[1],
+        #     np.std(fit_data["bootfit0"], axis=0)[1],
+        # )
+        m_e_0 = err_brackets(
+            np.average(fit_data["bootfit0"], axis=0)[1],
+            np.std(fit_data["bootfit0"], axis=0)[1],
+        )
+        m_e_1 = err_brackets(
+            np.average(fit_data["bootfit1"], axis=0)[1],
+            np.std(fit_data["bootfit1"], axis=0)[1],
+        )
+        m_e_2 = err_brackets(
+            np.average(fit_data["bootfit2"], axis=0)[1],
+            np.std(fit_data["bootfit2"], axis=0)[1],
+        )
+        print(np.std(fit_data["bootfit3"], axis=0))
+        print(np.std(fit_data["bootfit3"], axis=0)[1])
+        m_e_3 = err_brackets(
+            np.average(fit_data["bootfit3"], axis=0)[1],
+            np.std(fit_data["bootfit3"], axis=0)[1],
+        )
+        # print(m_e_0)
+
+        pypl.fill_between(
+            lambdas0[lmb_range],
+            np.average(fitBS0, axis=0) - np.std(fitBS0, axis=0),
+            np.average(fitBS0, axis=0) + np.std(fitBS0, axis=0),
+            alpha=0.3,
+            color=_colors[0],
+            label=rf"$\textrm{{M.E.}}={m_e_0}$",
+            # rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq0']:0.2}$"
+            # + "\n"
+            # + rf"$\textrm{{M.E.}}={m_e_0}$",
+        )
+        fitBS1 = np.array(
+            [fitfunction5(lambdas1[lmb_range], *bf) for bf in fit_data["bootfit1"]]
+            # [fitfunction5(lambdas1[:fitlim], *bf) for bf in fit_data["bootfit1"]]
+        )
+        print(np.std(fitBS1, axis=0))
+
+        pypl.fill_between(
+            lambdas1[lmb_range], #[:fitlim],
+            np.average(fitBS1, axis=0) - np.std(fitBS1, axis=0),
+            np.average(fitBS1, axis=0) + np.std(fitBS1, axis=0),
+            alpha=0.3,
+            color=_colors[1],
+            label=rf"$\textrm{{M.E.}}={m_e_1}$",
+            # rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq1']:0.2}$"
+            # + "\n"
+            # + rf"$\textrm{{M.E.}}={m_e_1}$",
+        )
+        fitBS2 = np.array(
+            [fitfunction5(lambdas2[lmb_range], *bf) for bf in fit_data["bootfit2"]]
+        )
+        print(np.std(fitBS2, axis=0))
+        pypl.fill_between(
+            lambdas2[lmb_range],
+            np.average(fitBS2, axis=0) - np.std(fitBS2, axis=0),
+            np.average(fitBS2, axis=0) + np.std(fitBS2, axis=0),
+            alpha=0.3,
+            color=_colors[2],
+            label=rf"$\textrm{{M.E.}}={m_e_2}$",
+            # rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq2']:0.2}$"
+            # + "\n"
+            # + rf"$\textrm{{M.E.}}={m_e_2}$",
+        )
+        fitBS3 = np.array([fitfunction5(lambdas3[lmb_range], *bf) for bf in fit_data["bootfit3"]])
+        print(np.std(fitBS3, axis=0))
+        pypl.fill_between(
+            lambdas3[lmb_range],
+            np.average(fitBS3, axis=0) - np.std(fitBS3, axis=0),
+            np.average(fitBS3, axis=0) + np.std(fitBS3, axis=0),
+            alpha=0.3,
+            color=_colors[3],
+            label= rf"$\textrm{{M.E.}}={m_e_3}$",
+            # rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:0.2}$"
+            # + "\n"
+            # + rf"$\textrm{{M.E.}}={m_e_3}$",
+        )
+
+        pypl.legend(fontsize="xx-small")
+        # pypl.xlim(-0.01, 0.16)
+        # pypl.ylim(0, 0.15)
+        # pypl.xlim(-0.001, 0.045)
+        # pypl.ylim(-0.003, 0.035)
+        pypl.xlim(-0.01, lambdas3[-1] * 1.1)
+        pypl.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
+        pypl.savefig(plotdir / ("lambda_dep_fit.pdf"))
+
+        # pypl.xlim(-0.005, 0.08)
+        # pypl.ylim(0.015, 0.065)
+        pypl.xlim(-0.0001, 0.025)
+        pypl.ylim(-0.0002, 0.015)
+        pypl.savefig(plotdir / ("lambda_dep_zoom.pdf"))
+
+    pypl.close()
+    return
+
 def fit_const(xdata, data_set, lmb_range):
     bounds = ([0], [np.inf])
     ydata_avg = np.average(data_set, axis=0)
@@ -510,7 +711,7 @@ if __name__ == "__main__":
     # scaled_z0 = (redchisq[0] - redchisq[0].min()) / redchisq[0].ptp()
     # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
 
-    plot_lmb_dep(all_data)
+    plot_lmb_depR(all_data)
     # plot_lmb_dep2(all_data)
 
     print("\n")
@@ -568,7 +769,7 @@ if __name__ == "__main__":
         print("====================\nFitting Failed\n", e, "\n====================")
         fit_data = None
 
-    plot_lmb_dep(all_data, fit_data)
+    plot_lmb_depR(all_data, fit_data)
 
     ### ----------------------------------------------------------------------
     # lmb_val = 0.06 #0.16
