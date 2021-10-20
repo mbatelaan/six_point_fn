@@ -118,7 +118,7 @@ def fit_lmb(ydata, function, lambdas, plotdir, p0=None):
     return bootfit, redchisq
 
 
-def plot_lmb_dep(all_data, fit_data=None):
+def plot_lmb_dep(all_data, plotdir, fit_data=None):
     """Make a plot of the lambda dependence of the energy shift"""
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
@@ -169,7 +169,7 @@ def plot_lmb_dep(all_data, fit_data=None):
     # pypl.ylim(0, 0.2)
     # pypl.ylim(-0.003, 0.035)
     # pypl.xlim(-0.01, 0.22)
-    pypl.xlim(-0.01, lambdas3[-1] * 1.1)
+    pypl.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
     pypl.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
 
     pypl.xlabel("$\lambda$")
@@ -180,7 +180,7 @@ def plot_lmb_dep(all_data, fit_data=None):
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
-        fitBS0 = np.array([fitfunction5(lambdas0[lmb_range], *bf) for bf in fit_data["bootfit0"]])
+        fitBS0 = np.array([fitfunction5(all_data["lambdas0"][lmb_range], *bf) for bf in fit_data["bootfit0"]])
         # print(np.std(fitBS0, axis=0))
         # print(
         #     np.average(fit_data["bootfit0"], axis=0)[1],
@@ -207,7 +207,7 @@ def plot_lmb_dep(all_data, fit_data=None):
         # print(m_e_0)
 
         pypl.fill_between(
-            lambdas0[lmb_range],
+            all_data["lambdas0"][lmb_range],
             np.average(fitBS0, axis=0) - np.std(fitBS0, axis=0),
             np.average(fitBS0, axis=0) + np.std(fitBS0, axis=0),
             alpha=0.3,
@@ -218,13 +218,13 @@ def plot_lmb_dep(all_data, fit_data=None):
             # + rf"$\textrm{{M.E.}}={m_e_0}$",
         )
         fitBS1 = np.array(
-            [fitfunction5(lambdas1[lmb_range], *bf) for bf in fit_data["bootfit1"]]
+            [fitfunction5(all_data["lambdas1"][lmb_range], *bf) for bf in fit_data["bootfit1"]]
             # [fitfunction5(lambdas1[:fitlim], *bf) for bf in fit_data["bootfit1"]]
         )
         print(np.std(fitBS1, axis=0))
 
         pypl.fill_between(
-            lambdas1[lmb_range], #[:fitlim],
+            all_data["lambdas1"][lmb_range], #[:fitlim],
             np.average(fitBS1, axis=0) - np.std(fitBS1, axis=0),
             np.average(fitBS1, axis=0) + np.std(fitBS1, axis=0),
             alpha=0.3,
@@ -235,11 +235,11 @@ def plot_lmb_dep(all_data, fit_data=None):
             # + rf"$\textrm{{M.E.}}={m_e_1}$",
         )
         fitBS2 = np.array(
-            [fitfunction5(lambdas2[lmb_range], *bf) for bf in fit_data["bootfit2"]]
+            [fitfunction5(all_data["lambdas2"][lmb_range], *bf) for bf in fit_data["bootfit2"]]
         )
         print(np.std(fitBS2, axis=0))
         pypl.fill_between(
-            lambdas2[lmb_range],
+            all_data["lambdas2"][lmb_range],
             np.average(fitBS2, axis=0) - np.std(fitBS2, axis=0),
             np.average(fitBS2, axis=0) + np.std(fitBS2, axis=0),
             alpha=0.3,
@@ -249,10 +249,10 @@ def plot_lmb_dep(all_data, fit_data=None):
             # + "\n"
             # + rf"$\textrm{{M.E.}}={m_e_2}$",
         )
-        fitBS3 = np.array([fitfunction5(lambdas3[lmb_range], *bf) for bf in fit_data["bootfit3"]])
+        fitBS3 = np.array([fitfunction5(all_data["lambdas3"][lmb_range], *bf) for bf in fit_data["bootfit3"]])
         print(np.std(fitBS3, axis=0))
         pypl.fill_between(
-            lambdas3[lmb_range],
+            all_data["lambdas3"][lmb_range],
             np.average(fitBS3, axis=0) - np.std(fitBS3, axis=0),
             np.average(fitBS3, axis=0) + np.std(fitBS3, axis=0),
             alpha=0.3,
@@ -268,7 +268,7 @@ def plot_lmb_dep(all_data, fit_data=None):
         # pypl.ylim(0, 0.15)
         # pypl.xlim(-0.001, 0.045)
         # pypl.ylim(-0.003, 0.035)
-        pypl.xlim(-0.01, lambdas3[-1] * 1.1)
+        pypl.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
         pypl.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
         pypl.savefig(plotdir / ("lambda_dep_fit.pdf"))
 
@@ -281,7 +281,7 @@ def plot_lmb_dep(all_data, fit_data=None):
     pypl.close()
     return
 
-def plot_lmb_depR(all_data, fit_data=None):
+def plot_lmb_depR(all_data, plotdir, fit_data=None):
     """Make a plot of the lambda dependence of the energy shift"""
     pypl.figure(figsize=(6, 6))
 
@@ -370,7 +370,7 @@ def plot_lmb_depR(all_data, fit_data=None):
     # pypl.ylim(0, 0.2)
     # pypl.ylim(-0.003, 0.035)
     # pypl.xlim(-0.01, 0.22)
-    pypl.xlim(-0.01, lambdas3[-1] * 1.1)
+    pypl.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
     pypl.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
 
     pypl.xlabel("$\lambda$")
@@ -519,7 +519,7 @@ def fit_const(xdata, data_set, lmb_range):
         fit_param[iboot] = popt
     return fit_param, chisq
 
-def plot_lmb_dep2(all_data, lmb_range=None):
+def plot_lmb_dep2(all_data, plotdir, lmb_range=None):
     """Make a plot of the lambda dependence of the energy shift"""
 
     xdata0 = all_data["lambdas0"][lmb_range]
@@ -633,7 +633,8 @@ def plot_lmb_dep2(all_data, lmb_range=None):
     return
 
 
-if __name__ == "__main__":
+
+def main():
     pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     pypl.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})
@@ -646,29 +647,28 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         config_file = sys.argv[1]
     else:
-        config_file = "data_dir.yaml"
+        config_file = "data_dir_theta2.yaml" #default file
     with open(config_file) as f:
         config = yaml.safe_load(f)
-    # TODO: Set up a defaults.yaml file for when there is no input file
     pickledir = Path(config["pickle_dir1"])
     pickledir2 = Path(config["pickle_dir2"])
     plotdir = Path(config["analysis_dir"]) / Path("plots")
     datadir = Path(config["analysis_dir"]) / Path("data")
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
+    print("datadir: ", datadir / ("lambda_dep.pkl"))
 
-    print(datadir / ("lambda_dep.pkl"))
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
     lmb_val = config["lmb_val"]
 
+    # Read data from the pickle file
     with open(
         datadir
         / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"),
         "rb",
     ) as file_in:
-        # with open(datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"), "rb") as file_in:
         data = pickle.load(file_in)
     lambdas = data["lambdas"]
     order0_fit = data["order0_fit"]
@@ -679,7 +679,8 @@ if __name__ == "__main__":
     time_choice = data["time_choice"]
     delta_t = data["delta_t"]
 
-    chisq_tol = 2.5 #1.7
+    # Filter out data points with a high reduced chi-squared value
+    chisq_tol = 1.5 #1.7
     order0_fit = order0_fit[np.where(redchisq[0] <= chisq_tol)]
     lambdas0 = lambdas[np.where(redchisq[0] <= chisq_tol)]
     order1_fit = order1_fit[np.where(redchisq[1] <= chisq_tol)]
@@ -688,11 +689,6 @@ if __name__ == "__main__":
     lambdas2 = lambdas[np.where(redchisq[2] <= chisq_tol)]
     order3_fit = order3_fit[np.where(redchisq[3] <= chisq_tol)]
     lambdas3 = lambdas[np.where(redchisq[3] <= chisq_tol)]
-
-    # print(np.shape(order0_fit))
-    # print(np.shape(order1_fit))
-    # print(np.shape(order2_fit))
-    # print(np.shape(order3_fit))
 
     all_data = {
         "lambdas0": lambdas0,
@@ -711,10 +707,9 @@ if __name__ == "__main__":
     # scaled_z0 = (redchisq[0] - redchisq[0].min()) / redchisq[0].ptp()
     # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
 
-    plot_lmb_depR(all_data)
-    # plot_lmb_dep2(all_data)
+    plot_lmb_depR(all_data, plotdir)
+    # plot_lmb_dep2(all_data, plotdir)
 
-    print("\n")
     # Fit the quadratic behaviour in lambda
     # p0 = (0.01, 0.01, 0.7)
     # p0 = (1, 1, 0.7)
@@ -723,32 +718,35 @@ if __name__ == "__main__":
     lmb_range=np.arange(4,14)
     # lmb_range=np.arange(5,10)
     # lmb_range=np.arange(6,9)
-    plot_lmb_dep2(all_data, lmb_range)
+    plot_lmb_dep2(all_data, plotdir, lmb_range)
+
+    # Fit to the lambda dependence at each order in lambda
+    print("\n")
     try:
         bootfit0, redchisq0 = fit_lmb(order0_fit[lmb_range], fitfunction5, lambdas0[lmb_range], plotdir, p0=p0)
-        print("redchisq", redchisq0, "\n")
-        print("fit", np.average(bootfit0, axis=0), "\n")
+        print("redchisq order 1", redchisq0, "\n")
+        print("fit order 1", np.average(bootfit0, axis=0), "\n")
         p0 = np.average(bootfit0, axis=0)
         # print(p0)
 
         bootfit1, redchisq1 = fit_lmb(
             order1_fit[lmb_range], fitfunction5, lambdas1[lmb_range], plotdir, p0=p0
         )
-        print("redchisq", redchisq1, "\n")
-        print("fit", np.average(bootfit1, axis=0), "\n")
+        print("redchisq order 2", redchisq1, "\n")
+        print("fit order 2", np.average(bootfit1, axis=0), "\n")
 
         bootfit2, redchisq2 = fit_lmb(
             order2_fit[lmb_range], fitfunction5, lambdas2[lmb_range], plotdir, p0=p0
         )
-        print("redchisq", redchisq2, "\n")
-        print("fit", np.average(bootfit2, axis=0), "\n")
+        print("redchisq order 3", redchisq2, "\n")
+        print("fit order 3", np.average(bootfit2, axis=0), "\n")
 
         bootfit3, redchisq3 = fit_lmb(
             order3_fit[lmb_range], fitfunction5, lambdas3[lmb_range], plotdir, p0=p0
         )
-        print("redchisq", redchisq3, "\n")
-        print("fit", np.average(bootfit3, axis=0), "\n")
-        print("fit std", np.std(bootfit3, axis=0), "\n")
+        print("redchisq order 4", redchisq3, "\n")
+        print("fit order 4", np.average(bootfit3, axis=0), "\n")
+        print("fit std order 4", np.std(bootfit3, axis=0), "\n")
 
         fit_data = {
             "lmb_range": lmb_range,
@@ -769,7 +767,7 @@ if __name__ == "__main__":
         print("====================\nFitting Failed\n", e, "\n====================")
         fit_data = None
 
-    plot_lmb_depR(all_data, fit_data)
+    plot_lmb_dep(all_data, plotdir, fit_data)
 
     ### ----------------------------------------------------------------------
     # lmb_val = 0.06 #0.16
@@ -907,3 +905,7 @@ if __name__ == "__main__":
     pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     pypl.savefig(plotdir / (f"delta_t_dep_l{lmb_val}.pdf"))
     # pypl.show()
+
+
+if __name__ == "__main__":
+    main()
