@@ -43,7 +43,7 @@ m_S = 0.4641829
 
 
 def plotting_script_all(
-    corr_matrix, corr_matrix1, corr_matrix2, corr_matrix3, lmb_val, name="", show=False
+    corr_matrix, corr_matrix1, corr_matrix2, corr_matrix3, lmb_val, plotdir, name="", show=False
 ):
     spacing = 2
     xlim = 16
@@ -132,7 +132,7 @@ def plotting_script_all(
 
 
 def plotting_script_all_N(
-    corr_matrix, corr_matrix1, corr_matrix2, corr_matrix3, lmb_val, name="", show=False
+    corr_matrix, corr_matrix1, corr_matrix2, corr_matrix3, lmb_val, plotdir, name="", show=False
 ):
     spacing = 2
     xlim = 16
@@ -221,7 +221,7 @@ def plotting_script_all_N(
 
 
 def plotting_script_diff_2(
-    diffG1, diffG2, diffG3, diffG4, fitvals, t_range, lmb_val, name="", show=False
+    diffG1, diffG2, diffG3, diffG4, fitvals, t_range, lmb_val, plotdir, name="", show=False
 ):
     spacing = 2
     xlim = 15
@@ -328,7 +328,7 @@ def plotting_script_diff_2(
     return
 
 def plotting_script_unpert(
-    correlator1, correlator2, ratio, fitvals1, fitvals2, fitvals, t_range12, t_range, name="", show=False
+    correlator1, correlator2, ratio, fitvals1, fitvals2, fitvals, t_range12, t_range, plotdir, name="", show=False
 ):
     spacing = 2
     xlim = 20
@@ -446,7 +446,7 @@ def plotting_script_unpert(
     return
 
 
-def plot_lmb_dep(all_data):
+def plot_lmb_dep(all_data, plotdir):
     """Make a plot of the lambda dependence of the energy shift"""
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
@@ -508,7 +508,7 @@ def plot_lmb_dep(all_data):
     # pypl.show()
 
 
-def plot_lmb_dep_fit(all_data, fit_data, fitfunction):
+def plot_lmb_dep_fit(all_data, fit_data, fitfunction, plotdir):
     """Make a plot of the lambda dependence of the energy shift"""
     pypl.figure(figsize=(6, 6))
     pypl.errorbar(
@@ -622,7 +622,7 @@ def fit_lmb(ydata, function, lambdas):
     return bootfit, redchisq
 
 
-if __name__ == "__main__":
+def main():
     pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     pypl.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})
@@ -663,7 +663,7 @@ if __name__ == "__main__":
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
-    plotting = False
+    plotting = True
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))
@@ -698,6 +698,7 @@ if __name__ == "__main__":
         bootfit_ratio[:, 0],
         fit_range12,
         fit_range,
+        plotdir, 
         name="_unpert_ratio",
         show=False,
     )
@@ -760,6 +761,7 @@ if __name__ == "__main__":
                 matrix_3 / 1e39,
                 matrix_4 / 1e39,
                 lmb_val,
+                plotdir,
                 name="_l" + str(lmb_val),
                 show=False,
             )
@@ -769,6 +771,7 @@ if __name__ == "__main__":
                 matrix_3 / 1e39,
                 matrix_4 / 1e39,
                 lmb_val,
+                plotdir,
                 name="_l" + str(lmb_val),
                 show=False,
             )
@@ -780,6 +783,7 @@ if __name__ == "__main__":
                 [bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1], bootfit4[:, 1]],
                 t_range,
                 lmb_val,
+                plotdir,
                 name="_l" + str(lmb_val) + "_all",
                 show=False,
             )
@@ -809,7 +813,7 @@ if __name__ == "__main__":
 
     # ----------------------------------------------------------------------
     # Make a plot of the lambda dependence of the energy shift
-    plot_lmb_dep(all_data)
+    # plot_lmb_dep(all_data, plotdir)
     # plot_lmb_dep_fit(all_data, bootfit, fitfunction2)
 
     # pypl.figure(figsize=(6, 6))
@@ -866,3 +870,8 @@ if __name__ == "__main__":
     # pypl.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # pypl.savefig(plotdir / ("lambda_dep.pdf"))
     # # pypl.show()
+
+
+if __name__ == "__main__":
+    main()
+
