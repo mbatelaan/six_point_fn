@@ -418,32 +418,32 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
 
         fitBS0 = np.array(
             [
-                fitfunction5(all_data["lambdas0"][lmb_range], *bf)
+                fitfunction5(all_data["lambdas0"], *bf)
                 for bf in fit_data["bootfit0"]
             ]
         )
         fitBS1 = np.array(
             [
-                fitfunction5(all_data["lambdas1"][lmb_range], *bf)
+                fitfunction5(all_data["lambdas1"], *bf)
                 for bf in fit_data["bootfit1"]
             ]
         )
         fitBS2 = np.array(
             [
-                fitfunction5(all_data["lambdas2"][lmb_range], *bf)
+                fitfunction5(all_data["lambdas2"], *bf)
                 for bf in fit_data["bootfit2"]
             ]
         )
         fitBS3 = np.array(
             [
-                fitfunction5(all_data["lambdas3"][lmb_range], *bf)
+                fitfunction5(all_data["lambdas3"], *bf)
                 for bf in fit_data["bootfit3"]
             ]
         )
 
 
         plt.plot(
-            all_data["lambdas0"][lmb_range],
+            all_data["lambdas0"],
             np.average(fitBS0, axis=0),
             label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq0']:2.3}$"
             + "\n"
@@ -454,9 +454,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
             alpha=0.9,
         )
         plt.plot(
-            all_data["lambdas1"][lmb_range],
+            all_data["lambdas1"],
             np.average(fitBS1, axis=0),
-            # np.average(all_data["order1_fit"], axis=1)[lmb_range],
+            # np.average(all_data["order1_fit"], axis=1),
             label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq1']:2.3}$"
             + "\n"
             + rf"$\textrm{{M.E.}}={m_e_1}$",
@@ -466,9 +466,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
             alpha=0.9,
         )
         plt.plot(
-            all_data["lambdas2"][lmb_range],
+            all_data["lambdas2"],
             np.average(fitBS2, axis=0),
-            # np.average(all_data["order2_fit"], axis=1)[lmb_range],
+            # np.average(all_data["order2_fit"], axis=1),
             label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq2']:2.3}$"
             + "\n"
             + rf"$\textrm{{M.E.}}={m_e_2}$",
@@ -478,9 +478,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
             alpha=0.9,
         )
         plt.plot(
-            all_data["lambdas3"][lmb_range],
+            all_data["lambdas3"],
             np.average(fitBS3, axis=0),
-            # np.average(all_data["order3_fit"], axis=1)[lmb_range],
+            # np.average(all_data["order3_fit"], axis=1),
             label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
             + "\n"
             + rf"$\textrm{{M.E.}}={m_e_3}$",
