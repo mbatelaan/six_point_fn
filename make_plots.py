@@ -395,6 +395,10 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
+        print(lmb_range)
+        plt.fill_between(np.array([-1,all_data["lambdas0"][lmb_range[0]]]), np.array([-1,-1]), np.array([1,1]), color='k', alpha=0.2, linewidth=0)
+        plt.fill_between(np.array([all_data["lambdas0"][lmb_range[-1]], 1]), np.array([-1,-1]), np.array([1,1]), color='k', alpha=0.2, linewidth=0)
+
         m_e_0 = err_brackets(
             np.average(fit_data["bootfit0"], axis=0)[1],
             np.std(fit_data["bootfit0"], axis=0)[1],
@@ -412,60 +416,48 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
             np.std(fit_data["bootfit3"], axis=0)[1],
         )
 
-        plt.fill_between(
+        plt.plot(
             all_data["lambdas0"][lmb_range],
-            np.average(all_data["order0_fit"], axis=1)[lmb_range]
-            - np.std(all_data["order0_fit"], axis=1)[lmb_range],
-            np.average(all_data["order0_fit"], axis=1)[lmb_range]
-            + np.std(all_data["order0_fit"], axis=1)[lmb_range],
+            np.average(all_data["order0_fit"], axis=1)[lmb_range],
             label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq0']:2.3}$"
             + "\n"
             + rf"$\textrm{{M.E.}}={m_e_0}$",
-            # label=r"$\mathcal{O}(\lambda^1)$",
             color=_colors[0],
-            linewidth=0,
+            linestyle='--',
+            linewidth=1,
             alpha=0.9,
         )
-        plt.fill_between(
+        plt.plot(
             all_data["lambdas1"][lmb_range],
-            np.average(all_data["order1_fit"], axis=1)[lmb_range]
-            - np.std(all_data["order1_fit"], axis=1)[lmb_range],
-            np.average(all_data["order1_fit"], axis=1)[lmb_range]
-            + np.std(all_data["order1_fit"], axis=1)[lmb_range],
+            np.average(all_data["order1_fit"], axis=1)[lmb_range],
             label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq1']:2.3}$"
             + "\n"
             + rf"$\textrm{{M.E.}}={m_e_1}$",
-            # label=r"$\mathcal{O}(\lambda^2)$",
             color=_colors[1],
-            linewidth=0,
+            linestyle='--',
+            linewidth=1,
             alpha=0.9,
         )
-        plt.fill_between(
+        plt.plot(
             all_data["lambdas2"][lmb_range],
-            np.average(all_data["order2_fit"], axis=1)[lmb_range]
-            - np.std(all_data["order2_fit"], axis=1)[lmb_range],
-            np.average(all_data["order2_fit"], axis=1)[lmb_range]
-            + np.std(all_data["order2_fit"], axis=1)[lmb_range],
+            np.average(all_data["order2_fit"], axis=1)[lmb_range],
             label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq2']:2.3}$"
             + "\n"
             + rf"$\textrm{{M.E.}}={m_e_2}$",
-            # label=r"$\mathcal{O}(\lambda^3)$",
             color=_colors[2],
-            linewidth=0,
+            linewidth=1,
+            linestyle='--',
             alpha=0.9,
         )
-        plt.fill_between(
+        plt.plot(
             all_data["lambdas3"][lmb_range],
-            np.average(all_data["order3_fit"], axis=1)[lmb_range]
-            - np.std(all_data["order3_fit"], axis=1)[lmb_range],
-            np.average(all_data["order3_fit"], axis=1)[lmb_range]
-            + np.std(all_data["order3_fit"], axis=1)[lmb_range],
+            np.average(all_data["order3_fit"], axis=1)[lmb_range],
             label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
             + "\n"
             + rf"$\textrm{{M.E.}}={m_e_3}$",
-            # label=r"$\mathcal{O}(\lambda^4)$",
             color=_colors[3],
-            linewidth=0,
+            linewidth=1,
+            linestyle='--',
             alpha=0.9,
         )
         
