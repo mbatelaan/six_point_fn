@@ -331,7 +331,9 @@ def plot_lmb_dep(all_data, plotdir, fit_data=None):
 
 
 def plot_lmb_depR(all_data, plotdir, fit_data=None):
-    """Make a plot of the lambda dependence of the energy shift"""
+    """Make a plot of the lambda dependence of the energy shift
+
+    Where the plot uses colored bands to show the dependence"""
     plt.figure(figsize=(6, 6))
 
     plt.fill_between(
@@ -423,7 +425,7 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     #     elinewidth=1,
     #     markerfacecolor="none",
     # )
-    plt.legend(fontsize="x-small")
+    plt.legend(fontsize="x-small",loc='upper left')
     # plt.ylim(0, 0.2)
     # plt.ylim(-0.003, 0.035)
     # plt.xlim(-0.01, 0.22)
@@ -434,12 +436,15 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     plt.ylabel("$\Delta E$")
     plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    plt.savefig(plotdir / ("lambda_dep.pdf"))
+    plt.savefig(plotdir / ("lambda_dep_bands.pdf"))
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
         fitBS0 = np.array(
-            [fitfunction5(lambdas0[lmb_range], *bf) for bf in fit_data["bootfit0"]]
+            [
+                fitfunction5(all_data["lambdas0"][lmb_range], *bf)
+                for bf in fit_data["bootfit0"]
+            ]
         )
         # print(np.std(fitBS0, axis=0))
         # print(
@@ -467,79 +472,82 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         # print(m_e_0)
 
         plt.fill_between(
-            lambdas0[lmb_range],
+            all_data["lambdas0"][lmb_range],
             np.average(fitBS0, axis=0) - np.std(fitBS0, axis=0),
             np.average(fitBS0, axis=0) + np.std(fitBS0, axis=0),
             alpha=0.3,
             color=_colors[0],
-            label=rf"$\textrm{{M.E.}}={m_e_0}$",
-            # rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq0']:0.2}$"
-            # + "\n"
-            # + rf"$\textrm{{M.E.}}={m_e_0}$",
+            # label=rf"$\textrm{{M.E.}}={m_e_0}$",
+            label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq0']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_0}$",
         )
         fitBS1 = np.array(
-            [fitfunction5(lambdas1[lmb_range], *bf) for bf in fit_data["bootfit1"]]
+            [
+                fitfunction5(all_data["lambdas1"][lmb_range], *bf)
+                for bf in fit_data["bootfit1"]
+            ]
             # [fitfunction5(lambdas1[:fitlim], *bf) for bf in fit_data["bootfit1"]]
         )
         print(np.std(fitBS1, axis=0))
 
         plt.fill_between(
-            lambdas1[lmb_range],  # [:fitlim],
+            all_data["lambdas1"][lmb_range],  # [:fitlim],
             np.average(fitBS1, axis=0) - np.std(fitBS1, axis=0),
             np.average(fitBS1, axis=0) + np.std(fitBS1, axis=0),
             alpha=0.3,
             color=_colors[1],
-            label=rf"$\textrm{{M.E.}}={m_e_1}$",
-            # rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq1']:0.2}$"
-            # + "\n"
-            # + rf"$\textrm{{M.E.}}={m_e_1}$",
+            # label=rf"$\textrm{{M.E.}}={m_e_1}$",
+            label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq1']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_1}$",
         )
         fitBS2 = np.array(
-            [fitfunction5(lambdas2[lmb_range], *bf) for bf in fit_data["bootfit2"]]
+            [
+                fitfunction5(all_data["lambdas2"][lmb_range], *bf)
+                for bf in fit_data["bootfit2"]
+            ]
         )
         print(np.std(fitBS2, axis=0))
         plt.fill_between(
-            lambdas2[lmb_range],
+            all_data["lambdas2"][lmb_range],
             np.average(fitBS2, axis=0) - np.std(fitBS2, axis=0),
             np.average(fitBS2, axis=0) + np.std(fitBS2, axis=0),
             alpha=0.3,
             color=_colors[2],
-            label=rf"$\textrm{{M.E.}}={m_e_2}$",
-            # rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq2']:0.2}$"
-            # + "\n"
-            # + rf"$\textrm{{M.E.}}={m_e_2}$",
+            # label=rf"$\textrm{{M.E.}}={m_e_2}$",
+            label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq2']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_2}$",
         )
         fitBS3 = np.array(
-            [fitfunction5(lambdas3[lmb_range], *bf) for bf in fit_data["bootfit3"]]
+            [
+                fitfunction5(all_data["lambdas3"][lmb_range], *bf)
+                for bf in fit_data["bootfit3"]
+            ]
         )
         print(np.std(fitBS3, axis=0))
         plt.fill_between(
-            lambdas3[lmb_range],
+            all_data["lambdas3"][lmb_range],
             np.average(fitBS3, axis=0) - np.std(fitBS3, axis=0),
             np.average(fitBS3, axis=0) + np.std(fitBS3, axis=0),
             alpha=0.3,
             color=_colors[3],
-            label=rf"$\textrm{{M.E.}}={m_e_3}$",
-            # rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:0.2}$"
-            # + "\n"
-            # + rf"$\textrm{{M.E.}}={m_e_3}$",
+            # label=rf"$\textrm{{M.E.}}={m_e_3}$",
+            label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_3}$",
         )
 
-        plt.legend(fontsize="xx-small")
+        plt.legend(fontsize="xx-small",loc='upper left')
+        # plt.legend(fontsize="xx-small")
         # plt.xlim(-0.01, 0.16)
         # plt.ylim(0, 0.15)
         # plt.xlim(-0.001, 0.045)
         # plt.ylim(-0.003, 0.035)
-        plt.xlim(-0.01, lambdas3[-1] * 1.1)
+        plt.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
         plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
-        plt.savefig(plotdir / ("lambda_dep_fit.pdf"))
-
-        # plt.xlim(-0.005, 0.08)
-        # plt.ylim(0.015, 0.065)
-        plt.xlim(-0.0001, 0.025)
-        plt.ylim(-0.0002, 0.015)
-        plt.savefig(plotdir / ("lambda_dep_zoom.pdf"))
-        plt.close()
+        plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
 
     plt.close()
     return
@@ -872,6 +880,7 @@ def main():
         fit_data = None
 
     plot_lmb_dep(all_data, plotdir, fit_data)
+    plot_lmb_depR(all_data, plotdir, fit_data)
 
     ### ----------------------------------------------------------------------
     # lmb_val = 0.06 #0.16
