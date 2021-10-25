@@ -92,6 +92,7 @@ def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1):
     plt.ylim(np.min(eval_left), 1.1*np.max(eval_left))
     plt.semilogy()
     plt.grid(True, alpha=0.4)
+    plt.tight_layout()
     plt.savefig(plotdir / (f"evals_{order}.pdf"))
     plt.close()
     sorted_evals = np.sort(eval_left)[::-1]
@@ -110,6 +111,7 @@ def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1):
     # mat = plt.matshow(covmat)
     mat = plt.matshow(covmat_inverse)
     plt.colorbar(mat, shrink=0.5)
+    plt.tight_layout()
     plt.savefig(plotdir / (f"cov_matrix_inverse_{order}.pdf"))
     plt.close()
     # print(covmat)
@@ -151,7 +153,7 @@ def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1):
 
 def plot_lmb_dep(all_data, plotdir, fit_data=None):
     """Make a plot of the lambda dependence of the energy shift"""
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(9, 6))
     plt.errorbar(
         all_data["lambdas0"],
         np.average(all_data["order0_fit"], axis=1),
@@ -200,13 +202,14 @@ def plot_lmb_dep(all_data, plotdir, fit_data=None):
     # plt.ylim(0, 0.2)
     # plt.ylim(-0.003, 0.035)
     # plt.xlim(-0.01, 0.22)
-    plt.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
-    plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
+    plt.xlim(-0.01, all_data["lambdas1"][-1] * 1.1)
+    plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
 
     plt.xlabel("$\lambda$")
     plt.ylabel("$\Delta E$")
-    plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
     plt.savefig(plotdir / ("lambda_dep.pdf"))
 
     if fit_data:
@@ -310,13 +313,14 @@ def plot_lmb_dep(all_data, plotdir, fit_data=None):
             + rf"$\textrm{{M.E.}}={m_e_3}$",
         )
 
-        plt.legend(fontsize="xx-small")
+        plt.legend(fontsize="x-small")
         # plt.xlim(-0.01, 0.16)
         # plt.ylim(0, 0.15)
         # plt.xlim(-0.001, 0.045)
         # plt.ylim(-0.003, 0.035)
-        plt.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
-        plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
+        plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
+        plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
+        plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_fit.pdf"))
 
         # plt.xlim(-0.005, 0.08)
@@ -334,7 +338,7 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     """Make a plot of the lambda dependence of the energy shift
 
     Where the plot uses colored bands to show the dependence"""
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(9, 6))
 
     plt.fill_between(
         all_data["lambdas0"],
@@ -384,13 +388,14 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     # plt.ylim(0, 0.2)
     # plt.ylim(-0.003, 0.035)
     # plt.xlim(-0.01, 0.22)
-    plt.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
-    plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
+    plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
+    plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
 
     plt.xlabel("$\lambda$")
     plt.ylabel("$\Delta E$")
-    plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
     plt.savefig(plotdir / ("lambda_dep_bands.pdf"))
 
     if fit_data:
@@ -563,14 +568,15 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         #     + rf"$\textrm{{M.E.}}={m_e_3}$",
         # )
 
-        plt.legend(fontsize="xx-small",loc='upper left')
-        # plt.legend(fontsize="xx-small")
+        plt.legend(fontsize="x-small",loc='upper left')
+        # plt.legend(fontsize="x-small")
         # plt.xlim(-0.01, 0.16)
         # plt.ylim(0, 0.15)
         # plt.xlim(-0.001, 0.045)
         # plt.ylim(-0.003, 0.035)
-        plt.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
-        plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
+        plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
+        plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
+        plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
 
     plt.close()
@@ -646,7 +652,7 @@ def plot_lmb_dep2(all_data, plotdir, lmb_range=None):
     )
     fit_param3, chisq3 = fit_const(xdata3, data_set3, lmb_range)
 
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(9, 6))
 
     ydata0 = np.divide(np.average(all_data["order0_fit"], axis=1), all_data["lambdas0"], out=np.zeros_like(np.average(all_data["order0_fit"], axis=1)), where=all_data["lambdas0"]!=0)
     plt.errorbar(
@@ -753,12 +759,13 @@ def plot_lmb_dep2(all_data, plotdir, lmb_range=None):
     # plt.ylim(-0.003, 0.035)
     # plt.xlim(-0.01, 0.22)
     # plt.xlim(-0.01, lambdas3[-1] * 1.1)
-    # plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.3)
+    # plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
 
     plt.xlabel("$\lambda$")
     plt.ylabel("$\Delta E / \lambda$")
-    plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
     plt.savefig(plotdir / ("lambda_dep_divlmb.pdf"))
 
     plt.close()
@@ -924,7 +931,7 @@ def main():
     delta_t_range = data["delta_t"]
     delta_t_choice = np.where(delta_t_range == config["delta_t"])[0][0]
 
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(9, 6))
     plt.errorbar(
         time_choice_range,
         np.average(order0_fit[:, delta_t_choice, :], axis=1),
@@ -976,8 +983,9 @@ def main():
     # plt.ylim(0.03, 0.055)
     plt.xlabel("$t_{0}$")
     plt.ylabel("$\Delta E$")
-    plt.title(rf"$\Delta t = {delta_t_range[delta_t_choice]}, \lambda = {lmb_val}$")
+    # plt.title(rf"$\Delta t = {delta_t_range[delta_t_choice]}, \lambda = {lmb_val}$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
     plt.savefig(plotdir / (f"time_choice_dep_l{lmb_val}.pdf"))
     plt.close()
 
@@ -989,7 +997,7 @@ def main():
     t0_choice = np.where(time_choice_range == config["time_choice"])[0][0]
     # t0_choice = config["time_choice"]
 
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(9, 6))
     plt.errorbar(
         delta_t_range,
         np.average(order0_fit[t0_choice, :, :], axis=1),
@@ -1040,8 +1048,9 @@ def main():
     # plt.ylim(0.03, 0.055)
     plt.xlabel("$\Delta t$")
     plt.ylabel("$\Delta E$")
-    plt.title(rf"$t_{{0}} = {time_choice_range[t0_choice]}, \lambda = {lmb_val}$")
+    # plt.title(rf"$t_{{0}} = {time_choice_range[t0_choice]}, \lambda = {lmb_val}$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
     plt.savefig(plotdir / (f"delta_t_dep_l{lmb_val}.pdf"))
     plt.close()
 
