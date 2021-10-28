@@ -63,7 +63,7 @@ def fitfunction5(lmb, Delta_E, matrix_element):
     return deltaE
 
 
-def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1):
+def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv = False):
     """Fit the lambda dependence
 
     data is a correlator with tht bootstraps on the first index and the time on the second
@@ -77,44 +77,43 @@ def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1):
     # print(np.shape(ydata))
     data_set = ydata
     ydata_avg = np.average(data_set, axis=0)
-    # print("ydata_avg", ydata_avg)
-    # print("lambdas", lambdas)
+
     covmat = np.cov(data_set.T)
     diag = np.diagonal(covmat)
-    norms = np.einsum("i,j->ij", diag, diag) ** 0.5
-    covmat_norm = covmat / norms
 
-    # Calculate the eigenvalues of the covariance matrix
-    eval_left, evec_left = np.linalg.eig(covmat)
-    print('\nevals: ', eval_left)
-    plt.figure(figsize=(5, 4))
-    plt.scatter(np.arange(len(eval_left)), eval_left)
-    plt.ylim(np.min(eval_left), 1.1*np.max(eval_left))
-    plt.semilogy()
-    plt.grid(True, alpha=0.4)
-    plt.tight_layout()
-    plt.savefig(plotdir / (f"evals_{order}.pdf"))
-    plt.close()
-    sorted_evals = np.sort(eval_left)[::-1]
-    print(sorted_evals)
-    svd = 3 #How many singular values do we want to keep for the inversion
-    rcond = (sorted_evals[svd-1] - sorted_evals[svd+1]) / 2 / sorted_evals[0]
-    print(rcond)
-    covmat_inverse = np.linalg.pinv(covmat, rcond=rcond)
-    # covmat_inverse = linalg.pinv(covmat)
+    if svd_inv:
+        # Calculate the eigenvalues of the covariance matrix
+        eval_left, evec_left = np.linalg.eig(covmat)
+        # print('\nevals: ', eval_left)
+        plt.figure(figsize=(5, 4))
+        plt.scatter(np.arange(len(eval_left)), eval_left)
+        plt.ylim(np.min(eval_left), 1.1*np.max(eval_left))
+        plt.semilogy()
+        plt.grid(True, alpha=0.4)
+        plt.tight_layout()
+        plt.savefig(plotdir / (f"evals_{order}.pdf"))
+        plt.close()
+        sorted_evals = np.sort(eval_left)[::-1]
+        # print(sorted_evals)
+        svd = 3 #How many singular values do we want to keep for the inversion
+        rcond = (sorted_evals[svd-1] - sorted_evals[svd+1]) / 2 / sorted_evals[0]
+        covmat_inverse = np.linalg.pinv(covmat, rcond=rcond)
+        dof = svd-2
+
+    else:        
+        covmat_inverse = linalg.pinv(covmat)
+        dof = len(lambdas)
+
 
     # u_, s_, v_ = np.linalg.svd(covmat)
     # print('singular values: ', s_)
 
     plt.figure(figsize=(11, 11))
-    # mat = plt.matshow(np.linalg.inv(covmat))
-    # mat = plt.matshow(covmat)
     mat = plt.matshow(covmat_inverse)
     plt.colorbar(mat, shrink=0.5)
     plt.tight_layout()
     plt.savefig(plotdir / (f"cov_matrix_inverse_{order}.pdf"))
     plt.close()
-    # print(covmat)
 
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     popt_avg, pcov_avg = curve_fit(
@@ -127,10 +126,8 @@ def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1):
         bounds=bounds,
     )
     chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, covmat_inverse)
-    print("fit_avg", popt_avg)
+    # print("fit_avg", popt_avg)
     p0 = popt_avg
-    # dof = len(lambdas)
-    dof = svd-2
     redchisq = chisq / dof
     bootfit = []
     for iboot, values in enumerate(ydata):
@@ -389,7 +386,8 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     # plt.ylim(-0.003, 0.035)
     # plt.xlim(-0.01, 0.22)
     plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
-    plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
+    # plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
+    plt.ylim(-0.005, 0.06)
 
     plt.xlabel("$\lambda$")
     plt.ylabel("$\Delta E$")
@@ -574,8 +572,10 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         # plt.ylim(0, 0.15)
         # plt.xlim(-0.001, 0.045)
         # plt.ylim(-0.003, 0.035)
-        plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
-        plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
+        # plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
+        plt.xlim(all_data["lambdas0"][0] * 0.9, all_data["lambdas0"][-1] * 1.1)
+        # plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
+        plt.ylim(np.average(all_data["order0_fit"], axis=1)[0] * 0.9, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
 
@@ -757,6 +757,7 @@ def plot_lmb_dep2(all_data, plotdir, lmb_range=None):
     plt.legend(fontsize="x-small")
     # plt.ylim(0, 0.2)
     # plt.ylim(-0.003, 0.035)
+    plt.ylim(-0.3, 5)
     # plt.xlim(-0.01, 0.22)
     # plt.xlim(-0.01, lambdas3[-1] * 1.1)
     # plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
@@ -850,11 +851,17 @@ def main():
 
     p0 = (1e-3, 0.7)
     fitlim = 30
-    lmb_range = np.arange(1, 22)
+    lmb_range = np.arange(5, 10)
+    # lmb_range = np.arange(24, 29)
+    # lmb_range = np.arange(18, 24)
+    # lmb_range = np.arange(0, 9)
+    # lmb_range = np.arange(1, 22)
+    # lmb_range = np.arange(8, 13)
     # lmb_range = np.arange(4, 14)
     # lmb_range = np.arange(6, 11)
     # lmb_range=np.arange(5,10)
     # lmb_range=np.arange(6,9)
+
     plot_lmb_dep2(all_data, plotdir, lmb_range)
 
     # Fit to the lambda dependence at each order in lambda
@@ -1056,6 +1063,142 @@ def main():
 
     # plt.show()
 
+def main_loop():
+    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    plt.rc("text", usetex=True)
+    rcParams.update({"figure.autolayout": True})
+
+    pars = params(0)
+    nboot = 200
+    nbin = 1
+
+    # Read in the directory data from the yaml file
+    if len(sys.argv) == 2:
+        config_file = sys.argv[1]
+    else:
+        config_file = "data_dir_theta2.yaml"  # default file
+    with open(config_file) as f:
+        config = yaml.safe_load(f)
+    pickledir = Path(config["pickle_dir1"])
+    pickledir2 = Path(config["pickle_dir2"])
+    plotdir = Path(config["analysis_dir"]) / Path("plots")
+    datadir = Path(config["analysis_dir"]) / Path("data")
+    plotdir.mkdir(parents=True, exist_ok=True)
+    datadir.mkdir(parents=True, exist_ok=True)
+    print("datadir: ", datadir / ("lambda_dep.pkl"))
+
+    t_range = np.arange(config["t_range0"], config["t_range1"])
+    time_choice = config["time_choice"]
+    delta_t = config["delta_t"]
+    lmb_val = config["lmb_val"]
+
+    # Read data from the pickle file
+    with open(
+        datadir
+        / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"),
+        "rb",
+    ) as file_in:
+        data = pickle.load(file_in)
+    lambdas = data["lambdas"]
+    order0_fit = data["order0_fit"]
+    order1_fit = data["order1_fit"]
+    order2_fit = data["order2_fit"]
+    order3_fit = data["order3_fit"]
+    redchisq = data["redchisq"]
+    time_choice = data["time_choice"]
+    delta_t = data["delta_t"]
+
+    # Filter out data points with a high reduced chi-squared value
+    chisq_tol = 1.5  # 1.7
+    order0_fit = order0_fit[np.where(redchisq[0] <= chisq_tol)]
+    lambdas0 = lambdas[np.where(redchisq[0] <= chisq_tol)]
+    order1_fit = order1_fit[np.where(redchisq[1] <= chisq_tol)]
+    lambdas1 = lambdas[np.where(redchisq[1] <= chisq_tol)]
+    order2_fit = order2_fit[np.where(redchisq[2] <= chisq_tol)]
+    lambdas2 = lambdas[np.where(redchisq[2] <= chisq_tol)]
+    order3_fit = order3_fit[np.where(redchisq[3] <= chisq_tol)]
+    lambdas3 = lambdas[np.where(redchisq[3] <= chisq_tol)]
+
+    all_data = {
+        "lambdas0": lambdas0,
+        "lambdas1": lambdas1,
+        "lambdas2": lambdas2,
+        "lambdas3": lambdas3,
+        "order0_fit": order0_fit,
+        "order1_fit": order1_fit,
+        "order2_fit": order2_fit,
+        "order3_fit": order3_fit,
+        "redchisq": redchisq,
+        "time_choice": time_choice,
+        "delta_t": delta_t,
+    }
+
+    # scaled_z0 = (redchisq[0] - redchisq[0].min()) / redchisq[0].ptp()
+    # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
+
+    plot_lmb_depR(all_data, plotdir)
+    # plot_lmb_dep2(all_data, plotdir)
+
+    p0 = (1e-3, 0.7)
+    fitlim = 30
+    lmb_range = np.arange(1, 22)
+    # lmb_range = np.arange(4, 14)
+    # lmb_range = np.arange(6, 11)
+    # lmb_range=np.arange(5,10)
+    # lmb_range=np.arange(6,9)
+    plot_lmb_dep2(all_data, plotdir, lmb_range)
+    
+    # Fit to the lambda dependence at each order in lambda
+    print("\n")
+    
+    fit_data_list = []
+    min_len = np.min([len(lambdas0), len(lambdas1), len(lambdas2), len(lambdas3)])
+    for lmb_initial in np.arange(0,min_len):
+        for lmb_final in np.arange(lmb_initial+5,min_len):
+            lmb_range = np.arange(lmb_initial, lmb_final)
+            print(f'lmb_range = {lmb_range}')
+            try:
+                # bootfit0, redchisq0, chisq0 = fit_lmb(
+                #     order0_fit[lmb_range], fitfunction5, lambdas0[lmb_range], plotdir, p0=p0, order=1
+                # )
+                # p0 = np.average(bootfit0, axis=0)
+                
+                # bootfit1, redchisq1, chisq1 = fit_lmb(
+                #     order1_fit[lmb_range], fitfunction5, lambdas1[lmb_range], plotdir, p0=p0, order=2
+                # )
+                
+                # bootfit2, redchisq2, chisq2 = fit_lmb(
+                #     order2_fit[lmb_range], fitfunction5, lambdas2[lmb_range], plotdir, p0=p0, order=3
+                # )
+                
+                bootfit3, redchisq3, chisq3 = fit_lmb(
+                    order3_fit[lmb_range], fitfunction5, lambdas3[lmb_range], plotdir, p0=p0, order=4
+                )
+                print("redchisq order 4:", redchisq3)
+                
+                fit_data = {
+                    "lmb_range": lmb_range,
+                    "fitlim": fitlim,
+                    # "bootfit0": bootfit0,
+                    # "bootfit1": bootfit1,
+                    # "bootfit2": bootfit2,
+                    "bootfit3": bootfit3,
+                    "lambdas3": lambdas3[lmb_range],
+                    # "redchisq0": redchisq0,
+                    # "redchisq1": redchisq1,
+                    # "redchisq2": redchisq2,
+                    "redchisq3": redchisq3,
+                }
+            except RuntimeError as e:
+                print("====================\nFitting Failed\n", e, "\n====================")
+                fit_data = None
+            fit_data_list.append(fit_data)
+                
+    with open(datadir / (f"matrix_elements_loop.pkl"), "wb") as file_out:
+        pickle.dump(fit_data_list, file_out)
+        
+    # plot_lmb_dep(all_data, plotdir, fit_data)
+    # plot_lmb_depR(all_data, plotdir, fit_data)
 
 if __name__ == "__main__":
     main()
