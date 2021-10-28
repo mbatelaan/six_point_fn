@@ -652,10 +652,16 @@ def main():
     else:
         G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
 
+    # lambdas = np.linspace(0.006,0.013,30)
+    # lambdas = np.linspace(0.008,0.012,30)
+    # lambdas = np.linspace(0.005,0.011,30)
+    # lambdas = np.linspace(0,0.01,30)
+    # lambdas = np.linspace(0,0.035,30)
+    lambdas = np.linspace(0,0.06,30)
+    # lambdas = np.linspace(0,0.08,30)
     # lambdas = np.linspace(0.12,0.16,20)
     # lambdas = np.linspace(0,0.16,10)[1:]
     # lambdas = np.linspace(0,0.06,30)
-    lambdas = np.linspace(0,0.08,30)
     # lambdas = np.linspace(0,0.02,30)
     # lambdas = np.linspace(0,0.007,30)
     # lambdas = np.linspace(0, 0.16, 30)  # [1:]
@@ -663,7 +669,7 @@ def main():
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
-    plotting = True
+    plotting = False
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))
