@@ -385,7 +385,8 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     # plt.ylim(0, 0.2)
     # plt.ylim(-0.003, 0.035)
     # plt.xlim(-0.01, 0.22)
-    plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
+    # plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
+    plt.xlim(-0.01, 0.065)
     # plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
     plt.ylim(-0.005, 0.06)
 
