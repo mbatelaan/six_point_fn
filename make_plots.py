@@ -80,25 +80,64 @@ def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv = False
 
     covmat = np.cov(data_set.T)
     diag = np.diagonal(covmat)
+    norms = np.einsum("i,j->ij", diag, diag) ** 0.5
+    covmat_norm = covmat / norms
 
     if svd_inv:
         # Calculate the eigenvalues of the covariance matrix
-        eval_left, evec_left = np.linalg.eig(covmat)
-        # print('\nevals: ', eval_left)
+        eval_left, evec_left = np.linalg.eig(covmat_norm)
+        # plt.figure(figsize=(5, 4))
+        # plt.scatter(np.arange(len(eval_left)), eval_left)
+        # plt.ylim(np.min(eval_left), 1.1*np.max(eval_left))
+        # plt.semilogy()
+        # plt.grid(True, alpha=0.4)
+        # plt.tight_layout()
+        # plt.savefig(plotdir / (f"evals_{order}.pdf"))
+        # plt.close()
+        sorted_evals = np.sort(eval_left)[::-1]
+        svd = 10 #How many singular values do we want to keep for the inversion
+        
+        lmb_min = np.sum(sorted_evals[svd:])/len(sorted_evals[svd:])
+        print(f"lmb_min = {lmb_min}")
+        print(f"sorted_evals = {sorted_evals}")
+        K = len(sorted_evals)*np.sum([max(lmb_i,lmb_min) for lmb_i in sorted_evals])**(-1)
+        print(f"K = {K}")
+        for ilmb,lmb in enumerate(sorted_evals[svd:]):
+            sorted_evals[svd+ilmb] = K*max(lmb,lmb_min)
+        print(f"sorted_evals = {sorted_evals}")
+
+        inv_evals = linalg.inv(np.diag(sorted_evals))
+        covmat_inverse = evec_left*inv_evals*linalg.inv(evec_left)
+        print(f"covmat_inverse = {covmat_inverse}")
+        dof = len(sorted_evals)-2
+    
         plt.figure(figsize=(5, 4))
-        plt.scatter(np.arange(len(eval_left)), eval_left)
+        plt.scatter(np.arange(len(eval_left)), eval_left, color='b', label="eigenvalues")
+        plt.scatter(np.arange(len(sorted_evals)), sorted_evals, color='k', label="modified eigenvalues")
         plt.ylim(np.min(eval_left), 1.1*np.max(eval_left))
         plt.semilogy()
         plt.grid(True, alpha=0.4)
         plt.tight_layout()
         plt.savefig(plotdir / (f"evals_{order}.pdf"))
         plt.close()
-        sorted_evals = np.sort(eval_left)[::-1]
-        # print(sorted_evals)
-        svd = 3 #How many singular values do we want to keep for the inversion
-        rcond = (sorted_evals[svd-1] - sorted_evals[svd+1]) / 2 / sorted_evals[0]
-        covmat_inverse = np.linalg.pinv(covmat, rcond=rcond)
-        dof = svd-2
+    
+        # # Calculate the eigenvalues of the covariance matrix
+        # eval_left, evec_left = np.linalg.eig(covmat)
+        # # print('\nevals: ', eval_left)
+        # plt.figure(figsize=(5, 4))
+        # plt.scatter(np.arange(len(eval_left)), eval_left)
+        # plt.ylim(np.min(eval_left), 1.1*np.max(eval_left))
+        # plt.semilogy()
+        # plt.grid(True, alpha=0.4)
+        # plt.tight_layout()
+        # plt.savefig(plotdir / (f"evals_{order}.pdf"))
+        # plt.close()
+        # sorted_evals = np.sort(eval_left)[::-1]
+        # # print(sorted_evals)
+        # svd = 3 #How many singular values do we want to keep for the inversion
+        # rcond = (sorted_evals[svd-1] - sorted_evals[svd+1]) / 2 / sorted_evals[0]
+        # covmat_inverse = np.linalg.pinv(covmat, rcond=rcond)
+        # dof = svd-2
 
     else:        
         covmat_inverse = linalg.pinv(covmat)
@@ -852,7 +891,8 @@ def main():
 
     p0 = (1e-3, 0.7)
     fitlim = 30
-    lmb_range = np.arange(5, 10)
+    lmb_range = np.arange(24, 29)
+    # lmb_range = np.arange(5, 10)
     # lmb_range = np.arange(24, 29)
     # lmb_range = np.arange(18, 24)
     # lmb_range = np.arange(0, 9)
