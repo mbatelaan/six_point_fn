@@ -629,12 +629,14 @@ def fit_const(xdata, data_set, lmb_range):
     covmat = np.cov(data_set.T)
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
 
-    eval_left, evec_left = np.linalg.eig(covmat)
-    print('\nevals: ', eval_left)
-    sorted_evals = np.sort(eval_left)[::-1]
-    # rcond = (sorted_evals[1] - sorted_evals[2])/2
-    rcond = (sorted_evals[1] - sorted_evals[2]) / 2 / sorted_evals[0]
-    covmat_inverse = np.linalg.pinv(covmat, rcond=rcond)
+    # eval_left, evec_left = np.linalg.eig(covmat)
+    # print('\nevals: ', eval_left)
+    # sorted_evals = np.sort(eval_left)[::-1]
+    # # rcond = (sorted_evals[1] - sorted_evals[2])/2
+    # rcond = (sorted_evals[1] - sorted_evals[2]) / 2 / sorted_evals[0]
+    # covmat_inverse = np.linalg.pinv(covmat, rcond=rcond)
+
+    covmat_inverse = np.linalg.inv(covmat)
 
     function = ff.constant
     p0 = 0.7
@@ -891,7 +893,8 @@ def main():
 
     p0 = (1e-3, 0.7)
     fitlim = 30
-    lmb_range = np.arange(24, 29)
+    lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
+    # lmb_range = np.arange(5, 11)
     # lmb_range = np.arange(5, 10)
     # lmb_range = np.arange(24, 29)
     # lmb_range = np.arange(18, 24)
