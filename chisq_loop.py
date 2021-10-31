@@ -1114,13 +1114,14 @@ def main_loop():
     # lmb_range = np.arange(6, 11)
     # lmb_range=np.arange(5,10)
     # lmb_range=np.arange(6,9)
-    plot_lmb_dep2(all_data, plotdir, lmb_range)
+    # plot_lmb_dep2(all_data, plotdir, lmb_range)
     
     # Fit to the lambda dependence at each order in lambda
     print("\n")
     
     fit_data_list = []
     min_len = np.min([len(lambdas0), len(lambdas1), len(lambdas2), len(lambdas3)])
+    print(min_len)
     for lmb_initial in np.arange(0,min_len):
         for lmb_final in np.arange(lmb_initial+3,min_len):
             lmb_range = np.arange(lmb_initial, lmb_final)

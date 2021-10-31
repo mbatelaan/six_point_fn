@@ -143,6 +143,8 @@ def fit_value3(diffG, t_range, function, norm=1):
     return bootfit, redchisq
 
 
+
+
 def read_correlators(pars, pickledir, pickledir2, mom_strings):
     """Read the pickle files which contain the correlator data
 
@@ -260,6 +262,8 @@ def read_correlators2(pars, pickledir, pickledir2, mom_strings):
     """Read the pickle files which contain the correlator data
 
     The script will check the folders for available files and pick out the files with the highest number of configurations.
+
+    This version reads only zero momentum correlators as it is for the case where all the momentum is contained in the twisted boundary conditions.
     """
 
     ### ----------------------------------------------------------------------
