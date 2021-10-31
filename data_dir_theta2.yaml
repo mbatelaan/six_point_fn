@@ -4,5 +4,7 @@ analysis_dir : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_
 time_choice : 4
 delta_t : 2
 t_range0 : 5
-t_range1 : 14
+t_range1 : 17
 lmb_val : 0.04
+lmb_init : 5
+lmb_final : 11

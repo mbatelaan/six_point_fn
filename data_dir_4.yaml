@@ -6,3 +6,5 @@ delta_t : 2
 t_range0 : 5
 t_range1 : 14
 lmb_val : 0.04
+lmb_init : 26
+lmb_final : 29

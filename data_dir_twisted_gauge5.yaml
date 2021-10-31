@@ -7,3 +7,5 @@ t_range0 : 5
 t_range1 : 14
 onlytwist : True
 lmb_val : 0.04
+lmb_init : 5
+lmb_final : 11
