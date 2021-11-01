@@ -815,6 +815,195 @@ def plot_lmb_dep2(all_data, plotdir, lmb_range=None):
     return
 
 
+
+def plot_lmb_dep3(all_data, plotdir, fit_data=None):
+    """Make a plot of the lambda dependence of the energy shift and divide it by lambda to show the linear behaviour"""
+
+    xdata0 = all_data["lambdas0"]
+    data_set0 = np.einsum(
+        "ij,i->ij", all_data["order0_fit"][1:], xdata0[1:] ** (-1)
+    )
+    # fit_param0, chisq0 = fit_const(xdata0, data_set0, lmb_range)
+    xdata1 = all_data["lambdas1"]
+    data_set1 = np.einsum(
+        "ij,i->ij", all_data["order1_fit"][1:], xdata1[1:] ** (-1)
+    )
+    # fit_param1, chisq1 = fit_const(xdata1, data_set1, lmb_range)
+    xdata2 = all_data["lambdas2"]
+    data_set2 = np.einsum(
+        "ij,i->ij", all_data["order2_fit"][1:], xdata2[1:] ** (-1)
+    )
+    # fit_param2, chisq2 = fit_const(xdata2, data_set2, lmb_range)
+    xdata3 = all_data["lambdas3"]
+    data_set3 = np.einsum(
+        "ij,i->ij", all_data["order3_fit"][1:], xdata3[1:] ** (-1)
+    )
+    # fit_param3, chisq3 = fit_const(xdata3, data_set3, lmb_range)
+
+    plt.figure(figsize=(9, 6))
+
+    ydata0 = np.divide(np.average(all_data["order0_fit"], axis=1), all_data["lambdas0"], out=np.zeros_like(np.average(all_data["order0_fit"], axis=1)), where=all_data["lambdas0"]!=0)
+    print(f"data_set0, {np.shape(data_set0)}")
+
+    plt.fill_between(
+        all_data["lambdas0"][1:],
+        np.average(data_set0, axis=1) - np.std(data_set0, axis=1),
+        np.average(data_set0, axis=1) + np.std(data_set0, axis=1),
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas1"][1:],
+        np.average(data_set1, axis=1) - np.std(data_set1, axis=1),
+        np.average(data_set1, axis=1) + np.std(data_set1, axis=1),
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas2"][1:],
+        np.average(data_set2, axis=1) - np.std(data_set2, axis=1),
+        np.average(data_set2, axis=1) + np.std(data_set2, axis=1),
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas3"][1:],
+        np.average(data_set3, axis=1) - np.std(data_set3, axis=1),
+        np.average(data_set3, axis=1) + np.std(data_set3, axis=1),
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=1,
+        alpha=0.3,
+    )
+
+    if fit_data:
+        lmb_range = fit_data["lmb_range"]
+        plt.fill_between(np.array([-1,all_data["lambdas0"][lmb_range[0]]]), np.array([-10,-10]), np.array([10,10]), color='k', alpha=0.2, linewidth=0)
+        plt.fill_between(np.array([all_data["lambdas0"][lmb_range[-1]], 1]), np.array([-10,-10]), np.array([10,10]), color='k', alpha=0.2, linewidth=0)
+
+        m_e_0 = err_brackets(
+            np.average(fit_data["bootfit0"], axis=0)[1],
+            np.std(fit_data["bootfit0"], axis=0)[1],
+        )
+        m_e_1 = err_brackets(
+            np.average(fit_data["bootfit1"], axis=0)[1],
+            np.std(fit_data["bootfit1"], axis=0)[1],
+        )
+        m_e_2 = err_brackets(
+            np.average(fit_data["bootfit2"], axis=0)[1],
+            np.std(fit_data["bootfit2"], axis=0)[1],
+        )
+        m_e_3 = err_brackets(
+            np.average(fit_data["bootfit3"], axis=0)[1],
+            np.std(fit_data["bootfit3"], axis=0)[1],
+        )
+
+        fitBS0 = np.array(
+            [
+                fitfunction5(all_data["lambdas0"], *bf)
+                for bf in fit_data["bootfit0"]
+            ]
+        )
+        print(f"shape fittBS0 = {np.shape(fitBS0)}")
+        fitBS0 = np.einsum("ij,j->ij", fitBS0[:,1:], all_data["lambdas0"][1:]**(-1))
+        fitBS1 = np.array(
+            [
+                fitfunction5(all_data["lambdas1"], *bf)
+                for bf in fit_data["bootfit1"]
+            ]
+        )
+        fitBS1 = np.einsum("ij,j->ij", fitBS1[:,1:], all_data["lambdas1"][1:]**(-1))
+        fitBS2 = np.array(
+            [
+                fitfunction5(all_data["lambdas2"], *bf)
+                for bf in fit_data["bootfit2"]
+            ]
+        )
+        fitBS2 = np.einsum("ij,j->ij", fitBS2[:,1:], all_data["lambdas2"][1:]**(-1))
+        fitBS3 = np.array(
+            [
+                fitfunction5(all_data["lambdas3"], *bf)
+                for bf in fit_data["bootfit3"]
+            ]
+        )
+        fitBS3 = np.einsum("ij,j->ij", fitBS3[:,1:], all_data["lambdas3"][1:]**(-1))
+
+        plt.plot(
+            all_data["lambdas0"][1:],
+            np.average(fitBS0, axis=0),
+            label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq0']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_0}$",
+            color=_colors[0],
+            linestyle='--',
+            linewidth=1,
+            alpha=0.9,
+        )
+        plt.plot(
+            all_data["lambdas1"][1:],
+            np.average(fitBS1, axis=0),
+            # np.average(all_data["order1_fit"], axis=1),
+            label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq1']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_1}$",
+            color=_colors[1],
+            linestyle='--',
+            linewidth=1,
+            alpha=0.9,
+        )
+        plt.plot(
+            all_data["lambdas2"][1:],
+            np.average(fitBS2, axis=0),
+            # np.average(all_data["order2_fit"], axis=1),
+            label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq2']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_2}$",
+            color=_colors[2],
+            linewidth=1,
+            linestyle='--',
+            alpha=0.9,
+        )
+        plt.plot(
+            all_data["lambdas3"][1:],
+            np.average(fitBS3, axis=0),
+            # np.average(all_data["order3_fit"], axis=1),
+            label = rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_3}$",
+            color=_colors[3],
+            linewidth=1,
+            linestyle='--',
+            alpha=0.9,
+        )
+    plt.legend(fontsize="x-small")
+    # plt.ylim(0, 0.2)
+    # plt.ylim(-0.003, 0.035)
+    # plt.xlim(-0.01, 0.22)
+    # plt.xlim(-0.01, lambdas3[-1] * 1.1)
+    # plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
+
+    # plt.xlim(-0.01, 0.065)
+    plt.xlim(all_data["lambdas0"][0] * 0.9, all_data["lambdas0"][-1] * 1.1)
+    plt.ylim(0.5, 2)
+
+
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$\Delta E / \lambda$")
+    # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(plotdir / ("lambda_dep_divlmb.pdf"))
+
+    plt.close()
+    return
+
+
 def main():
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     plt.rc("text", usetex=True)
@@ -888,7 +1077,7 @@ def main():
     # scaled_z0 = (redchisq[0] - redchisq[0].min()) / redchisq[0].ptp()
     # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
 
-    plot_lmb_depR(all_data, plotdir)
+    # plot_lmb_depR(all_data, plotdir)
     # plot_lmb_dep2(all_data, plotdir)
 
     p0 = (1e-3, 0.7)
@@ -906,7 +1095,7 @@ def main():
     # lmb_range=np.arange(5,10)
     # lmb_range=np.arange(6,9)
 
-    plot_lmb_dep2(all_data, plotdir, lmb_range)
+    # plot_lmb_dep2(all_data, plotdir, lmb_range)
 
     # Fit to the lambda dependence at each order in lambda
     print("\n")
@@ -963,12 +1152,13 @@ def main():
 
     plot_lmb_dep(all_data, plotdir, fit_data)
     plot_lmb_depR(all_data, plotdir, fit_data)
+    plot_lmb_dep3(all_data, plotdir, fit_data)
 
     ### ----------------------------------------------------------------------
     # lmb_val = 0.06 #0.16
-    time_choice_range = np.arange(5, 10)
-    delta_t_range = np.arange(1, 4)
-    t_range = np.arange(4, 9)
+    # time_choice_range = np.arange(5, 10)
+    # delta_t_range = np.arange(1, 4)
+    # t_range = np.arange(4, 9)
 
     # with open(datadir / ("fit_data_time_choice"+str(time_choice_range[0])+"-"+str(time_choice_range[-1])+".pkl"), "rb") as file_in:
     with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "rb") as file_in:
@@ -1040,11 +1230,7 @@ def main():
     plt.savefig(plotdir / (f"time_choice_dep_l{lmb_val}.pdf"))
     plt.close()
 
-    # plt.show()
-
     # --------------------------------------------------------------------------------
-    # t0_choice = 0
-
     t0_choice = np.where(time_choice_range == config["time_choice"])[0][0]
     # t0_choice = config["time_choice"]
 
@@ -1105,7 +1291,6 @@ def main():
     plt.savefig(plotdir / (f"delta_t_dep_l{lmb_val}.pdf"))
     plt.close()
 
-    # plt.show()
 
 def main_loop():
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
