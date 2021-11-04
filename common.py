@@ -97,18 +97,7 @@ def fit_value2(diffG, t_range, function):
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     function.initparfnc(diffG, timeslice=8)
     fitparam = stats.fit_bootstrap(function.eval, function.initpar, t_range, data_set, bounds=None, time=False, fullcov=False)
-    # print(fitparam)
 
-    # popt_avg, pcov_avg = curve_fit(function.eval_2, t_range, diffG_avg, sigma=diag_sigma, p0=function.initpar)
-    # chisq = ff.chisqfn(
-    #     *popt_avg, function.eval_2, t_range, diffG_avg, np.linalg.inv(covmat)
-    # )
-    # redchisq = chisq / len(t_range)
-    # bootfit = []
-    # for iboot, values in enumerate(diffG):
-    #     popt, pcov = curve_fit(function.eval_2, t_range, values[t_range], sigma=diag_sigma, p0=function.initpar)
-    #     bootfit.append(popt)
-    # bootfit = np.array(bootfit)
     bootfit = fitparam["param"]
     return bootfit, fitparam["redchisq"]
 
@@ -122,15 +111,13 @@ def fit_value3(diffG, t_range, function, norm=1):
     diffG = diffG/norm
     data_set = diffG[:, t_range]
     diffG_avg = np.average(data_set, axis=0)
-    # print(f"diffG_avg = {diffG}")
     covmat = np.cov(data_set.T)
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     function.initparfnc(diffG, timeslice=7)
-    # print("initpar",function.initpar)
-    # fitparam = stats.fit_bootstrap(function.eval, function.initpar, t_range, data_set, bounds=None, time=False, fullcov=False)
-    # print(fitparam)
+    print('initpar = ', function.initpar)
+
     popt_avg, pcov_avg = curve_fit(function.eval_2, t_range, diffG_avg, sigma=diag_sigma, p0=function.initpar)
-    # print(f"popt_avg = {popt_avg}")
+
     chisq = ff.chisqfn2(
         popt_avg, function.eval_2, t_range, diffG_avg, np.linalg.inv(covmat)
     )
