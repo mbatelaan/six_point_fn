@@ -487,7 +487,7 @@ def plotting_script_summation(ratio, fitvals, redchisq, t_range, function, plotd
     plt.ylim(-0.2,25)
     plt.legend(fontsize="x-small")
     plt.savefig(plotdir / ("summation_method.pdf"))
-
+    
     if show:
         plt.show()
     plt.close()
@@ -495,6 +495,7 @@ def plotting_script_summation(ratio, fitvals, redchisq, t_range, function, plotd
 
 
 def main():
+    """ Fit and plot the ratio of the summed three-point function over the two-point function"""
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     plt.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})

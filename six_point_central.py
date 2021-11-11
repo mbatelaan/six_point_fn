@@ -18,6 +18,7 @@ from common import fit_value
 from common import fit_value3
 from common import read_correlators
 from common import read_correlators2
+from common import read_correlators3
 from common import make_matrices
 from common import gevp
 
@@ -648,7 +649,11 @@ def main():
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
     if "onlytwist" in config and config["onlytwist"]:
         G2_nucl, G2_sigm = read_correlators2(pars, pickledir_k1, pickledir_k2, mom_strings)
+    elif "qmax" in config and config["qmax"]:
+        G2_nucl, G2_sigm = read_correlators3(pars, pickledir_k1, pickledir_k2, mom_strings)
+        print("qmax")
     else:
+        print("else")
         G2_nucl, G2_sigm = read_correlators(pars, pickledir_k1, pickledir_k2, mom_strings)
 
     # lambdas = np.linspace(0.006,0.013,30)
