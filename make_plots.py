@@ -238,8 +238,8 @@ def plot_lmb_dep(all_data, plotdir, fit_data=None):
     # plt.ylim(0, 0.2)
     # plt.ylim(-0.003, 0.035)
     # plt.xlim(-0.01, 0.22)
-    plt.xlim(-0.01, all_data["lambdas1"][-1] * 1.1)
-    plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
+    plt.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
+    plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
 
     plt.xlabel("$\lambda$")
     plt.ylabel("$\Delta E$")
@@ -354,8 +354,8 @@ def plot_lmb_dep(all_data, plotdir, fit_data=None):
         # plt.ylim(0, 0.15)
         # plt.xlim(-0.001, 0.045)
         # plt.ylim(-0.003, 0.035)
-        plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
-        plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
+        plt.xlim(-0.01, all_data["lambdas3"][-1] * 1.1)
+        plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_fit.pdf"))
 
@@ -613,9 +613,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         # plt.xlim(-0.001, 0.045)
         # plt.ylim(-0.003, 0.035)
         # plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
-        plt.xlim(all_data["lambdas0"][0] * 0.9, all_data["lambdas0"][-1] * 1.1)
+        plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
         # plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
-        plt.ylim(np.average(all_data["order0_fit"], axis=1)[0] * 0.9, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
+        plt.ylim(np.average(all_data["order3_fit"], axis=1)[0] * 0.9, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
 
@@ -1050,7 +1050,7 @@ def main():
     delta_t = data["delta_t"]
 
     # Filter out data points with a high reduced chi-squared value
-    chisq_tol = 1.5  # 1.7
+    chisq_tol = 2  # 1.7
     order0_fit = order0_fit[np.where(redchisq[0] <= chisq_tol)]
     lambdas0 = lambdas[np.where(redchisq[0] <= chisq_tol)]
     order1_fit = order1_fit[np.where(redchisq[1] <= chisq_tol)]
