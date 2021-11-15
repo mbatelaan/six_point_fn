@@ -884,8 +884,18 @@ def plot_lmb_dep3(all_data, plotdir, fit_data=None):
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
-        plt.fill_between(np.array([-1,all_data["lambdas0"][lmb_range[0]]]), np.array([-10,-10]), np.array([10,10]), color='k', alpha=0.2, linewidth=0)
-        plt.fill_between(np.array([all_data["lambdas0"][lmb_range[-1]], 1]), np.array([-10,-10]), np.array([10,10]), color='k', alpha=0.2, linewidth=0)
+        lmb_range0 = fit_data["lmb_range0"]
+        lmb_range1 = fit_data["lmb_range1"]
+        lmb_range2 = fit_data["lmb_range2"]
+        lmb_range3 = fit_data["lmb_range3"]
+
+        # plt.fill_between(np.array([-1,all_data["lambdas0"][lmb_range[0]]]), np.array([-10,-10]), np.array([10,10]), color='k', alpha=0.2, linewidth=0)
+        # plt.fill_between(np.array([all_data["lambdas0"][lmb_range[-1]], 1]), np.array([-10,-10]), np.array([10,10]), color='k', alpha=0.2, linewidth=0)
+
+        plt.fill_between(np.array([all_data["lambdas0"][lmb_range0[0]], all_data["lambdas0"][lmb_range0[-1]]]), np.array([-10,-10]), np.array([10,10]), color=_colors[0], alpha=0.1, linewidth=0)
+        plt.fill_between(np.array([all_data["lambdas1"][lmb_range1[0]], all_data["lambdas1"][lmb_range1[-1]]]), np.array([-10,-10]), np.array([10,10]), color=_colors[1], alpha=0.1, linewidth=0)
+        plt.fill_between(np.array([all_data["lambdas2"][lmb_range2[0]], all_data["lambdas2"][lmb_range2[-1]]]), np.array([-10,-10]), np.array([10,10]), color=_colors[2], alpha=0.1, linewidth=0)
+        plt.fill_between(np.array([all_data["lambdas3"][lmb_range3[0]], all_data["lambdas3"][lmb_range3[-1]]]), np.array([-10,-10]), np.array([10,10]), color=_colors[3], alpha=0.1, linewidth=0)
 
         m_e_0 = err_brackets(
             np.average(fit_data["bootfit0"], axis=0)[1],
@@ -910,7 +920,6 @@ def plot_lmb_dep3(all_data, plotdir, fit_data=None):
                 for bf in fit_data["bootfit0"]
             ]
         )
-        print(f"shape fittBS0 = {np.shape(fitBS0)}")
         fitBS0 = np.einsum("ij,j->ij", fitBS0[:,1:], all_data["lambdas0"][1:]**(-1))
         fitBS1 = np.array(
             [
@@ -989,7 +998,7 @@ def plot_lmb_dep3(all_data, plotdir, fit_data=None):
     # plt.ylim(-0.005, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
 
     # plt.xlim(-0.01, 0.065)
-    plt.xlim(all_data["lambdas0"][0] * 0.9, all_data["lambdas0"][-1] * 1.1)
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
     plt.ylim(0.5, 2)
 
 
@@ -1083,25 +1092,16 @@ def main():
     p0 = (1e-3, 0.7)
     fitlim = 30
     lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
-    # lmb_range = np.arange(5, 11)
-    # lmb_range = np.arange(5, 10)
-    # lmb_range = np.arange(24, 29)
-    # lmb_range = np.arange(18, 24)
-    # lmb_range = np.arange(0, 9)
-    # lmb_range = np.arange(1, 22)
-    # lmb_range = np.arange(8, 13)
-    # lmb_range = np.arange(4, 14)
-    # lmb_range = np.arange(6, 11)
-    # lmb_range=np.arange(5,10)
-    # lmb_range=np.arange(6,9)
-
-    # plot_lmb_dep2(all_data, plotdir, lmb_range)
 
     # Fit to the lambda dependence at each order in lambda
     print("\n")
     try:
+        if lmb_range[-1] >= len(lambdas0):
+            lmb_range0 = np.arange(min(len(lambdas0)-5,lmb_range[0]), len(lambdas0))
+        else:
+            lmb_range0 = lmb_range
         bootfit0, redchisq0, chisq0 = fit_lmb(
-            order0_fit[lmb_range], fitfunction5, lambdas0[lmb_range], plotdir, p0=p0, order=1
+            order0_fit[lmb_range0], fitfunction5, lambdas0[lmb_range0], plotdir, p0=p0, order=1
         )
         print("redchisq order 1:", redchisq0)
         print("chisq order 1:", chisq0)
@@ -1109,22 +1109,41 @@ def main():
 
         p0 = np.average(bootfit0, axis=0)
 
+        print(lmb_range)
+        print(len(lambdas1))
+        if lmb_range[-1] >= len(lambdas1):
+            lmb_range1 = np.arange(min(len(lambdas1)-5,lmb_range[0]), len(lambdas1))
+        else:
+            lmb_range1 = lmb_range
+        print(lmb_range1)
         bootfit1, redchisq1, chisq1 = fit_lmb(
-            order1_fit[lmb_range], fitfunction5, lambdas1[lmb_range], plotdir, p0=p0, order=2
+            order1_fit[lmb_range1], fitfunction5, lambdas1[lmb_range1], plotdir, p0=p0, order=2
         )
         print("redchisq order 2:", redchisq1)
         print("chisq order 2:", chisq1)
         print("fit order 2:", np.average(bootfit1, axis=0), "\n")
 
+        print(lmb_range)
+        print(len(lambdas2))
+        if lmb_range[-1] >= len(lambdas2):
+            lmb_range2 = np.arange(min(len(lambdas2)-5,lmb_range[0]), len(lambdas2))
+        else:
+            lmb_range2 = lmb_range
+        print(lmb_range2)
+
         bootfit2, redchisq2, chisq2 = fit_lmb(
-            order2_fit[lmb_range], fitfunction5, lambdas2[lmb_range], plotdir, p0=p0, order=3
+            order2_fit[lmb_range2], fitfunction5, lambdas2[lmb_range2], plotdir, p0=p0, order=3
         )
         print("redchisq order 3:", redchisq2)
         print("chisq order 3:", chisq2)
         print("fit order 3:", np.average(bootfit2, axis=0), "\n")
 
+        if lmb_range[-1] >= len(lambdas3):
+            lmb_range3 = np.arange(min(len(lambdas3)-5,lmb_range[0]), len(lambdas3))
+        else:
+            lmb_range3 = lmb_range
         bootfit3, redchisq3, chisq3 = fit_lmb(
-            order3_fit[lmb_range], fitfunction5, lambdas3[lmb_range], plotdir, p0=p0, order=4
+            order3_fit[lmb_range3], fitfunction5, lambdas3[lmb_range3], plotdir, p0=p0, order=4
         )
         print("redchisq order 4:", redchisq3)
         print("chisq order 4:", chisq3)
@@ -1133,6 +1152,10 @@ def main():
 
         fit_data = {
             "lmb_range": lmb_range,
+            "lmb_range0": lmb_range0,
+            "lmb_range1": lmb_range1,
+            "lmb_range2": lmb_range2,
+            "lmb_range3": lmb_range3,
             "fitlim": fitlim,
             "bootfit0": bootfit0,
             "bootfit1": bootfit1,
@@ -1150,9 +1173,9 @@ def main():
         print("====================\nFitting Failed\n", e, "\n====================")
         fit_data = None
 
+    plot_lmb_dep3(all_data, plotdir, fit_data)
     plot_lmb_dep(all_data, plotdir, fit_data)
     plot_lmb_depR(all_data, plotdir, fit_data)
-    plot_lmb_dep3(all_data, plotdir, fit_data)
 
     ### ----------------------------------------------------------------------
     # lmb_val = 0.06 #0.16

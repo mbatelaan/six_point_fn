@@ -19,6 +19,7 @@ from common import fit_value3
 from common import read_correlators
 from common import read_correlators2
 from common import read_correlators3
+from common import read_correlators4
 from common import make_matrices
 from common import gevp
 
@@ -650,7 +651,7 @@ def main():
     if "onlytwist" in config and config["onlytwist"]:
         G2_nucl, G2_sigm = read_correlators2(pars, pickledir_k1, pickledir_k2, mom_strings)
     elif "qmax" in config and config["qmax"]:
-        G2_nucl, G2_sigm = read_correlators3(pars, pickledir_k1, pickledir_k2, mom_strings)
+        G2_nucl, G2_sigm = read_correlators4(pars, pickledir_k1, pickledir_k2, mom_strings)
         print("qmax")
     else:
         print("else")
@@ -659,7 +660,7 @@ def main():
     # lambdas = np.linspace(0.006,0.013,30)
     # lambdas = np.linspace(0.008,0.012,30)
     # lambdas = np.linspace(0.005,0.011,30)
-    lambdas = np.linspace(0,0.05,30)
+    lambdas = np.linspace(0,0.1,30)
     # lambdas = np.linspace(0,0.035,30)
     # lambdas = np.linspace(0,0.06,30)
     # lambdas = np.linspace(0,0.08,30)
@@ -673,7 +674,9 @@ def main():
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
-    plotting = True
+    plotting = config["plotting"]
+    time_loop = config["time_loop"]
+    # plotting = True
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))
@@ -714,7 +717,7 @@ def main():
         show=False,
     )
 
-    time_loop=False
+    # time_loop=False
     if time_loop:
         time_limits = [[1,20],[1,20]]
         fitlist = stats.fit_loop(ratio_unpert, aexp_function, time_limits, plot=False, disp=True, time=False, weights_=True)
@@ -727,7 +730,7 @@ def main():
         with open(datadir / (f"time_window_loop.pkl"), "wb") as file_out:
             pickle.dump(fitlist, file_out)
             
-        lmb_val = 0.03
+        lmb_val = 0.04
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
         )
