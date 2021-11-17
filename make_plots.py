@@ -438,9 +438,18 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
+        lmb_range0 = fit_data["lmb_range0"]
+        lmb_range1 = fit_data["lmb_range1"]
+        lmb_range2 = fit_data["lmb_range2"]
+        lmb_range3 = fit_data["lmb_range3"]
+
         print(lmb_range)
-        plt.fill_between(np.array([-1,all_data["lambdas0"][lmb_range[0]]]), np.array([-1,-1]), np.array([1,1]), color='k', alpha=0.2, linewidth=0)
-        plt.fill_between(np.array([all_data["lambdas0"][lmb_range[-1]], 1]), np.array([-1,-1]), np.array([1,1]), color='k', alpha=0.2, linewidth=0)
+        # plt.fill_between(np.array([-1,all_data["lambdas0"][lmb_range[0]]]), np.array([-1,-1]), np.array([1,1]), color='k', alpha=0.2, linewidth=0)
+        # plt.fill_between(np.array([all_data["lambdas0"][lmb_range[-1]], 1]), np.array([-1,-1]), np.array([1,1]), color='k', alpha=0.2, linewidth=0)
+        plt.fill_between(np.array([all_data["lambdas0"][lmb_range0[0]], all_data["lambdas0"][lmb_range0[-1]]]), np.array([-10,-10]), np.array([10,10]), color=_colors[0], alpha=0.1, linewidth=0)
+        plt.fill_between(np.array([all_data["lambdas1"][lmb_range1[0]], all_data["lambdas1"][lmb_range1[-1]]]), np.array([-10,-10]), np.array([10,10]), color=_colors[1], alpha=0.1, linewidth=0)
+        plt.fill_between(np.array([all_data["lambdas2"][lmb_range2[0]], all_data["lambdas2"][lmb_range2[-1]]]), np.array([-10,-10]), np.array([10,10]), color=_colors[2], alpha=0.1, linewidth=0)
+        plt.fill_between(np.array([all_data["lambdas3"][lmb_range3[0]], all_data["lambdas3"][lmb_range3[-1]]]), np.array([-10,-10]), np.array([10,10]), color=_colors[3], alpha=0.1, linewidth=0)
 
         m_e_0 = err_brackets(
             np.average(fit_data["bootfit0"], axis=0)[1],
@@ -1058,6 +1067,21 @@ def main():
     time_choice = data["time_choice"]
     delta_t = data["delta_t"]
 
+    all_data0 = {
+        "lambdas0": lambdas,
+        "lambdas1": lambdas,
+        "lambdas2": lambdas,
+        "lambdas3": lambdas,
+        "order0_fit": order0_fit,
+        "order1_fit": order1_fit,
+        "order2_fit": order2_fit,
+        "order3_fit": order3_fit,
+        "redchisq": redchisq,
+        "time_choice": time_choice,
+        "delta_t": delta_t,
+    }
+    plot_lmb_dep(all_data0, plotdir)
+
     # Filter out data points with a high reduced chi-squared value
     chisq_tol = 2  # 1.7
     order0_fit = order0_fit[np.where(redchisq[0] <= chisq_tol)]
@@ -1087,7 +1111,7 @@ def main():
     # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
 
     # plot_lmb_depR(all_data, plotdir)
-    # plot_lmb_dep2(all_data, plotdir)
+    # plot_lmb_dep(all_data, plotdir)
 
     p0 = (1e-3, 0.7)
     fitlim = 30
@@ -1174,8 +1198,8 @@ def main():
         fit_data = None
 
     plot_lmb_dep3(all_data, plotdir, fit_data)
-    plot_lmb_dep(all_data, plotdir, fit_data)
     plot_lmb_depR(all_data, plotdir, fit_data)
+    # plot_lmb_dep(all_data, plotdir, fit_data)
 
     ### ----------------------------------------------------------------------
     # lmb_val = 0.06 #0.16
