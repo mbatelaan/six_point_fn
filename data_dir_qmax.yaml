@@ -4,12 +4,12 @@ analysis_dir : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_
 qmax : True
 time_choice : 4
 delta_t : 2
-t_range0 : 5
+t_range0 : 6
 t_range1 : 12
 lmb_val : 0.04
 # lmb_init : 4
 # lmb_final : 7
-lmb_init : 14
-lmb_final : 24
-plotting : True
-time_loop : True
+lmb_init : 10
+lmb_final : 14
+plotting : False
+time_loop : False
