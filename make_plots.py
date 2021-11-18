@@ -59,7 +59,7 @@ def fitfunction4(lmb, E_nucl_p, E_sigma_p, matrix_element):
 
 
 def fitfunction5(lmb, Delta_E, matrix_element):
-    deltaE = 0.5 * np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
+    deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
     return deltaE
 
 
