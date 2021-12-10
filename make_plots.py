@@ -425,9 +425,11 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     # plt.ylim(-0.003, 0.035)
     # plt.xlim(-0.01, 0.22)
     # plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
-    plt.xlim(-0.01, 0.065)
+    # plt.xlim(-0.01, 0.065)
     # plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
-    plt.ylim(-0.005, 0.06)
+    # plt.ylim(-0.005, 0.06)
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.ylim( 0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
 
     plt.xlabel("$\lambda$")
     plt.ylabel("$\Delta E$")
@@ -624,7 +626,8 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         # plt.xlim(-0.01, all_data["lambdas0"][-1] * 1.1)
         plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
         # plt.ylim(-0.005, np.average(all_data["order0_fit"], axis=1)[-1] * 1.1)
-        plt.ylim(np.average(all_data["order3_fit"], axis=1)[0] * 0.9, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
+        # plt.ylim(np.average(all_data["order3_fit"], axis=1)[0] * 0.9, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
+        plt.ylim( 0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
 
@@ -1008,7 +1011,7 @@ def plot_lmb_dep3(all_data, plotdir, fit_data=None):
 
     # plt.xlim(-0.01, 0.065)
     plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
-    plt.ylim(0.5, 2)
+    plt.ylim(0, 3)
 
 
     plt.xlabel("$\lambda$")
@@ -1417,12 +1420,7 @@ def main_loop():
 
     p0 = (1e-3, 0.7)
     fitlim = 30
-    lmb_range = np.arange(1, 22)
-    # lmb_range = np.arange(4, 14)
-    # lmb_range = np.arange(6, 11)
-    # lmb_range=np.arange(5,10)
-    # lmb_range=np.arange(6,9)
-    plot_lmb_dep2(all_data, plotdir, lmb_range)
+    # plot_lmb_dep2(all_data, plotdir, lmb_range)
     
     # Fit to the lambda dependence at each order in lambda
     print("\n")

@@ -698,8 +698,6 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     eval_left, evec_left = np.linalg.eig(np.matmul(mat_1, np.linalg.inv(mat_0)).T)
     eval_right, evec_right = np.linalg.eig(np.matmul(np.linalg.inv(mat_0), mat_1))
 
-    # print("left:", eval_left, evec_left)
-    # print("right:", eval_right, evec_right)
     # Ordering of the eigenvalues
     if eval_left[0] > eval_left[1]:
         eval_left = eval_left.T[::-1].T

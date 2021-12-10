@@ -7,9 +7,12 @@ delta_t : 2
 t_range0 : 6
 t_range1 : 12
 lmb_val : 0.04
-# lmb_init : 4
-# lmb_final : 7
-lmb_init : 10
-lmb_final : 14
+lmb_i : 0
+lmb_f : 0.05
+lmb_init : 18
+lmb_final : 22
+# lmb_init : 10
+# lmb_final : 14
 plotting : False
 time_loop : False
+

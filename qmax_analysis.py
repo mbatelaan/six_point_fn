@@ -19,7 +19,6 @@ from common import fit_value3
 from common import read_correlators
 from common import read_correlators2
 from common import read_correlators3
-from common import read_correlators4
 from common import make_matrices
 from common import gevp
 
@@ -42,6 +41,39 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 # From the theta tuning:
 m_N = 0.4179255
 m_S = 0.4641829
+
+def plot_eff_correlators(corrs, plotdir, name="", show=False):
+    spacing = 2
+    xlim = 16
+    time = np.arange(0, np.shape(corrs[0])[1])
+
+    f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
+    for i, corr in enumerate(corrs):
+        eff_corr = stats.bs_effmass(corr[:,:,0], time_axis=1, spacing=1) 
+        yavg = np.average(eff_corr, axis=0)
+        ystd = np.std(eff_corr, axis=0)
+        axs.errorbar(
+            time[:xlim],
+            yavg[:xlim],
+            ystd[:xlim],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[i],
+            fmt="s",
+            markerfacecolor="none",
+            # label=r"$G_{NN}(t),\ \mathcal{O}(\lambda^0)$",
+        )
+    plt.legend(fontsize="xx-small")
+    # plt.ylabel(r"$G_{nn}(t;\vec{p}=(1,0,0))$")
+    # plt.title("$\lambda=0.04$")
+    # plt.title("$\lambda=" + str(lmb_val) + "$")
+    # plt.xlabel(r"$\textrm{t/a}$")
+    plt.xlabel(r"$t/a$")
+    plt.savefig(plotdir / ("eff_corr_comp_" + name + ".pdf"))
+    if show:
+        plt.show()
+    plt.close()
+    return
 
 
 def plotting_script_all(
@@ -333,7 +365,7 @@ def plotting_script_unpert(
     correlator1, correlator2, ratio, fitvals1, fitvals2, fitvals, t_range12, t_range, plotdir, name="", show=False
 ):
     spacing = 2
-    xlim = 20
+    xlim = 25
     time = np.arange(0, np.shape(correlator1)[1])
     efftime = time[:-spacing] + 0.5
     correlator1 = stats.bs_effmass(correlator1, time_axis=1, spacing=1) 
@@ -360,10 +392,10 @@ def plotting_script_unpert(
         fmt="s",
         markerfacecolor="none",
     )
-    plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})]$")
+    plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})]$")
     plt.xlabel(r"$t/a$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    plt.ylim(-0.2,0.4)
+    plt.ylim(-0.1,0)
     plt.savefig(plotdir / ("unpert_effmass.pdf"))
 
 
@@ -398,7 +430,7 @@ def plotting_script_unpert(
         np.average(fitvals1) + np.std(fitvals1),
         alpha=0.3,
         color=_colors[0],
-        label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
+        label=rf"$E_N(\mathbf{{0}})$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
     )
     axs[0].plot(t_range12, len(t_range12) * [np.average(fitvals2)], color=_colors[1])
     axs[0].fill_between(
@@ -436,8 +468,9 @@ def plotting_script_unpert(
     # axs[0].axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
     plt.setp(axs, xlim=(0, xlim))
+    plt.setp(axs, ylim=(0, 2))
     axs[0].set_ylabel(r"$\textrm{Effective energy}$")
-    axs[1].set_ylabel(r"$G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})$")
+    axs[1].set_ylabel(r"$G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})$")
     plt.xlabel("$t/a$")
     axs[1].legend(fontsize="x-small")
     # plt.title("$\lambda=" + str(lmb_val) + "$")
@@ -509,8 +542,124 @@ def plot_lmb_dep(all_data, plotdir):
     plt.savefig(plotdir / ("lambda_dep.pdf"))
     # plt.show()
 
+
+def plot_lmb_dep_fit(all_data, fit_data, fitfunction, plotdir):
+    """Make a plot of the lambda dependence of the energy shift"""
+    plt.figure(figsize=(6, 6))
+    plt.errorbar(
+        all_data["lambdas"],
+        np.average(all_data["order0_fit"], axis=1),
+        np.std(all_data["order0_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        all_data["lambdas"] + 0.0001,
+        np.average(all_data["order1_fit"], axis=1),
+        np.std(all_data["order1_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        all_data["lambdas"]+ 0.0002,
+        np.average(all_data["order2_fit"], axis=1),
+        np.std(all_data["order2_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        all_data["lambdas"] +0.0003,
+        np.average(all_data["order3_fit"], axis=1),
+        np.std(all_data["order3_fit"], axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    params = np.average(fit_data, axis=0)
+    fit_ydata = fitfunction(lambdas, *params)
+    print(fit_ydata)
+    plt.plot(lambdas, fit_ydata, color="k")
+    # axs.fill_between(
+    #     t_range,
+    #     np.average(fitvals[1]) - np.std(fitvals[1]),
+    #     np.average(fitvals[1]) + np.std(fitvals[1]),
+    #     alpha=0.3,
+    #     color=_colors[1],
+    # )
+
+    plt.legend(fontsize="x-small")
+    plt.xlim(-0.01, 0.22)
+    plt.ylim(0, 0.2)
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$\Delta E$")
+    plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.savefig(plotdir / ("lambda_dep_fit.pdf"))
+    # plt.show()
+
+
+def fitfunction(lmb, pars):
+    deltaE = 0.5 * (pars[0] + pars[1]) - 0.5 * np.sqrt(
+        (pars[0] - pars[1]) ** 2 + 4 * lmb ** 2 * pars[2] ** 2
+    )
+    return deltaE
+
+
+def fitfunction2(lmb, pars0, pars1, pars2):
+    deltaE = 0.5 * (pars0 + pars1) - 0.5 * np.sqrt(
+        (pars0 - pars1) ** 2 + 4 * lmb ** 2 * pars2 ** 2
+    )
+    return deltaE
+
+
+def fit_lmb(ydata, function, lambdas):
+    """Fit the lambda dependence
+
+    data is a correlator with tht bootstraps on the first index and the time on the second
+    lambdas is an array of time values to fit over
+    the function will return an array of fit parameters for each bootstrap
+    """
+    # order0_fit[i] = bootfit1[:, 0]
+    ydata = ydata.T
+    data_set = ydata
+    ydata_avg = np.average(data_set, axis=0)
+    print(ydata_avg)
+    print(lambdas)
+    covmat = np.cov(data_set.T)
+    diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
+    popt_avg, pcov_avg = curve_fit(
+        function, lambdas, ydata_avg, sigma=covmat, maxfev=2000
+    )
+    chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, np.linalg.inv(covmat))
+    redchisq = chisq / len(lambdas)
+    bootfit = []
+    for iboot, values in enumerate(ydata):
+        popt, pcov = curve_fit(function, lambdas, values, sigma=covmat, maxfev=2000)
+        bootfit.append(popt)
+    bootfit = np.array(bootfit)
+
+    return bootfit, redchisq
+
+
 def main():
-    """ Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
+    """ Script to look at the energy differences between the states to make sure the calculation worked correctly"""
+
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     plt.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})
@@ -525,13 +674,6 @@ def main():
     print("Reading directories from: ", config_file)
     with open(config_file) as f:
         config = yaml.safe_load(f)
-
-    # Set things to defaults defined in another YAML file
-    with open("defaults.yaml") as f:
-        defaults = yaml.safe_load(f)
-    for key, value in defaults.items():
-        config.setdefault(key, value)
-            
     pickledir_k1 = Path(config["pickle_dir1"])
     pickledir_k2 = Path(config["pickle_dir2"])
     plotdir = Path(config["analysis_dir"]) / Path("plots")
@@ -541,65 +683,31 @@ def main():
 
     # Read the correlator data from the pickle files
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
-    if "onlytwist" in config and config["onlytwist"]:
-        G2_nucl, G2_sigm = read_correlators2(pars, pickledir_k1, pickledir_k2, mom_strings)
-    elif "qmax" in config and config["qmax"]:
-        G2_nucl, G2_sigm = read_correlators4(pars, pickledir_k1, pickledir_k2, mom_strings)
-        print("qmax")
-    else:
-        print("else")
-        G2_nucl, G2_sigm = read_correlators(pars, pickledir_k1, pickledir_k2, mom_strings)
+    G2_nucl, G2_sigm = read_correlators3(pars, pickledir_k1, pickledir_k2, mom_strings)
 
-    # lambdas = np.linspace(0.006,0.013,30)
-    # lambdas = np.linspace(0.008,0.012,30)
-    # lambdas = np.linspace(0.005,0.011,30)
-    # lambdas = np.linspace(0,0.1,30)
-    # lambdas = np.linspace(0,0.035,30)
-    # lambdas = np.linspace(0,0.06,30)
-    # lambdas = np.linspace(0,0.08,30)
-    # lambdas = np.linspace(0.12,0.16,20)
-    # lambdas = np.linspace(0,0.16,10)[1:]
-    # lambdas = np.linspace(0,0.06,30)
-    # lambdas = np.linspace(0,0.02,30)
-    # lambdas = np.linspace(0,0.007,30)
-    # lambdas = np.linspace(0, 0.16, 30)  # [1:]
-    # lambdas = np.linspace(0,0.16,10) #[1:]
-    lambdas = np.linspace(config["lmb_i"], config["lmb_f"],30)
-    t_range = np.arange(config["t_range0"], config["t_range1"])
-    time_choice = config["time_choice"]
-    delta_t = config["delta_t"]
-    plotting = config["plotting"]
-    time_loop = config["time_loop"]
-    # plotting = True
+    # if "onlytwist" in config and config["onlytwist"]:
+    #     G2_nucl, G2_sigm = read_correlators2(pars, pickledir_k1, pickledir_k2, mom_strings)
+    # elif "qmax" in config and config["qmax"]:
+    #     G2_nucl, G2_sigm = read_correlators3(pars, pickledir_k1, pickledir_k2, mom_strings)
+    #     print("qmax")
+    # else:
+    #     print("else")
+    #     G2_nucl, G2_sigm = read_correlators(pars, pickledir_k1, pickledir_k2, mom_strings)
 
-    order0_fit = np.zeros((len(lambdas), pars.nboot))
-    order1_fit = np.zeros((len(lambdas), pars.nboot))
-    order2_fit = np.zeros((len(lambdas), pars.nboot))
-    order3_fit = np.zeros((len(lambdas), pars.nboot))
-    red_chisq_list = np.zeros((4, len(lambdas)))
-    
     aexp_function = ff.initffncs("Aexp")
-    # aexp_eval = aexp_function.eval
-    print(aexp_function.label)
 
     # Fit to the energy gap
-    # fit_range = np.arange(5,14)
-    fit_range = np.arange(7,17)
-    fit_range12 = np.arange(7,17)
-    ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:,:,0]
-    bootfit1, redchisq1 = fit_value3(G2_nucl[0][:,:,0], fit_range12, aexp_function, norm=1)
-    bootfit2, redchisq2 = fit_value3(G2_sigm[0][:,:,0], fit_range12, aexp_function, norm=1)
+    fit_range = np.arange(5,17)
+    fit_range12 = np.arange(8,22)
+    ratio_unpert = G2_nucl[1][:, :, 0] / G2_sigm[1][:,:,0]
+    bootfit1, redchisq1 = fit_value3(G2_nucl[1][:,:,0], fit_range12, aexp_function, norm=1)
+    bootfit2, redchisq2 = fit_value3(G2_sigm[1][:,:,0], fit_range12, aexp_function, norm=1)
     bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, fit_range)
-    # print(f"redchisq = {redchisq_ratio}")
-    # print(f"fit = {np.average(bootfit1,axis=0)}")
-    # print(f"fit = {np.average(bootfit2,axis=0)}")
-    # print(f"fit = {np.average(bootfit_ratio,axis=0)}")
     diff = bootfit1[:,1]-bootfit2[:,1]
-    # print(f"diff = {np.average(diff,axis=0)}")
-    # print(f"diff = {err_brackets(np.average(diff),np.std(diff))}")
+
     plotting_script_unpert(
-        G2_nucl[0][:, :, 0],
-        G2_sigm[0][:,:,0],
+        G2_nucl[1][:, :, 0],
+        G2_sigm[1][:,:,0],
         ratio_unpert,
         bootfit1[:, 1],
         bootfit2[:, 1],
@@ -611,7 +719,12 @@ def main():
         show=False,
     )
 
-    # time_loop=False
+    plot_eff_correlators(G2_nucl, plotdir, name="nucl", show=False)
+    plot_eff_correlators(G2_sigm, plotdir, name="sigma", show=False)
+
+    exit()
+
+    time_loop=False
     if time_loop:
         time_limits = [[1,20],[1,20]]
         fitlist = stats.fit_loop(ratio_unpert, aexp_function, time_limits, plot=False, disp=True, time=False, weights_=True)
@@ -624,7 +737,7 @@ def main():
         with open(datadir / (f"time_window_loop.pkl"), "wb") as file_out:
             pickle.dump(fitlist, file_out)
             
-        lmb_val = 0.04
+        lmb_val = 0.03
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
         )
@@ -650,7 +763,7 @@ def main():
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) 
         bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function, norm=1)
-        order0_fit[i] = bootfit1[:, 1] # /2
+        order0_fit[i] = bootfit1[:, 1]/2
         red_chisq_list[0, i] = redchisq1
         print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
         print(f"redchisq1 = {redchisq1}")
@@ -661,7 +774,7 @@ def main():
         ratio2 = Gt1_2 / Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) 
         bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function, norm=1)
-        order1_fit[i] = bootfit2[:, 1] # /2
+        order1_fit[i] = bootfit2[:, 1]/2
         red_chisq_list[1, i] = redchisq2
         print(f"redchisq2 = {redchisq2}")
 
@@ -671,7 +784,7 @@ def main():
         ratio3 = Gt1_3 / Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) 
         bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
-        order2_fit[i] = bootfit3[:, 1] # /2
+        order2_fit[i] = bootfit3[:, 1]/2
         red_chisq_list[2, i] = redchisq3
         print(f"redchisq3 = {redchisq3}")
 
@@ -681,7 +794,7 @@ def main():
         ratio4 = Gt1_4 / Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) 
         bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
-        order3_fit[i] = bootfit4[:, 1] # /2
+        order3_fit[i] = bootfit4[:, 1]/2
         red_chisq_list[3, i] = redchisq4
         print(f"redchisq4 = {redchisq4}")
 
@@ -737,6 +850,71 @@ def main():
         "wb",
     ) as file_out:
         pickle.dump(all_data, file_out)
+
+    # bootfit, redchisq = fit_lmb(order0_fit, fitfunction2, lambdas)
+    # print(bootfit)
+    # print(redchisq)
+
+    # ----------------------------------------------------------------------
+    # Make a plot of the lambda dependence of the energy shift
+    # plot_lmb_dep(all_data, plotdir)
+    # plot_lmb_dep_fit(all_data, bootfit, fitfunction2)
+
+    # plt.figure(figsize=(6, 6))
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(order0_fit, axis=1),
+    #     np.std(order0_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^1)$",
+    #     color=_colors[0],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas+0.001,
+    #     np.average(order1_fit, axis=1),
+    #     np.std(order1_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^2)$",
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas+0.002,
+    #     np.average(order2_fit, axis=1),
+    #     np.std(order2_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^3)$",
+    #     color=_colors[2],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas+0.003,
+    #     np.average(order3_fit, axis=1),
+    #     np.std(order3_fit, axis=1),
+    #     fmt="s",
+    #     label=r"$\mathcal{O}(\lambda^4)$",
+    #     color=_colors[3],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.legend(fontsize="x-small")
+    # plt.xlim(-0.01, 0.22)
+    # plt.ylim(0, 0.2)
+    # plt.xlabel("$\lambda$")
+    # plt.ylabel("$\Delta E$")
+    # plt.title(rf"$t_{{0}}={time_choice}, \Delta t={delta_t}$")
+    # plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    # plt.savefig(plotdir / ("lambda_dep.pdf"))
+    # # plt.show()
+
 
 if __name__ == "__main__":
     main()

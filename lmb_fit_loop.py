@@ -746,6 +746,7 @@ def plot_lmb_dep2(all_data, plotdir, lmb_range=None):
 
 
 def main_loop():
+    """ Fit to the lambda dependence of the energy shift and loop over the fit windows """
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     plt.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})
