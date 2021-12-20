@@ -843,22 +843,23 @@ def main_loop():
             lmb_range = np.arange(lmb_initial, lmb_final)
             print(f'lmb_range = {lmb_range}')
             try:
-                # bootfit0, redchisq0, chisq0 = fit_lmb(
-                #     order0_fit[lmb_range], fitfunction5, lambdas0[lmb_range], plotdir, p0=p0, order=1
-                # )
-                # p0 = np.average(bootfit0, axis=0)
-                
-                # bootfit1, redchisq1, chisq1 = fit_lmb(
-                #     order1_fit[lmb_range], fitfunction5, lambdas1[lmb_range], plotdir, p0=p0, order=2
-                # )
-                
-                # bootfit2, redchisq2, chisq2 = fit_lmb(
-                #     order2_fit[lmb_range], fitfunction5, lambdas2[lmb_range], plotdir, p0=p0, order=3
-                # )
-                
-                bootfit3, redchisq3, chisq3 = fit_lmb(
-                    order3_fit[lmb_range], fitfunction5, lambdas3[lmb_range], plotdir, p0=p0, order=4, svd_inv = False
-                )
+                # if lmb_range[-1] < len(lambdas0):
+                #     bootfit0, redchisq0, chisq0 = fit_lmb(
+                #         order0_fit[lmb_range], fitfunction5, lambdas0[lmb_range], plotdir, p0=p0, order=1, svd_inv = False
+                #     )
+                #     p0 = np.average(bootfit0, axis=0)
+                # if lmb_range[-1] < len(lambdas1):
+                #     bootfit1, redchisq1, chisq1 = fit_lmb(
+                #         order1_fit[lmb_range], fitfunction5, lambdas1[lmb_range], plotdir, p0=p0, order=2, svd_inv = False
+                #     )
+                # if lmb_range[-1] < len(lambdas2):
+                #     bootfit2, redchisq2, chisq2 = fit_lmb(
+                #         order2_fit[lmb_range], fitfunction5, lambdas2[lmb_range], plotdir, p0=p0, order=3, svd_inv = False
+                #     )
+                if lmb_range[-1] < len(lambdas3):
+                    bootfit3, redchisq3, chisq3 = fit_lmb(
+                        order3_fit[lmb_range], fitfunction5, lambdas3[lmb_range], plotdir, p0=p0, order=4, svd_inv = False
+                    )
                 print("redchisq order 4:", redchisq3)
                 
                 fit_data = {
@@ -869,6 +870,10 @@ def main_loop():
                     # "bootfit2": bootfit2,
                     "bootfit3": bootfit3,
                     "lambdas3": lambdas3[lmb_range],
+                    # "chisq0": chisq0,
+                    # "chisq1": chisq1,
+                    # "chisq2": chisq2,
+                    "chisq3": chisq3,
                     # "redchisq0": redchisq0,
                     # "redchisq1": redchisq1,
                     # "redchisq2": redchisq2,

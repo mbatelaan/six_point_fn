@@ -330,7 +330,7 @@ def plotting_script_diff_2(
     return
 
 def plotting_script_unpert(
-    correlator1, correlator2, ratio, fitvals1, fitvals2, fitvals, t_range12, t_range, plotdir, name="", show=False
+    correlator1, correlator2, ratio, fitvals1, fitvals2, fitvals, fitvals_effratio, t_range12, t_range, plotdir, name="", show=False
 ):
     spacing = 2
     xlim = 20
@@ -360,10 +360,33 @@ def plotting_script_unpert(
         fmt="s",
         markerfacecolor="none",
     )
-    plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})]$")
+
+    # plt.plot(t_range12, len(t_range12) * [np.average(fitvals1 -fitvals2)], color=_colors[0])
+    # plt.fill_between(
+    #     t_range12,
+    #     np.average(fitvals1 -fitvals2) - np.std(fitvals1 -fitvals2),
+    #     np.average(fitvals1 -fitvals2) + np.std(fitvals1 -fitvals2),
+    #     alpha=0.3,
+    #     color=_colors[0],
+    #     label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1 -fitvals2),np.std(fitvals1 -fitvals2))}",
+    # )
+    plt.plot(t_range12, len(t_range12) * [np.average(fitvals_effratio)], color=_colors[0])
+    plt.fill_between(
+        t_range12,
+        np.average(fitvals_effratio) - np.std(fitvals_effratio),
+        np.average(fitvals_effratio) + np.std(fitvals_effratio),
+        alpha=0.3,
+        color=_colors[0],
+        # label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals_effratio),np.std(fitvals_effratio))}",
+        label=rf"$\Delta E(\lambda=0)$ = {err_brackets(np.average(fitvals_effratio),np.std(fitvals_effratio))}",
+    )
+
+    plt.legend(fontsize='x-small')
+    # plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})]$")
+    plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})]$")
     plt.xlabel(r"$t/a$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    plt.ylim(-0.2,0.4)
+    plt.ylim(-0.1,0)
     plt.savefig(plotdir / ("unpert_effmass.pdf"))
 
 
@@ -398,7 +421,8 @@ def plotting_script_unpert(
         np.average(fitvals1) + np.std(fitvals1),
         alpha=0.3,
         color=_colors[0],
-        label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
+        # label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
+        label=rf"$E_N(\mathbf{{0}})$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
     )
     axs[0].plot(t_range12, len(t_range12) * [np.average(fitvals2)], color=_colors[1])
     axs[0].fill_between(
@@ -437,7 +461,8 @@ def plotting_script_unpert(
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
     plt.setp(axs, xlim=(0, xlim))
     axs[0].set_ylabel(r"$\textrm{Effective energy}$")
-    axs[1].set_ylabel(r"$G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})$")
+    # axs[1].set_ylabel(r"$G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})$")
+    axs[1].set_ylabel(r"$G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})$")
     plt.xlabel("$t/a$")
     axs[1].legend(fontsize="x-small")
     # plt.title("$\lambda=" + str(lmb_val) + "$")
@@ -584,12 +609,15 @@ def main():
 
     # Fit to the energy gap
     # fit_range = np.arange(5,14)
-    fit_range = np.arange(7,17)
-    fit_range12 = np.arange(7,17)
+    # fit_range = np.arange(7,17)
+    # fit_range12 = np.arange(7,17)
+    fit_range = t_range
+    fit_range12 = t_range
     ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:,:,0]
     bootfit1, redchisq1 = fit_value3(G2_nucl[0][:,:,0], fit_range12, aexp_function, norm=1)
     bootfit2, redchisq2 = fit_value3(G2_sigm[0][:,:,0], fit_range12, aexp_function, norm=1)
     bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, fit_range)
+    bootfit_effratio, redchisq_effratio = fit_value3(ratio_unpert, fit_range12, aexp_function, norm=1)
     # print(f"redchisq = {redchisq_ratio}")
     # print(f"fit = {np.average(bootfit1,axis=0)}")
     # print(f"fit = {np.average(bootfit2,axis=0)}")
@@ -604,6 +632,7 @@ def main():
         bootfit1[:, 1],
         bootfit2[:, 1],
         bootfit_ratio[:, 0],
+        bootfit_effratio[:, 1],
         fit_range12,
         fit_range,
         plotdir, 
@@ -614,7 +643,7 @@ def main():
     # time_loop=False
     if time_loop:
         time_limits = [[1,20],[1,20]]
-        fitlist = stats.fit_loop(ratio_unpert, aexp_function, time_limits, plot=False, disp=True, time=False, weights_=True)
+        fitlist = stats.fit_loop_bayes(ratio_unpert, aexp_function, time_limits, plot=False, disp=True, time=False, weights_=True)
         print(fitlist[0]["redchisq"])
         print([i["x"] for i in fitlist])
         print([i["chisq"] for i in fitlist])
