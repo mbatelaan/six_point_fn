@@ -1,0 +1,13 @@
+pickle_dir1 : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta3/kappa1/pickle/
+pickle_dir2 : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta3/kappa2/pickle/
+analysis_dir : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta3/analysis/
+qmax : True
+time_choice : 4
+delta_t : 2
+t_range0 : 5
+t_range1 : 17
+lmb_val : 0.04
+lmb_i : 0
+lmb_f : 0.05
+lmb_init : 5
+lmb_final : 11
