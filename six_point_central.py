@@ -20,6 +20,7 @@ from common import read_correlators
 from common import read_correlators2
 from common import read_correlators3
 from common import read_correlators4
+from common import read_correlators5
 from common import make_matrices
 from common import gevp
 
@@ -333,7 +334,7 @@ def plotting_script_unpert(
     correlator1, correlator2, ratio, fitvals1, fitvals2, fitvals, fitvals_effratio, t_range12, t_range, plotdir, name="", show=False
 ):
     spacing = 2
-    xlim = 20
+    xlim = 25
     time = np.arange(0, np.shape(correlator1)[1])
     efftime = time[:-spacing] + 0.5
     correlator1 = stats.bs_effmass(correlator1, time_axis=1, spacing=1) 
@@ -459,7 +460,7 @@ def plotting_script_unpert(
 
     # axs[0].axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
-    plt.setp(axs, xlim=(0, xlim))
+    plt.setp(axs, xlim=(0, xlim),ylim=(0,2))
     axs[0].set_ylabel(r"$\textrm{Effective energy}$")
     # axs[1].set_ylabel(r"$G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})$")
     axs[1].set_ylabel(r"$G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})$")
@@ -534,7 +535,7 @@ def plot_lmb_dep(all_data, plotdir):
     plt.savefig(plotdir / ("lambda_dep.pdf"))
     # plt.show()
 
-def main
+def main():
     """ Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     plt.rc("text", usetex=True)
@@ -571,6 +572,9 @@ def main
     elif "qmax" in config and config["qmax"]:
         G2_nucl, G2_sigm = read_correlators4(pars, pickledir_k1, pickledir_k2, mom_strings)
         print("qmax")
+    elif "onlytwist2" in config and config["onlytwist2"]:
+        G2_nucl, G2_sigm = read_correlators5(pars, pickledir_k1, pickledir_k2, mom_strings)
+        print("onlytwist2\n\n")
     else:
         print("else")
         G2_nucl, G2_sigm = read_correlators(pars, pickledir_k1, pickledir_k2, mom_strings)
@@ -589,7 +593,7 @@ def main
     # lambdas = np.linspace(0,0.007,30)
     # lambdas = np.linspace(0, 0.16, 30)  # [1:]
     # lambdas = np.linspace(0,0.16,10) #[1:]
-    lambdas = np.linspace(config["lmb_i"], config["lmb_f"],30)
+    lambdas = np.linspace(config["lmb_i"], config["lmb_f"],15) # Changed to 10 from 30 for speed
     
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
@@ -664,6 +668,12 @@ def main
     order2_fit = np.zeros((len(lambdas), pars.nboot))
     order3_fit = np.zeros((len(lambdas), pars.nboot))
     red_chisq_list = np.zeros((4, len(lambdas)))
+
+    order0_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
+    order1_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
+    order2_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
+    order3_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
+
     
     for i, lmb_val in enumerate(lambdas):
         print(f"Lambda = {lmb_val}\n")
@@ -678,6 +688,10 @@ def main
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) 
         bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function, norm=1)
+        bootfit_state1, redchisq_1 = fit_value3(Gt1_1, t_range, aexp_function, norm=1)
+        bootfit_state2, redchisq_2 = fit_value3(Gt2_1, t_range, aexp_function, norm=1)
+        order0_states_fit[i,0] = bootfit_state1
+        order0_states_fit[i,1] = bootfit_state2
         order0_fit[i] = bootfit1[:, 1] # /2
         red_chisq_list[0, i] = redchisq1
         print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
@@ -689,6 +703,10 @@ def main
         ratio2 = Gt1_2 / Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) 
         bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function, norm=1)
+        bootfit_state1, redchisq_1 = fit_value3(Gt1_2, t_range, aexp_function, norm=1)
+        bootfit_state2, redchisq_2 = fit_value3(Gt2_2, t_range, aexp_function, norm=1)
+        order1_states_fit[i,0] = bootfit_state1
+        order1_states_fit[i,1] = bootfit_state2
         order1_fit[i] = bootfit2[:, 1] # /2
         red_chisq_list[1, i] = redchisq2
         print(f"redchisq2 = {redchisq2}")
@@ -699,6 +717,11 @@ def main
         ratio3 = Gt1_3 / Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) 
         bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
+        bootfit_state1, redchisq_1 = fit_value3(Gt1_3, t_range, aexp_function, norm=1)
+        bootfit_state2, redchisq_2 = fit_value3(Gt2_3, t_range, aexp_function, norm=1)
+        order2_states_fit[i,0] = bootfit_state1
+        order2_states_fit[i,1] = bootfit_state2
+
         order2_fit[i] = bootfit3[:, 1] # /2
         red_chisq_list[2, i] = redchisq3
         print(f"redchisq3 = {redchisq3}")
@@ -709,6 +732,11 @@ def main
         ratio4 = Gt1_4 / Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) 
         bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
+        bootfit_state1, redchisq_1 = fit_value3(Gt1_4, t_range, aexp_function, norm=1)
+        bootfit_state2, redchisq_2 = fit_value3(Gt2_4, t_range, aexp_function, norm=1)
+        order3_states_fit[i,0] = bootfit_state1
+        order3_states_fit[i,1] = bootfit_state2
+
         order3_fit[i] = bootfit4[:, 1] # /2
         red_chisq_list[3, i] = redchisq4
         print(f"redchisq4 = {redchisq4}")
@@ -755,6 +783,10 @@ def main
         "order1_fit": order1_fit,
         "order2_fit": order2_fit,
         "order3_fit": order3_fit,
+        "order0_states_fit": order0_states_fit,
+        "order1_states_fit": order1_states_fit,
+        "order2_states_fit": order2_states_fit,
+        "order3_states_fit": order3_states_fit,
         "redchisq": red_chisq_list,
         "time_choice": time_choice,
         "delta_t": delta_t,

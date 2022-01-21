@@ -152,6 +152,7 @@ def read_correlators(pars, pickledir, pickledir2, mom_strings):
     print(conf_num_list)
     # conf_num_list = [100] # hard code a choice
     conf_num = conf_num_list[np.argmax(conf_num_list)]
+    print("conf_num:", conf_num)
     barspec_name = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
 
     ### ----------------------------------------------------------------------
@@ -566,6 +567,149 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     G2_nucl.append(G2_unpert_qp100_nucl)
     G2_sigm.append(G2_unpert_q000_sigma)
     
+
+    ### ----------------------------------------------------------------------
+    ### SU & SS
+    filelist_SU1 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    filelist_SU3 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    filelist_SS2 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    filelist_SS4 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+
+    G2_q100_SU_lmb = read_pickle(filelist_SU1, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q000_SS_lmb2 = read_pickle(filelist_SS2, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q100_SU_lmb3 = read_pickle(filelist_SU3, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q000_SS_lmb4 = read_pickle(filelist_SS4, nboot=pars.nboot, nbin=pars.nbin)
+    G2_sigm.append(G2_q100_SU_lmb)
+    G2_sigm.append(G2_q000_SS_lmb2)
+    G2_sigm.append(G2_q100_SU_lmb3)
+    G2_sigm.append(G2_q000_SS_lmb4)
+
+    ### ----------------------------------------------------------------------
+    ### US & UU
+    filelist_US1 = pickledir / Path(
+        "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    filelist_UU2 = pickledir / Path(
+        "baryon-3pt_UU_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    filelist_US3 = pickledir / Path(
+        "baryon-3pt_US_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    filelist_UU4 = pickledir / Path(
+        "baryon-3pt_UU_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+
+    G2_q000_US_lmb = read_pickle(filelist_US1, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q100_UU_lmb2 = read_pickle(filelist_UU2, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q000_US_lmb3 = read_pickle(filelist_US3, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q100_UU_lmb4 = read_pickle(filelist_UU4, nboot=pars.nboot, nbin=pars.nbin)
+    G2_nucl.append(G2_q000_US_lmb)
+    G2_nucl.append(G2_q100_UU_lmb2)
+    G2_nucl.append(G2_q000_US_lmb3)
+    G2_nucl.append(G2_q100_UU_lmb4)
+
+    return G2_nucl, G2_sigm
+
+def read_correlators5(pars, pickledir, pickledir2, mom_strings):
+    """Read the pickle files which contain the correlator data
+
+    The script will check the folders for available files and pick out the files with the highest number of configurations.
+    """
+    ### ----------------------------------------------------------------------
+    ### find the highest number of configurations available
+    ### Unperturbed correlators
+    fileup = (
+        pickledir
+        / Path(
+            "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+            + mom_strings[1]
+        )
+    ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
+    conf_num_list = np.array(
+        [int("".join(filter(str.isdigit, l.name))) for l in list(fileup)]
+    )
+    conf_num = conf_num_list[np.argmax(conf_num_list)]
+    print("conf_numU:", conf_num)
+    barspec_nameU = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
+
+    filestrange = (
+        pickledir2
+        / Path(
+            "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+            + mom_strings[1]
+        )
+    ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
+    conf_num_list = np.array(
+        [int("".join(filter(str.isdigit, l.name))) for l in list(filestrange)]
+    )
+    conf_num = conf_num_list[np.argmax(conf_num_list)]
+    print("conf_numS:", conf_num)
+    barspec_nameS = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
+
+    # files = (
+    #     pickledir
+    #     / Path(
+    #         "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/p+0+0+0/"
+    #     )
+    # ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
+    # # Strip the conf number from the file names
+    # conf_num_list = np.array(
+    #     [int("".join(filter(str.isdigit, l.name))) for l in list(files)]
+    # )
+    # print(conf_num_list)
+    # # conf_num_list = [100] # hard code a choice
+    # conf_num = conf_num_list[np.argmax(conf_num_list)]
+    # print("conf_num:", conf_num)
+    # barspec_nameU = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
+    # barspec_name = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
+
+    ### ----------------------------------------------------------------------
+    G2_nucl = []
+    G2_sigm = []
+    ### ----------------------------------------------------------------------
+    ### Unperturbed correlators
+    unpertfile_nucleon_pos = pickledir / Path(
+        "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    unpertfile_sigma = pickledir2 / Path(
+        "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    G2_unpert_qp100_nucl = read_pickle(
+        unpertfile_nucleon_pos, nboot=pars.nboot, nbin=pars.nbin
+    )
+    G2_unpert_q000_sigma = read_pickle(
+        unpertfile_sigma, nboot=pars.nboot, nbin=pars.nbin
+    )
+    G2_nucl.append(G2_unpert_qp100_nucl)
+    G2_sigm.append(G2_unpert_q000_sigma)
 
     ### ----------------------------------------------------------------------
     ### SU & SS

@@ -3,13 +3,11 @@ pickle_dir2 : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_p
 analysis_dir : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn4/analysis/
 time_choice : 4
 delta_t : 2
-t_range0 : 5
-t_range1 : 14
+t_range0 : 8
+t_range1 : 21
 lmb_val : 0.04
 lmb_init : 20
 lmb_final : 30
-# lmb_init : 26
-# lmb_final : 29
 lmb_i : 0
-lmb_f : 0.08
-time_loop : True
+lmb_f : 0.05
+time_loop : False
