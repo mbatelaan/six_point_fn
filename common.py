@@ -165,7 +165,6 @@ def read_correlators(pars, pickledir, pickledir2, mom_strings):
         [int("".join(filter(str.isdigit, l.name))) for l in list(files)]
     )
     print(conf_num_list)
-    # conf_num_list = [100] # hard code a choice
     conf_num = conf_num_list[np.argmax(conf_num_list)]
     print("conf_num:", conf_num)
     barspec_name = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
@@ -392,9 +391,7 @@ def read_correlators3(pars, pickledir, pickledir2, mom_strings):
     """Read the pickle files which contain the correlator data
 
     The script will check the folders for available files and pick out the files with the highest number of configurations.
-
-    This version reads only zero momentum correlators as it is for the case where all the momentum is contained in the twisted boundary conditions.
-
+    This version reads the correlators for all momenta in mom_strings
     Used in the qmax_analysis script
     """
 
@@ -526,9 +523,7 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     """Read the pickle files which contain the correlator data
 
     The script will check the folders for available files and pick out the files with the highest number of configurations.
-
     This version reads only zero momentum correlators as it is for the case where all the momentum is contained in the twisted boundary conditions.
-
     Used when the "qmax" parameter is in the data file
     """
 
@@ -536,7 +531,7 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     G2_nucl = []
     G2_sigm = []
     ### ----------------------------------------------------------------------
-    ### Unperturbed correlators
+    ### Find the pickle files with the highest number of configurations
     fileup = (
         pickledir
         / Path(
@@ -565,18 +560,19 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     print("conf_numS:", conf_num)
     barspec_nameS = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
 
+    ### ----------------------------------------------------------------------
+    ### Unperturbed correlators
     unpertfile_nucleon_pos = pickledir2 / Path(
         "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameS
     )
-    print(unpertfile_nucleon_pos)
     unpertfile_sigma = pickledir2 / Path(
         "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameS
     )
-    print(unpertfile_sigma)
+
     G2_unpert_qp100_nucl = read_pickle(
         unpertfile_nucleon_pos, nboot=pars.nboot, nbin=pars.nbin
     )
