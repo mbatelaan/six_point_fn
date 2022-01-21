@@ -46,7 +46,14 @@ m_S = 0.4641829
 
 
 def plotting_script_all(
-    corr_matrix, corr_matrix1, corr_matrix2, corr_matrix3, lmb_val, plotdir, name="", show=False
+    corr_matrix,
+    corr_matrix1,
+    corr_matrix2,
+    corr_matrix3,
+    lmb_val,
+    plotdir,
+    name="",
+    show=False,
 ):
     spacing = 2
     xlim = 16
@@ -135,7 +142,14 @@ def plotting_script_all(
 
 
 def plotting_script_all_N(
-    corr_matrix, corr_matrix1, corr_matrix2, corr_matrix3, lmb_val, plotdir, name="", show=False
+    corr_matrix,
+    corr_matrix1,
+    corr_matrix2,
+    corr_matrix3,
+    lmb_val,
+    plotdir,
+    name="",
+    show=False,
 ):
     spacing = 2
     xlim = 16
@@ -224,7 +238,16 @@ def plotting_script_all_N(
 
 
 def plotting_script_diff_2(
-    diffG1, diffG2, diffG3, diffG4, fitvals, t_range, lmb_val, plotdir, name="", show=False
+    diffG1,
+    diffG2,
+    diffG3,
+    diffG4,
+    fitvals,
+    t_range,
+    lmb_val,
+    plotdir,
+    name="",
+    show=False,
 ):
     spacing = 2
     xlim = 15
@@ -330,16 +353,28 @@ def plotting_script_diff_2(
     plt.close()
     return
 
+
 def plotting_script_unpert(
-    correlator1, correlator2, ratio, fitvals1, fitvals2, fitvals, fitvals_effratio, t_range12, t_range, plotdir, name="", show=False
+    correlator1,
+    correlator2,
+    ratio,
+    fitvals1,
+    fitvals2,
+    fitvals,
+    fitvals_effratio,
+    t_range12,
+    t_range,
+    plotdir,
+    name="",
+    show=False,
 ):
     spacing = 2
     xlim = 25
     time = np.arange(0, np.shape(correlator1)[1])
     efftime = time[:-spacing] + 0.5
-    correlator1 = stats.bs_effmass(correlator1, time_axis=1, spacing=1) 
-    correlator2 = stats.bs_effmass(correlator2, time_axis=1, spacing=1) 
-    effratio = stats.bs_effmass(ratio, time_axis=1, spacing=1) 
+    correlator1 = stats.bs_effmass(correlator1, time_axis=1, spacing=1)
+    correlator2 = stats.bs_effmass(correlator2, time_axis=1, spacing=1)
+    effratio = stats.bs_effmass(ratio, time_axis=1, spacing=1)
     yavg_1 = np.average(correlator1, axis=0)
     ystd_1 = np.std(correlator1, axis=0)
     yavg_2 = np.average(correlator2, axis=0)
@@ -348,7 +383,6 @@ def plotting_script_unpert(
     ystd_ratio = np.std(ratio, axis=0)
     yavg_effratio = np.average(effratio, axis=0)
     ystd_effratio = np.std(effratio, axis=0)
-
 
     plt.figure(figsize=(5, 5))
     plt.errorbar(
@@ -371,7 +405,9 @@ def plotting_script_unpert(
     #     color=_colors[0],
     #     label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1 -fitvals2),np.std(fitvals1 -fitvals2))}",
     # )
-    plt.plot(t_range12, len(t_range12) * [np.average(fitvals_effratio)], color=_colors[0])
+    plt.plot(
+        t_range12, len(t_range12) * [np.average(fitvals_effratio)], color=_colors[0]
+    )
     plt.fill_between(
         t_range12,
         np.average(fitvals_effratio) - np.std(fitvals_effratio),
@@ -382,14 +418,13 @@ def plotting_script_unpert(
         label=rf"$\Delta E(\lambda=0)$ = {err_brackets(np.average(fitvals_effratio),np.std(fitvals_effratio))}",
     )
 
-    plt.legend(fontsize='x-small')
+    plt.legend(fontsize="x-small")
     # plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})]$")
     plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})]$")
     plt.xlabel(r"$t/a$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    plt.ylim(-0.1,0)
+    plt.ylim(-0.1, 0)
     plt.savefig(plotdir / ("unpert_effmass.pdf"))
-
 
     f, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True)
     f.tight_layout()
@@ -460,7 +495,7 @@ def plotting_script_unpert(
 
     # axs[0].axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
-    plt.setp(axs, xlim=(0, xlim),ylim=(0,2))
+    plt.setp(axs, xlim=(0, xlim), ylim=(0, 2))
     axs[0].set_ylabel(r"$\textrm{Effective energy}$")
     # axs[1].set_ylabel(r"$G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})$")
     axs[1].set_ylabel(r"$G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})$")
@@ -489,7 +524,7 @@ def plot_lmb_dep(all_data, plotdir):
         markerfacecolor="none",
     )
     plt.errorbar(
-        all_data["lambdas"] +  0.0001,
+        all_data["lambdas"] + 0.0001,
         np.average(all_data["order1_fit"], axis=1),
         np.std(all_data["order1_fit"], axis=1),
         fmt="s",
@@ -511,7 +546,7 @@ def plot_lmb_dep(all_data, plotdir):
         markerfacecolor="none",
     )
     plt.errorbar(
-        all_data["lambdas"]+ 0.0003,
+        all_data["lambdas"] + 0.0003,
         np.average(all_data["order3_fit"], axis=1),
         np.std(all_data["order3_fit"], axis=1),
         fmt="s",
@@ -535,13 +570,14 @@ def plot_lmb_dep(all_data, plotdir):
     plt.savefig(plotdir / ("lambda_dep.pdf"))
     # plt.show()
 
+
 def main():
-    """ Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
+    """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     plt.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})
 
-    pars = params(0) # Get the parameters for this lattice
+    pars = params(0)  # Get the parameters for this lattice
 
     # Read in the directory data from the yaml file if one is given
     if len(sys.argv) == 2:
@@ -557,7 +593,7 @@ def main():
         defaults = yaml.safe_load(f)
     for key, value in defaults.items():
         config.setdefault(key, value)
-            
+
     pickledir_k1 = Path(config["pickle_dir1"])
     pickledir_k2 = Path(config["pickle_dir2"])
     plotdir = Path(config["analysis_dir"]) / Path("plots")
@@ -568,33 +604,30 @@ def main():
     # Read the correlator data from the pickle files
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
     if "onlytwist" in config and config["onlytwist"]:
-        G2_nucl, G2_sigm = read_correlators2(pars, pickledir_k1, pickledir_k2, mom_strings)
+        G2_nucl, G2_sigm = read_correlators2(
+            pars, pickledir_k1, pickledir_k2, mom_strings
+        )
     elif "qmax" in config and config["qmax"]:
-        G2_nucl, G2_sigm = read_correlators4(pars, pickledir_k1, pickledir_k2, mom_strings)
+        G2_nucl, G2_sigm = read_correlators4(
+            pars, pickledir_k1, pickledir_k2, mom_strings
+        )
         print("qmax")
     elif "onlytwist2" in config and config["onlytwist2"]:
-        G2_nucl, G2_sigm = read_correlators5(pars, pickledir_k1, pickledir_k2, mom_strings)
+        G2_nucl, G2_sigm = read_correlators5(
+            pars, pickledir_k1, pickledir_k2, mom_strings
+        )
         print("onlytwist2\n\n")
     else:
         print("else")
-        G2_nucl, G2_sigm = read_correlators(pars, pickledir_k1, pickledir_k2, mom_strings)
+        G2_nucl, G2_sigm = read_correlators(
+            pars, pickledir_k1, pickledir_k2, mom_strings
+        )
 
-    # lambdas = np.linspace(0.006,0.013,30)
-    # lambdas = np.linspace(0.008,0.012,30)
-    # lambdas = np.linspace(0.005,0.011,30)
-    # lambdas = np.linspace(0,0.1,30)
-    # lambdas = np.linspace(0,0.035,30)
-    # lambdas = np.linspace(0,0.06,30)
-    # lambdas = np.linspace(0,0.08,30)
-    # lambdas = np.linspace(0.12,0.16,20)
-    # lambdas = np.linspace(0,0.16,10)[1:]
-    # lambdas = np.linspace(0,0.06,30)
-    # lambdas = np.linspace(0,0.02,30)
-    # lambdas = np.linspace(0,0.007,30)
-    # lambdas = np.linspace(0, 0.16, 30)  # [1:]
-    # lambdas = np.linspace(0,0.16,10) #[1:]
-    lambdas = np.linspace(config["lmb_i"], config["lmb_f"],15) # Changed to 10 from 30 for speed
-    
+    # Set the lambda values that will be used (from the parameters file)
+    lambdas = np.linspace(
+        config["lmb_i"], config["lmb_f"], 15
+    )  # Changed to 10 from 30 for speed
+
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
@@ -611,21 +644,27 @@ def main():
     # fit_range12 = np.arange(7,17)
     fit_range = t_range
     fit_range12 = t_range
-    ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:,:,0]
-    bootfit1, redchisq1 = fit_value3(G2_nucl[0][:,:,0], fit_range12, aexp_function, norm=1)
-    bootfit2, redchisq2 = fit_value3(G2_sigm[0][:,:,0], fit_range12, aexp_function, norm=1)
+    ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:, :, 0]
+    bootfit1, redchisq1 = fit_value3(
+        G2_nucl[0][:, :, 0], fit_range12, aexp_function, norm=1
+    )
+    bootfit2, redchisq2 = fit_value3(
+        G2_sigm[0][:, :, 0], fit_range12, aexp_function, norm=1
+    )
     bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, fit_range)
-    bootfit_effratio, redchisq_effratio = fit_value3(ratio_unpert, fit_range12, aexp_function, norm=1)
+    bootfit_effratio, redchisq_effratio = fit_value3(
+        ratio_unpert, fit_range12, aexp_function, norm=1
+    )
     # print(f"redchisq = {redchisq_ratio}")
     # print(f"fit = {np.average(bootfit1,axis=0)}")
     # print(f"fit = {np.average(bootfit2,axis=0)}")
     # print(f"fit = {np.average(bootfit_ratio,axis=0)}")
-    diff = bootfit1[:,1]-bootfit2[:,1]
+    diff = bootfit1[:, 1] - bootfit2[:, 1]
     # print(f"diff = {np.average(diff,axis=0)}")
     # print(f"diff = {err_brackets(np.average(diff),np.std(diff))}")
     plotting_script_unpert(
         G2_nucl[0][:, :, 0],
-        G2_sigm[0][:,:,0],
+        G2_sigm[0][:, :, 0],
         ratio_unpert,
         bootfit1[:, 1],
         bootfit2[:, 1],
@@ -633,14 +672,22 @@ def main():
         bootfit_effratio[:, 1],
         fit_range12,
         fit_range,
-        plotdir, 
+        plotdir,
         name="_unpert_ratio",
         show=False,
     )
 
     if time_loop:
-        time_limits = [[1,20],[1,20]]
-        fitlist = stats.fit_loop_bayes(ratio_unpert, aexp_function, time_limits, plot=False, disp=True, time=False, weights_=True)
+        time_limits = [[1, 20], [1, 20]]
+        fitlist = stats.fit_loop_bayes(
+            ratio_unpert,
+            aexp_function,
+            time_limits,
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
         print(fitlist[0]["redchisq"])
         print([i["x"] for i in fitlist])
         print([i["chisq"] for i in fitlist])
@@ -649,7 +696,7 @@ def main():
 
         with open(datadir / (f"time_window_loop.pkl"), "wb") as file_out:
             pickle.dump(fitlist, file_out)
-            
+
         lmb_val = 0.04
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
@@ -658,11 +705,18 @@ def main():
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
         ratio4 = Gt1_4 / Gt2_4
-        fitlist = stats.fit_loop(ratio4, aexp_function, time_limits, plot=False, disp=True, time=False, weights_=True)
+        fitlist = stats.fit_loop(
+            ratio4,
+            aexp_function,
+            time_limits,
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
         with open(datadir / (f"time_window_loop_lambda.pkl"), "wb") as file_out:
             pickle.dump(fitlist, file_out)
 
-    
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))
     order2_fit = np.zeros((len(lambdas), pars.nboot))
@@ -674,7 +728,6 @@ def main():
     order2_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
     order3_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
 
-    
     for i, lmb_val in enumerate(lambdas):
         print(f"Lambda = {lmb_val}\n")
         # Construct a correlation matrix for each order in lambda(skipping order 0)
@@ -686,13 +739,13 @@ def main():
             matrix_1, time_choice, delta_t, name="_test", show=False
         )
         ratio1 = Gt1_1 / Gt2_1
-        effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) 
+        effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
         bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_1, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_1, t_range, aexp_function, norm=1)
-        order0_states_fit[i,0] = bootfit_state1
-        order0_states_fit[i,1] = bootfit_state2
-        order0_fit[i] = bootfit1[:, 1] # /2
+        order0_states_fit[i, 0] = bootfit_state1
+        order0_states_fit[i, 1] = bootfit_state2
+        order0_fit[i] = bootfit1[:, 1]  # /2
         red_chisq_list[0, i] = redchisq1
         print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
         print(f"redchisq1 = {redchisq1}")
@@ -701,13 +754,13 @@ def main():
             matrix_2, time_choice, delta_t, name="_test", show=False
         )
         ratio2 = Gt1_2 / Gt2_2
-        effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) 
+        effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
         bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_2, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_2, t_range, aexp_function, norm=1)
-        order1_states_fit[i,0] = bootfit_state1
-        order1_states_fit[i,1] = bootfit_state2
-        order1_fit[i] = bootfit2[:, 1] # /2
+        order1_states_fit[i, 0] = bootfit_state1
+        order1_states_fit[i, 1] = bootfit_state2
+        order1_fit[i] = bootfit2[:, 1]  # /2
         red_chisq_list[1, i] = redchisq2
         print(f"redchisq2 = {redchisq2}")
 
@@ -715,14 +768,14 @@ def main():
             matrix_3, time_choice, delta_t, name="_test", show=False
         )
         ratio3 = Gt1_3 / Gt2_3
-        effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) 
+        effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
         bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_3, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_3, t_range, aexp_function, norm=1)
-        order2_states_fit[i,0] = bootfit_state1
-        order2_states_fit[i,1] = bootfit_state2
+        order2_states_fit[i, 0] = bootfit_state1
+        order2_states_fit[i, 1] = bootfit_state2
 
-        order2_fit[i] = bootfit3[:, 1] # /2
+        order2_fit[i] = bootfit3[:, 1]  # /2
         red_chisq_list[2, i] = redchisq3
         print(f"redchisq3 = {redchisq3}")
 
@@ -730,14 +783,14 @@ def main():
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
         ratio4 = Gt1_4 / Gt2_4
-        effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) 
+        effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1)
         bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_4, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_4, t_range, aexp_function, norm=1)
-        order3_states_fit[i,0] = bootfit_state1
-        order3_states_fit[i,1] = bootfit_state2
+        order3_states_fit[i, 0] = bootfit_state1
+        order3_states_fit[i, 1] = bootfit_state2
 
-        order3_fit[i] = bootfit4[:, 1] # /2
+        order3_fit[i] = bootfit4[:, 1]  # /2
         red_chisq_list[3, i] = redchisq4
         print(f"redchisq4 = {redchisq4}")
 
@@ -798,6 +851,6 @@ def main():
     ) as file_out:
         pickle.dump(all_data, file_out)
 
+
 if __name__ == "__main__":
     main()
-

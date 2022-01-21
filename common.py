@@ -60,15 +60,15 @@ def fit_value(diffG, t_range):
     data_set = diffG[:, t_range]
     diffG_avg = np.average(data_set, axis=0)
     covmat = np.cov(data_set.T)
-    pypl.figure(figsize=(11,11))
+    pypl.figure(figsize=(11, 11))
     diag = np.diagonal(covmat)
-    norms = np.einsum('i,j->ij',diag,diag)**0.5
-    covmat_norm = covmat/ norms
-    pypl.figure(figsize=(11,11))
+    norms = np.einsum("i,j->ij", diag, diag) ** 0.5
+    covmat_norm = covmat / norms
+    pypl.figure(figsize=(11, 11))
     mat = pypl.matshow(np.linalg.inv(covmat))
     pypl.colorbar(mat, shrink=0.5)
     pypl.savefig("cov_matrix_corr.pdf")
-    
+
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     popt_avg, pcov_avg = curve_fit(ff.constant, t_range, diffG_avg, sigma=covmat)
     chisq = ff.chisqfn(
@@ -96,10 +96,19 @@ def fit_value2(diffG, t_range, function):
     covmat = np.cov(data_set.T)
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     function.initparfnc(diffG, timeslice=8)
-    fitparam = stats.fit_bootstrap(function.eval, function.initpar, t_range, data_set, bounds=None, time=False, fullcov=False)
+    fitparam = stats.fit_bootstrap(
+        function.eval,
+        function.initpar,
+        t_range,
+        data_set,
+        bounds=None,
+        time=False,
+        fullcov=False,
+    )
 
     bootfit = fitparam["param"]
     return bootfit, fitparam["redchisq"]
+
 
 def fit_value3(diffG, t_range, function, norm=1):
     """Fit a function to the diffG correlator
@@ -108,15 +117,17 @@ def fit_value3(diffG, t_range, function, norm=1):
     t_range is an array of time values to fit over
     the function will return an array of fit parameters for each bootstrap
     """
-    diffG = diffG/norm
+    diffG = diffG / norm
     data_set = diffG[:, t_range]
     diffG_avg = np.average(data_set, axis=0)
     covmat = np.cov(data_set.T)
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     function.initparfnc(diffG, timeslice=7)
-    print('initpar = ', function.initpar)
+    print("initpar = ", function.initpar)
 
-    popt_avg, pcov_avg = curve_fit(function.eval_2, t_range, diffG_avg, sigma=diag_sigma, p0=function.initpar)
+    popt_avg, pcov_avg = curve_fit(
+        function.eval_2, t_range, diffG_avg, sigma=diag_sigma, p0=function.initpar
+    )
 
     chisq = ff.chisqfn2(
         popt_avg, function.eval_2, t_range, diffG_avg, np.linalg.inv(covmat)
@@ -124,12 +135,16 @@ def fit_value3(diffG, t_range, function, norm=1):
     redchisq = chisq / len(t_range)
     bootfit = []
     for iboot, values in enumerate(diffG):
-        popt, pcov = curve_fit(function.eval_2, t_range, values[t_range], sigma=diag_sigma, p0=function.initpar)
+        popt, pcov = curve_fit(
+            function.eval_2,
+            t_range,
+            values[t_range],
+            sigma=diag_sigma,
+            p0=function.initpar,
+        )
         bootfit.append(popt)
     bootfit = np.array(bootfit)
     return bootfit, redchisq
-
-
 
 
 def read_correlators(pars, pickledir, pickledir2, mom_strings):
@@ -372,12 +387,15 @@ def read_correlators2(pars, pickledir, pickledir2, mom_strings):
 
     return G2_nucl, G2_sigm
 
+
 def read_correlators3(pars, pickledir, pickledir2, mom_strings):
     """Read the pickle files which contain the correlator data
 
     The script will check the folders for available files and pick out the files with the highest number of configurations.
 
     This version reads only zero momentum correlators as it is for the case where all the momentum is contained in the twisted boundary conditions.
+
+    Used in the qmax_analysis script
     """
 
     ### ----------------------------------------------------------------------
@@ -412,7 +430,6 @@ def read_correlators3(pars, pickledir, pickledir2, mom_strings):
     conf_num = conf_num_list[np.argmax(conf_num_list)]
     print("conf_numS:", conf_num)
     barspec_nameS = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
-
 
     for mom in mom_strings:
         unpertfile_nucleon_pos = pickledir2 / Path(
@@ -435,7 +452,7 @@ def read_correlators3(pars, pickledir, pickledir2, mom_strings):
         )
         G2_nucl.append(G2_unpert_qp100_nucl)
         G2_sigm.append(G2_unpert_q000_sigma)
-        
+
     return G2_nucl, G2_sigm
 
     ### ----------------------------------------------------------------------
@@ -504,12 +521,15 @@ def read_correlators3(pars, pickledir, pickledir2, mom_strings):
 
     return G2_nucl, G2_sigm
 
+
 def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     """Read the pickle files which contain the correlator data
 
     The script will check the folders for available files and pick out the files with the highest number of configurations.
 
     This version reads only zero momentum correlators as it is for the case where all the momentum is contained in the twisted boundary conditions.
+
+    Used when the "qmax" parameter is in the data file
     """
 
     ### ----------------------------------------------------------------------
@@ -545,7 +565,6 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     print("conf_numS:", conf_num)
     barspec_nameS = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
 
-
     unpertfile_nucleon_pos = pickledir2 / Path(
         "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp121040/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
@@ -566,7 +585,6 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     )
     G2_nucl.append(G2_unpert_qp100_nucl)
     G2_sigm.append(G2_unpert_q000_sigma)
-    
 
     ### ----------------------------------------------------------------------
     ### SU & SS
@@ -633,6 +651,7 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     G2_nucl.append(G2_q100_UU_lmb4)
 
     return G2_nucl, G2_sigm
+
 
 def read_correlators5(pars, pickledir, pickledir2, mom_strings):
     """Read the pickle files which contain the correlator data
