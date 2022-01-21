@@ -639,21 +639,17 @@ def main():
     print(aexp_function.label)
 
     # Fit to the energy gap
-    # fit_range = np.arange(5,14)
-    # fit_range = np.arange(7,17)
-    # fit_range12 = np.arange(7,17)
     fit_range = t_range
-    fit_range12 = t_range
     ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:, :, 0]
     bootfit1, redchisq1 = fit_value3(
-        G2_nucl[0][:, :, 0], fit_range12, aexp_function, norm=1
+        G2_nucl[0][:, :, 0], fit_range, aexp_function, norm=1
     )
     bootfit2, redchisq2 = fit_value3(
-        G2_sigm[0][:, :, 0], fit_range12, aexp_function, norm=1
+        G2_sigm[0][:, :, 0], fit_range, aexp_function, norm=1
     )
     bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, fit_range)
     bootfit_effratio, redchisq_effratio = fit_value3(
-        ratio_unpert, fit_range12, aexp_function, norm=1
+        ratio_unpert, fit_range, aexp_function, norm=1
     )
     # print(f"redchisq = {redchisq_ratio}")
     # print(f"fit = {np.average(bootfit1,axis=0)}")
@@ -670,7 +666,7 @@ def main():
         bootfit2[:, 1],
         bootfit_ratio[:, 0],
         bootfit_effratio[:, 1],
-        fit_range12,
+        fit_range,
         fit_range,
         plotdir,
         name="_unpert_ratio",
