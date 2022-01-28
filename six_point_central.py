@@ -641,10 +641,10 @@ def main():
     # Fit to the energy gap
     fit_range = t_range
     ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:, :, 0]
-    bootfit_unpert1, redchisq1 = fit_value3(
+    bootfit_unpert_nucl, redchisq1 = fit_value3(
         G2_nucl[0][:, :, 0], fit_range, aexp_function, norm=1
     )
-    bootfit_unpert2, redchisq2 = fit_value3(
+    bootfit_unpert_sigma, redchisq2 = fit_value3(
         G2_sigm[0][:, :, 0], fit_range, aexp_function, norm=1
     )
     bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, fit_range)
@@ -652,18 +652,18 @@ def main():
         ratio_unpert, fit_range, aexp_function, norm=1
     )
     # print(f"redchisq = {redchisq_ratio}")
-    # print(f"fit = {np.average(bootfit_unpert1,axis=0)}")
-    # print(f"fit = {np.average(bootfit_unpert2,axis=0)}")
+    # print(f"fit = {np.average(bootfit_unpert_nucl,axis=0)}")
+    # print(f"fit = {np.average(bootfit_unpert_sigma,axis=0)}")
     # print(f"fit = {np.average(bootfit_ratio,axis=0)}")
-    diff = bootfit_unpert1[:, 1] - bootfit_unpert2[:, 1]
+    diff = bootfit_unpert_nucl[:, 1] - bootfit_unpert_sigma[:, 1]
     # print(f"diff = {np.average(diff,axis=0)}")
     # print(f"diff = {err_brackets(np.average(diff),np.std(diff))}")
     plotting_script_unpert(
         G2_nucl[0][:, :, 0],
         G2_sigm[0][:, :, 0],
         ratio_unpert,
-        bootfit_unpert1[:, 1],
-        bootfit_unpert2[:, 1],
+        bootfit_unpert_nucl[:, 1],
+        bootfit_unpert_sigma[:, 1],
         bootfit_ratio[:, 0],
         bootfit_effratio[:, 1],
         fit_range,
@@ -828,8 +828,8 @@ def main():
     # Save the fit data to a pickle file
     all_data = {
         "lambdas": lambdas,
-        "bootfit_unpert1": bootfit_unpert1,
-        "bootfit_unpert2": bootfit_unpert2,
+        "bootfit_unpert_nucl": bootfit_unpert_nucl,
+        "bootfit_unpert_sigma": bootfit_unpert_sigma,
         "order0_fit": order0_fit,
         "order1_fit": order1_fit,
         "order2_fit": order2_fit,
