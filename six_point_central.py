@@ -573,22 +573,24 @@ def plot_lmb_dep(all_data, plotdir):
 
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
+    # Plotting setup
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     plt.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})
 
-    pars = params(0)  # Get the parameters for this lattice
+    # Get the parameters for this lattice ensemble (kp121040kp120620)
+    pars = params(0)
 
-    # Read in the directory data from the yaml file if one is given
+    # Read in the analysis data from the yaml file if one is given
     if len(sys.argv) == 2:
         config_file = sys.argv[1]
     else:
         config_file = "data_dir_theta2.yaml"
-    print("Reading directories from: ", config_file)
+    print(f"Reading directories from: {config_file}\n")
     with open(config_file) as f:
         config = yaml.safe_load(f)
 
-    # Set things to defaults defined in another YAML file
+    # Set parameters to defaults defined in another YAML file
     with open("defaults.yaml") as f:
         defaults = yaml.safe_load(f)
     for key, value in defaults.items():
@@ -611,23 +613,18 @@ def main():
         G2_nucl, G2_sigm = read_correlators4(
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
-        print("qmax")
     elif "onlytwist2" in config and config["onlytwist2"]:
         G2_nucl, G2_sigm = read_correlators5(
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
-        print("onlytwist2\n\n")
     else:
         print("else")
         G2_nucl, G2_sigm = read_correlators(
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
 
-    # Set the lambda values that will be used (from the parameters file)
-    lambdas = np.linspace(
-        config["lmb_i"], config["lmb_f"], 15
-    )  # Changed to 10 from 30 for speed
-
+    # Set the analysis parameters that will be used (from the yaml file)
+    lambdas = np.linspace(config["lmb_i"], config["lmb_f"], 15)
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
@@ -635,18 +632,26 @@ def main():
     time_loop = config["time_loop"]
 
     aexp_function = ff.initffncs("Aexp")
-    # aexp_eval = aexp_function.eval
+    twoexp_function = ff.initffncs("Twoexp")
     print(aexp_function.label)
 
-    # Fit to the energy gap
+    # Fit to the energy of the Nucleon and Sigma
+    # Then fit to the ratio of those correlators to get the energy gap
     fit_range = t_range
-    ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:, :, 0]
+    # twoexp_function.initparfnc(G2_nucl[0][:, :, 0], timeslice=7)
+    # fitparam = stats.fit_bootstrap(twoexp_function.eval, twoexp_function.initpar, fitrange, G2_nucl[0][:, :, 0], bounds=None, time=False, fullcov=False):
+    # fitlist = stats.fit_loop(G2_nucl[0][:, :, 0], twoexp_function, [[fitrange[0], fitrange[0]+1],[fitrange[-1], fitrange[-1]+1]])
+
+    # exit()
+
     bootfit_unpert_nucl, redchisq1 = fit_value3(
         G2_nucl[0][:, :, 0], fit_range, aexp_function, norm=1
     )
+
     bootfit_unpert_sigma, redchisq2 = fit_value3(
         G2_sigm[0][:, :, 0], fit_range, aexp_function, norm=1
     )
+    ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:, :, 0]
     bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, fit_range)
     bootfit_effratio, redchisq_effratio = fit_value3(
         ratio_unpert, fit_range, aexp_function, norm=1

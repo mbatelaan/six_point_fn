@@ -113,7 +113,7 @@ def fit_value2(diffG, t_range, function):
 def fit_value3(diffG, t_range, function, norm=1):
     """Fit a function to the diffG correlator
 
-    diffG is a correlator with tht bootstraps on the first index and the time on the second
+    diffG is a correlator with the bootstraps on the first index and the time on the second
     t_range is an array of time values to fit over
     the function will return an array of fit parameters for each bootstrap
     """
