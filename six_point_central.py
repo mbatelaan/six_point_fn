@@ -638,15 +638,32 @@ def main():
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
     fit_range = t_range
-    # twoexp_function.initparfnc(G2_nucl[0][:, :, 0], timeslice=7)
-    # fitparam = stats.fit_bootstrap(twoexp_function.eval, twoexp_function.initpar, fitrange, G2_nucl[0][:, :, 0], bounds=None, time=False, fullcov=False):
-    # fitlist = stats.fit_loop(G2_nucl[0][:, :, 0], twoexp_function, [[fitrange[0], fitrange[0]+1],[fitrange[-1], fitrange[-1]+1]])
+    fit_range_2 = np.arange(4,21)
 
-    # exit()
+    # twoexp_function.initparfnc(G2_nucl[0][:, :, 0], timeslice=7)
+    # fitparam = stats.fit_bootstrap(twoexp_function.eval, twoexp_function.initpar, fit_range_2, G2_nucl[0][:, fit_range_2, 0], bounds=None, time=False, fullcov=False)
+
+    # print(fitparam)
+    # print([key for key in fitparam])
+    # print(fitparam["paramavg"])
+    # print("\n\n First one done \n\n")
+
+    fitlist = stats.fit_loop(G2_nucl[0][:, :, 0], twoexp_function, [[1,7],[21,21]])
+    # print(fitlist)
+    # print([key for key in fitlist[0]])
+    print([elem["x"] for elem in fitlist])
+    print([elem["redchisq"] for elem in fitlist])
+    print([elem["paramavg"] for elem in fitlist])
 
     bootfit_unpert_nucl, redchisq1 = fit_value3(
         G2_nucl[0][:, :, 0], fit_range, aexp_function, norm=1
     )
+    print(f"fit = {np.average(bootfit_unpert_nucl,axis=0)}")
+
+
+
+    exit()
+
 
     bootfit_unpert_sigma, redchisq2 = fit_value3(
         G2_sigm[0][:, :, 0], fit_range, aexp_function, norm=1
