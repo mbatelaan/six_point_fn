@@ -903,4 +903,6 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
         stats.ploteffmass(Gt1, "eig_1" + name, plotdir, show=True)
         stats.ploteffmass(Gt2, "eig_2" + name, plotdir, show=True)
 
-    return Gt1, Gt2, eval_left
+    gevp_data = [eval_left, evec_left, eval_right, evec_right]
+
+    return Gt1, Gt2, gevp_data

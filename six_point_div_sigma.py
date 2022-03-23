@@ -722,6 +722,14 @@ def main():
     order1_fit = np.zeros((len(lambdas), pars.nboot))
     order2_fit = np.zeros((len(lambdas), pars.nboot))
     order3_fit = np.zeros((len(lambdas), pars.nboot))
+    order0_evals = np.zeros((len(lambdas), 2))
+    order1_evals = np.zeros((len(lambdas), 2))
+    order2_evals = np.zeros((len(lambdas), 2))
+    order3_evals = np.zeros((len(lambdas), 2))
+    order0_evecs = np.zeros((len(lambdas), 2,2))
+    order1_evecs = np.zeros((len(lambdas), 2,2))
+    order2_evecs = np.zeros((len(lambdas), 2,2))
+    order3_evecs = np.zeros((len(lambdas), 2,2))
     red_chisq_list = np.zeros((4, len(lambdas)))
 
     order0_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
@@ -737,7 +745,7 @@ def main():
             G2_nucl, G2_sigm, lmb_val
         )
 
-        Gt1_1, Gt2_1, evals = gevp(
+        Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp(
             matrix_1, time_choice, delta_t, name="_test", show=False
         )
         ratio1 = Gt1_1 / Gt2_1
@@ -748,12 +756,17 @@ def main():
         order0_states_fit[i, 0] = bootfit_state1
         order0_states_fit[i, 1] = bootfit_state2
         order0_fit[i] = bootfit1[:, 1]  # /2
+        order0_evals[i] = eval_left
+        order0_evecs[i] = evec_left
+        print("\n\ne-vals: ",eval_left)
+        print("\n\ne-vecs l: ",evec_left)
+        print("\n\ne-vecs r: ",evec_right)
         red_chisq_list[0, i] = redchisq1
 
         print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
         print(f"redchisq1 = {redchisq1}")
 
-        Gt1_2, Gt2_2, evals = gevp(
+        Gt1_2, Gt2_2, [eval_left, evec_left, eval_right, evec_right] = gevp(
             matrix_2, time_choice, delta_t, name="_test", show=False
         )
         ratio2 = Gt1_2 / Gt2_2
@@ -764,10 +777,12 @@ def main():
         order1_states_fit[i, 0] = bootfit_state1
         order1_states_fit[i, 1] = bootfit_state2
         order1_fit[i] = bootfit2[:, 1]  # /2
+        order1_evals[i] = eval_left
+        order1_evecs[i] = evec_left
         red_chisq_list[1, i] = redchisq2
         print(f"redchisq2 = {redchisq2}")
 
-        Gt1_3, Gt2_3, evals = gevp(
+        Gt1_3, Gt2_3, [eval_left, evec_left, eval_right, evec_right] = gevp(
             matrix_3, time_choice, delta_t, name="_test", show=False
         )
         ratio3 = Gt1_3 / Gt2_3
@@ -777,12 +792,13 @@ def main():
         bootfit_state2, redchisq_2 = fit_value3(Gt2_3, t_range, aexp_function, norm=1)
         order2_states_fit[i, 0] = bootfit_state1
         order2_states_fit[i, 1] = bootfit_state2
-
         order2_fit[i] = bootfit3[:, 1]  # /2
+        order2_evals[i] = eval_left
+        order2_evecs[i] = evec_left
         red_chisq_list[2, i] = redchisq3
         print(f"redchisq3 = {redchisq3}")
 
-        Gt1_4, Gt2_4, evals = gevp(
+        Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp(
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
         ratio4 = Gt1_4 / Gt2_4
@@ -792,8 +808,9 @@ def main():
         bootfit_state2, redchisq_2 = fit_value3(Gt2_4, t_range, aexp_function, norm=1)
         order3_states_fit[i, 0] = bootfit_state1
         order3_states_fit[i, 1] = bootfit_state2
-
         order3_fit[i] = bootfit4[:, 1]  # /2
+        order3_evals[i] = eval_left
+        order3_evecs[i] = evec_left
         red_chisq_list[3, i] = redchisq4
 
         if i == 0:
@@ -865,6 +882,14 @@ def main():
         "order1_fit": order1_fit,
         "order2_fit": order2_fit,
         "order3_fit": order3_fit,
+        "order0_evals": order0_evals,
+        "order1_evals": order1_evals,
+        "order2_evals": order2_evals,
+        "order3_evals": order3_evals,
+        "order0_evecs": order0_evecs,
+        "order1_evecs": order1_evecs,
+        "order2_evecs": order2_evecs,
+        "order3_evecs": order3_evecs,
         "order0_states_fit": order0_states_fit,
         "order1_states_fit": order1_states_fit,
         "order2_states_fit": order2_states_fit,

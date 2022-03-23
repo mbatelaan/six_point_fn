@@ -147,6 +147,69 @@ def plotting_script_diff_2(
     pypl.close()
     return
 
+def plot_eigenstates(
+    state1, state2, t_range, lmb_val, name="", show=False
+):
+    spacing = 2
+    xlim = 15
+    time = np.arange(0, np.shape(state1)[1])
+    efftime = time[:-spacing] + 0.5
+    f, axs = pypl.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
+
+    yeffavg_1 = np.average(state1, axis=0)
+    yeffstd_1 = np.std(state1, axis=0)
+    axs.errorbar(
+        efftime[:xlim],
+        yeffavg_1[:xlim],
+        yeffstd_1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$\mathcal{O}(\lambda^1)$",
+    )
+    # axs.plot(t_range, len(t_range) * [np.average(fitvals[0])], color=_colors[0])
+    # axs.fill_between(
+    #     t_range,
+    #     np.average(fitvals[0]) - np.std(fitvals[0]),
+    #     np.average(fitvals[0]) + np.std(fitvals[0]),
+    #     alpha=0.3,
+    #     color=_colors[0],
+    # )
+    yeffavg_2 = np.average(state2, axis=0)
+    yeffstd_2 = np.std(state2, axis=0)
+    axs.errorbar(
+        efftime[:xlim] + 0.2,
+        yeffavg_2[:xlim],
+        yeffstd_2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$\mathcal{O}(\lambda^2)$",
+    )
+    # axs.plot(t_range, len(t_range) * [np.average(fitvals[1])], color=_colors[1])
+    # axs.fill_between(
+    #     t_range,
+    #     np.average(fitvals[1]) - np.std(fitvals[1]),
+    #     np.average(fitvals[1]) + np.std(fitvals[1]),
+    #     alpha=0.3,
+    #     color=_colors[1],
+    # )
+    axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    # pypl.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
+    pypl.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
+    pypl.xlabel("$t/a$")
+    pypl.legend(fontsize="x-small")
+    pypl.title("$\lambda=" + str(lmb_val) + "$")
+    pypl.savefig(plotdir / ("eigenstates" + name + ".pdf"))
+    if show:
+        pypl.show()
+    pypl.close()
+    return
+
 
 if __name__ == "__main__":
     pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
@@ -207,7 +270,7 @@ if __name__ == "__main__":
                 matrix_1, time_choice, delta_t, name="_test", show=False
             )
             ratio1 = Gt1_1 / Gt2_1
-            effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) / 2
+            effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) 
             bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function)
             order0_fit[i, j] = bootfit1[:, 1]
             red_chisq_list[0, i, j] = redchisq1
@@ -216,7 +279,7 @@ if __name__ == "__main__":
                 matrix_2, time_choice, delta_t, name="_test", show=False
             )
             ratio2 = Gt1_2 / Gt2_2
-            effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) / 2
+            effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) 
             bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function)
             order1_fit[i, j] = bootfit2[:, 1]
             red_chisq_list[1, i, j] = redchisq2
@@ -225,7 +288,7 @@ if __name__ == "__main__":
                 matrix_3, time_choice, delta_t, name="_test", show=False
             )
             ratio3 = Gt1_3 / Gt2_3
-            effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) / 2
+            effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) 
             bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function)
             order2_fit[i, j] = bootfit3[:, 1]
             red_chisq_list[2, i, j] = redchisq3
@@ -234,7 +297,9 @@ if __name__ == "__main__":
                 matrix_4, time_choice, delta_t, name="_test", show=False
             )
             ratio4 = Gt1_4 / Gt2_4
-            effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) / 2
+            effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) 
+            effmass_1 = stats.bs_effmass(Gt1_4, time_axis=1, spacing=1)
+            effmass_2 = stats.bs_effmass(Gt2_4, time_axis=1, spacing=1)
             bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function)
             order3_fit[i, j] = bootfit4[:, 1]
             red_chisq_list[3, i, j] = redchisq4
@@ -252,6 +317,10 @@ if __name__ == "__main__":
                     name="_l" + str(lmb_val) + "_time_choice" + str(time_choice),
                     show=False,
                 )
+                plot_eigenstates(effmass_1, effmass_2, t_range, lmb_val,
+                    name="_l" + str(lmb_val) + "_time_choice" + str(time_choice),
+                    show=False)
+
 
     # ----------------------------------------------------------------------
     # Save the fit data to a pickle file
