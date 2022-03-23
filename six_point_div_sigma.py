@@ -56,7 +56,7 @@ def plotting_script_all(
     show=False,
 ):
     spacing = 2
-    xlim = 16
+    xlim = 25
     time = np.arange(0, np.shape(corr_matrix[0][0])[1])
 
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
@@ -152,7 +152,7 @@ def plotting_script_all_N(
     show=False,
 ):
     spacing = 2
-    xlim = 16
+    xlim = 25
     time = np.arange(0, np.shape(corr_matrix[0][0])[1])
 
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
@@ -250,7 +250,7 @@ def plotting_script_diff_2(
     show=False,
 ):
     spacing = 2
-    xlim = 15
+    xlim = 25
     time = np.arange(0, np.shape(diffG1)[1])
     efftime = time[:-spacing] + 0.5
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
