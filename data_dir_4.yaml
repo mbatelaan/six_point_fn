@@ -11,3 +11,4 @@ lmb_final : 30
 lmb_i : 0
 lmb_f : 0.05
 time_loop : False
+plotting : True

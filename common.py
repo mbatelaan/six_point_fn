@@ -906,3 +906,54 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     gevp_data = [eval_left, evec_left, eval_right, evec_right]
 
     return Gt1, Gt2, gevp_data
+
+def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
+    """Solve the GEVP for a given correlation matrix
+
+    corr_matrix has the matrix indices as the first two, then the bootstrap index and then the time index
+    time_choice is the timeslice on which the GEVP will be set
+    delta_t is the size of the time evolution which will be used to solve the GEVP
+    """
+    mat_0_avg = np.average(corr_matrix[:, :, :, time_choice], axis=2)
+    mat_1_avg = np.average(corr_matrix[:, :, :, time_choice + delta_t], axis=2)
+    nboot = np.shape(corr_matrix)[2]
+
+    evec_left_list = []
+    evec_right_list = []
+    eval_left_list = []
+    eval_right_list = []
+    
+    for boot in range(nboot):
+        mat_0 = corr_matrix[:, :, boot, time_choice]
+        mat_1 = corr_matrix[:, :, boot, time_choice + delta_t]
+        
+        eval_left, evec_left = np.linalg.eig(np.matmul(mat_1, np.linalg.inv(mat_0)).T)
+        eval_right, evec_right = np.linalg.eig(np.matmul(np.linalg.inv(mat_0), mat_1))
+
+        # Ordering of the eigenvalues
+        if eval_left[0] > eval_left[1]:
+            eval_left = eval_left.T[::-1].T
+            evec_left = evec_left.T[::-1].T
+        if eval_right[0] > eval_right[1]:
+            eval_right = eval_right.T[::-1].T
+            evec_right = evec_right.T[::-1].T
+
+        evec_left_list.append(evec_left)
+        evec_right_list.append(evec_right)
+        eval_left_list.append(eval_left)
+        eval_right_list.append(eval_right)
+
+    evec_left = np.average(evec_left_list, axis=0)
+    evec_right = np.average(evec_right_list, axis=0)
+    evec_left = np.average(evec_left_list, axis=0)
+    evec_right = np.average(evec_right_list, axis=0)
+
+    Gt1 = np.einsum("i,ijkl,j->kl", evec_left[:, 0], corr_matrix, evec_right[:, 0])
+    Gt2 = np.einsum("i,ijkl,j->kl", evec_left[:, 1], corr_matrix, evec_right[:, 1])
+
+    if show:
+        stats.ploteffmass(Gt1, "eig_1" + name, plotdir, show=True)
+        stats.ploteffmass(Gt2, "eig_2" + name, plotdir, show=True)
+
+    gevp_data = [np.array(eval_left_list), np.array(evec_left_list), np.array(eval_right_list), np.array(evec_right_list)]
+    return Gt1, Gt2, gevp_data
