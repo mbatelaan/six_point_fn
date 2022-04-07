@@ -424,7 +424,7 @@ def plotting_script_unpert(
     plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})]$")
     plt.xlabel(r"$t/a$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    plt.ylim(-0.1, 0)
+    plt.ylim(-0.1, 0.1)
     plt.savefig(plotdir / ("unpert_effmass.pdf"))
 
     f, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True)
@@ -740,7 +740,7 @@ def main():
     order3_states_fit_divsigma = np.zeros((len(lambdas), 2, pars.nboot, 2))
 
     for i, lmb_val in enumerate(lambdas):
-        print(f"Lambda = {lmb_val}\n")
+        print(f"\n====================\nLambda = {lmb_val}\n====================")
         # Construct a correlation matrix for each order in lambda(skipping order 0)
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
@@ -749,6 +749,7 @@ def main():
         Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_1, time_choice, delta_t, name="_test", show=False
         )
+        print(f"evec_1 = {np.average(evec_left,axis=0)}")
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
         bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function, norm=1)
@@ -770,6 +771,8 @@ def main():
         Gt1_2, Gt2_2, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_2, time_choice, delta_t, name="_test", show=False
         )
+        print(f"evec_2 = {np.average(evec_left,axis=0)}")
+        # print(f"evec_2 = {evec_left}")
         ratio2 = Gt1_2 / Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
         bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function, norm=1)
@@ -786,6 +789,7 @@ def main():
         Gt1_3, Gt2_3, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_3, time_choice, delta_t, name="_test", show=False
         )
+        print(f"evec_3 = {np.average(evec_left,axis=0)}")
         ratio3 = Gt1_3 / Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
         bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
@@ -802,6 +806,7 @@ def main():
         Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
+        print(f"evec_4 = {np.average(evec_left,axis=0)}")
         ratio4 = Gt1_4 / Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1)
         bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)

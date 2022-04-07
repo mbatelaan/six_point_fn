@@ -244,7 +244,7 @@ if __name__ == "__main__":
     # lmb_val = 0.06 #0.16
     # lmb_val = 0.04 #0.16
     time_choice_range = np.arange(2, 12)
-    delta_t_range = np.arange(1, 4)
+    delta_t_range = np.arange(1, 6)
     plotting = True
 
     order0_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))

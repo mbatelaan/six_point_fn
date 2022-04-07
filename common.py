@@ -123,7 +123,7 @@ def fit_value3(diffG, t_range, function, norm=1):
     covmat = np.cov(data_set.T)
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     function.initparfnc(diffG, timeslice=7)
-    print("initpar = ", function.initpar)
+    # print("initpar = ", function.initpar)
 
     popt_avg, pcov_avg = curve_fit(
         function.eval_2, t_range, diffG_avg, sigma=diag_sigma, p0=function.initpar
@@ -916,12 +916,19 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     """
     mat_0_avg = np.average(corr_matrix[:, :, :, time_choice], axis=2)
     mat_1_avg = np.average(corr_matrix[:, :, :, time_choice + delta_t], axis=2)
-    nboot = np.shape(corr_matrix)[2]
+
+    eval_left, evec_left = np.linalg.eig(np.matmul(mat_1_avg, np.linalg.inv(mat_0_avg)).T)
+    eval_right, evec_right = np.linalg.eig(np.matmul(np.linalg.inv(mat_0_avg), mat_1_avg))
+
+    print('average = ', np.matmul(mat_1_avg, np.linalg.inv(mat_0_avg)).T)
+    print(f"\nevec_left = {evec_left}")
+    print(f"eval_left = {eval_left}")
 
     evec_left_list = []
     evec_right_list = []
     eval_left_list = []
     eval_right_list = []
+    nboot = np.shape(corr_matrix)[2]
     
     for boot in range(nboot):
         mat_0 = corr_matrix[:, :, boot, time_choice]
@@ -929,14 +936,31 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
         
         eval_left, evec_left = np.linalg.eig(np.matmul(mat_1, np.linalg.inv(mat_0)).T)
         eval_right, evec_right = np.linalg.eig(np.matmul(np.linalg.inv(mat_0), mat_1))
+        # if boot == 1:
+        if evec_left[1,0]**2 > 0.4:
+            print('\nboot 1  = ', np.matmul(mat_1, np.linalg.inv(mat_0)).T)
+            # print('evec sq = ', evec_left[:,0]**2)
+            print('evec sq = ', evec_left, evec_right,'\n')
 
-        # Ordering of the eigenvalues
-        if eval_left[0] > eval_left[1]:
-            eval_left = eval_left.T[::-1].T
-            evec_left = evec_left.T[::-1].T
-        if eval_right[0] > eval_right[1]:
-            eval_right = eval_right.T[::-1].T
-            evec_right = evec_right.T[::-1].T
+        # Ordering by the square of the first value of the eigenvectors
+        if evec_left[0,0]**2 < evec_left[0,1]**2:
+            print("sorting left")
+            eval_left = eval_left[:,::-1]
+            evec_left = evec_left[:,::-1]
+        # if eval_right[0] > eval_right[1]:
+        #     print("sorting right")
+        #     eval_right = eval_right.T[::-1].T
+        #     evec_right = evec_right.T[::-1].T
+
+        # # Ordering of the eigenvalues
+        # if eval_left[0] > eval_left[1]:
+        #     print("sorting left")
+        #     eval_left = eval_left.T[::-1].T
+        #     evec_left = evec_left.T[::-1].T
+        # if eval_right[0] > eval_right[1]:
+        #     print("sorting right")
+        #     eval_right = eval_right.T[::-1].T
+        #     evec_right = evec_right.T[::-1].T
 
         evec_left_list.append(evec_left)
         evec_right_list.append(evec_right)
