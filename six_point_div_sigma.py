@@ -21,6 +21,7 @@ from common import read_correlators2
 from common import read_correlators3
 from common import read_correlators4
 from common import read_correlators5
+from common import read_correlators6
 from common import make_matrices
 from common import gevp
 from common import gevp_bootstrap
@@ -616,6 +617,10 @@ def main():
         )
     elif "onlytwist2" in config and config["onlytwist2"]:
         G2_nucl, G2_sigm = read_correlators5(
+            pars, pickledir_k1, pickledir_k2, mom_strings
+        )
+    elif "one_fourier" in config and config["one_fourier"]:
+        G2_nucl, G2_sigm = read_correlators6(
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
     else:
