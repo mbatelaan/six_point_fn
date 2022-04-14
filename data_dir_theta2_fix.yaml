@@ -1,8 +1,8 @@
 pickle_dir1 : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta2_fix/kappa1/pickle/
 pickle_dir2 : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta2_fix/kappa2/pickle/
 analysis_dir : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta2_fix/analysis/
-time_choice : 9
-delta_t : 4
+time_choice : 5
+delta_t : 1
 t_range0 : 8
 t_range1 : 24
 lmb_val : 0.04
