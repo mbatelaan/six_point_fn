@@ -19,6 +19,7 @@ from common import read_correlators
 from common import read_correlators2
 from common import make_matrices
 from common import gevp
+from common import gevp_bootstrap
 
 from params import params
 
@@ -252,6 +253,14 @@ if __name__ == "__main__":
     order2_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
     order3_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
     red_chisq_list = np.zeros((4, len(time_choice_range), len(delta_t_range)))
+    order0_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    order0_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
+    order1_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    order1_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
+    order2_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    order2_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
+    order3_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    order3_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
 
     aexp_function = ff.initffncs("Aexp")
     # aexp_eval = aexp_function.eval
@@ -266,9 +275,14 @@ if __name__ == "__main__":
             )
 
             ### ----------------------------------------------------------------------
-            Gt1_1, Gt2_1, evals = gevp(
+            # Gt1_1, Gt2_1, evals = gevp(
+            #     matrix_1, time_choice, delta_t, name="_test", show=False
+            # )
+            Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
                 matrix_1, time_choice, delta_t, name="_test", show=False
             )
+            order0_evals[i,j] = eval_left
+            order0_evecs[i,j] = evec_left
             ratio1 = Gt1_1 / Gt2_1
             effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) 
             bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function)
@@ -293,9 +307,14 @@ if __name__ == "__main__":
             order2_fit[i, j] = bootfit3[:, 1]
             red_chisq_list[2, i, j] = redchisq3
 
-            Gt1_4, Gt2_4, evals = gevp(
+            # Gt1_4, Gt2_4, evals = gevp(
+            #     matrix_4, time_choice, delta_t, name="_test", show=False
+            # )
+            Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
                 matrix_4, time_choice, delta_t, name="_test", show=False
             )
+            order3_evals[i,j] = eval_left
+            order3_evecs[i,j] = evec_left
             ratio4 = Gt1_4 / Gt2_4
             effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) 
             effmass_1 = stats.bs_effmass(Gt1_4, time_axis=1, spacing=1)
@@ -330,6 +349,8 @@ if __name__ == "__main__":
         "order1_fit": order1_fit,
         "order2_fit": order2_fit,
         "order3_fit": order3_fit,
+        "order3_evals": order3_evals,
+        "order3_evecs": order3_evecs,
         "redchisq": red_chisq_list,
         "time_choice": time_choice_range,
         "delta_t": delta_t_range,
