@@ -1317,6 +1317,9 @@ def main():
     time_choice_range = data["time_choice"]
     delta_t_range = data["delta_t"]
     delta_t_choice = np.where(delta_t_range == config["delta_t"])[0][0]
+    order3_evals = data["order3_evals"]
+    order3_evecs = data["order3_evecs"]
+
 
     plt.figure(figsize=(9, 6))
     plt.errorbar(
@@ -1377,6 +1380,46 @@ def main():
     plt.close()
 
     # --------------------------------------------------------------------------------
+    # plot the eigenvector values against t0
+    evec1 = order3_evecs[:, delta_t_choice, :,0,0]**2
+    evec2 = order3_evecs[:, delta_t_choice, :,0,1]**2
+    plt.figure(figsize=(9, 6))
+    plt.errorbar(
+        time_choice_range,
+        np.average(evec1, axis=1),
+        np.std(evec1, axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        time_choice_range,
+        np.average(evec2, axis=1),
+        np.std(evec2, axis=1),
+        fmt="x",
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.legend(fontsize="x-small")
+    # plt.xlim(-0.01, 0.22)
+    # plt.ylim(0, 0.06)
+    # plt.ylim(0.03, 0.055)
+    plt.xlabel("$t_{0}$")
+    plt.ylabel("eigenvector squared")
+    # plt.title(rf"$\Delta t = {delta_t_range[delta_t_choice]}, \lambda = {lmb_val}$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(plotdir / (f"time_choice_dep_l{lmb_val}_eigenvectors.pdf"))
+    plt.close()
+
+
+    # --------------------------------------------------------------------------------
     t0_choice = np.where(time_choice_range == config["time_choice"])[0][0]
     # t0_choice = config["time_choice"]
 
@@ -1435,6 +1478,45 @@ def main():
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.tight_layout()
     plt.savefig(plotdir / (f"delta_t_dep_l{lmb_val}.pdf"))
+    plt.close()
+
+    # --------------------------------------------------------------------------------
+    # plot the eigenvector values against delta t
+    evec1 = order3_evecs[t0_choice, :, :,0,0]**2
+    evec2 = order3_evecs[t0_choice, :, :,0,1]**2
+    plt.figure(figsize=(9, 6))
+    plt.errorbar(
+        delta_t_range,
+        np.average(evec1, axis=1),
+        np.std(evec1, axis=1),
+        fmt="s",
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        delta_t_range,
+        np.average(evec2, axis=1),
+        np.std(evec2, axis=1),
+        fmt="x",
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.legend(fontsize="x-small")
+    # plt.ylim(0, 0.2)
+    # plt.ylim(0.03, 0.055)
+    plt.xlabel("$\Delta t$")
+    plt.ylabel("eigenvector squared")
+    # plt.title(rf"$t_{{0}} = {time_choice_range[t0_choice]}, \lambda = {lmb_val}$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(plotdir / (f"delta_t_dep_l{lmb_val}_eigenvector.pdf"))
     plt.close()
 
 
