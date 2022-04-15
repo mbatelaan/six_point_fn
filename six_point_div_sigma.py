@@ -620,6 +620,8 @@ def main():
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
     elif "one_fourier" in config and config["one_fourier"]:
+        # As a test to see if the momenta are correct
+        mom_strings = ["p+1+0+0", "p+0+0+0", "p-1+0+0"]
         G2_nucl, G2_sigm = read_correlators6(
             pars, pickledir_k1, pickledir_k2, mom_strings
         )

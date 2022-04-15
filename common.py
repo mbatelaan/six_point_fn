@@ -1049,7 +1049,7 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
         eval_left, evec_left = np.linalg.eig(np.matmul(mat_1, np.linalg.inv(mat_0)).T)
         eval_right, evec_right = np.linalg.eig(np.matmul(np.linalg.inv(mat_0), mat_1))
         # if boot == 1:
-        if evec_left[1,0]**2 > 0.4:
+        # if evec_left[1,0]**2 > 0.4:
             # print('\nboot 1  = ', np.matmul(mat_1, np.linalg.inv(mat_0)).T)
             # print('evec sq = ', evec_left[:,0]**2)
             # print('evec sq = ', evec_left, evec_right,'\n')
