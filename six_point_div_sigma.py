@@ -587,7 +587,7 @@ def main():
     if len(sys.argv) == 2:
         config_file = sys.argv[1]
     else:
-        config_file = "data_dir_theta2.yaml"
+        config_file = "data_dir_theta2_fix.yaml"
     print(f"Reading directories from: {config_file}\n")
     with open(config_file) as f:
         config = yaml.safe_load(f)
@@ -621,7 +621,7 @@ def main():
         )
     elif "one_fourier" in config and config["one_fourier"]:
         # As a test to see if the momenta are correct
-        mom_strings = ["p+1+0+0", "p+0+0+0", "p-1+0+0"]
+        mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
         G2_nucl, G2_sigm = read_correlators6(
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
