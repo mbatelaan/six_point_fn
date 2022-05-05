@@ -252,7 +252,7 @@ def plotting_script_diff_2(
     show=False,
 ):
     spacing = 2
-    xlim = 25
+    xlim = 20
     time = np.arange(0, np.shape(diffG1)[1])
     efftime = time[:-spacing] + 0.5
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
@@ -344,7 +344,7 @@ def plotting_script_diff_2(
 
     axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
-    plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.4))
+    plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.25))
     plt.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
     plt.xlabel("$t/a$")
     plt.legend(fontsize="x-small")
@@ -756,17 +756,19 @@ def main():
         Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_1, time_choice, delta_t, name="_test", show=False
         )
-        Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_1, evec_right[:, :, 0])
-        Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_1, evec_right[:, :, 1])
+        # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_1, evec_right[:, :, 0])
+        # Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_1, evec_right[:, :, 1])
         print(f"evec_1 = {np.average(evec_left,axis=0)}")
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
-        bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_1, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_1, t_range, aexp_function, norm=1)
         order0_states_fit[i, 0] = bootfit_state1
         order0_states_fit[i, 1] = bootfit_state2
+
+        bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function, norm=1)
         order0_fit[i] = bootfit1[:, 1]  # /2
+
         order0_evals[i] = eval_left
         order0_evecs[i] = evec_left
         # print("\n\ne-vals: ",eval_left)
@@ -780,8 +782,8 @@ def main():
         Gt1_2, Gt2_2, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_2, time_choice, delta_t, name="_test", show=False
         )
-        Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_2, evec_right[:, :, 0])
-        Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_2, evec_right[:, :, 1])
+        # Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_2, evec_right[:, :, 0])
+        # Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_2, evec_right[:, :, 1])
         print(f"evec_2 = {np.average(evec_left,axis=0)}")
         # print(f"evec_2 = {evec_left}")
         ratio2 = Gt1_2 / Gt2_2
@@ -800,8 +802,8 @@ def main():
         Gt1_3, Gt2_3, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_3, time_choice, delta_t, name="_test", show=False
         )
-        Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_3, evec_right[:, :, 0])
-        Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_3, evec_right[:, :, 1])
+        # Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_3, evec_right[:, :, 0])
+        # Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_3, evec_right[:, :, 1])
 
         print(f"evec_3 = {np.average(evec_left,axis=0)}")
         ratio3 = Gt1_3 / Gt2_3
@@ -820,15 +822,15 @@ def main():
         Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
-        Gt1_4 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_4, evec_right[:, :, 0])
-        Gt2_4 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_4, evec_right[:, :, 1])
+        # Gt1_4 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_4, evec_right[:, :, 0])
+        # Gt2_4 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_4, evec_right[:, :, 1])
 
         print(f"evec_4 = {np.average(evec_left,axis=0)}")
         ratio4 = Gt1_4 / Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1)
         bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
-        bootfit_state1, redchisq_1 = fit_value3(Gt1_4, t_range, aexp_function, norm=1)
-        bootfit_state2, redchisq_2 = fit_value3(Gt2_4, t_range, aexp_function, norm=1)
+        bootfit_state1, redchisq_1 = fit_value3(Gt1_4, t_range, aexp_function, norm=1e30)
+        bootfit_state2, redchisq_2 = fit_value3(Gt2_4, t_range, aexp_function, norm=1e30)
         order3_states_fit[i, 0] = bootfit_state1
         order3_states_fit[i, 1] = bootfit_state2
         order3_fit[i] = bootfit4[:, 1]  # /2

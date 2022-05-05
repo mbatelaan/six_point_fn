@@ -135,6 +135,7 @@ def fit_value3(diffG, t_range, function, norm=1):
     redchisq = chisq / len(t_range)
     bootfit = []
     for iboot, values in enumerate(diffG):
+        # print("p0 = ", function.initpar)
         popt, pcov = curve_fit(
             function.eval_2,
             t_range,

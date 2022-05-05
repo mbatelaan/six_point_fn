@@ -9,8 +9,8 @@ t_range1 : 20
 lmb_val : 0.04
 lmb_i : 0
 lmb_f : 0.05
-lmb_init : 13
-lmb_final : 18
+lmb_init : 5
+lmb_final : 11
 plotting : True
 time_loop : False
 
