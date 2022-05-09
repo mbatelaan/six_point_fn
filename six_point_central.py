@@ -788,7 +788,6 @@ def main():
         bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_3, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_3, t_range, aexp_function, norm=1)
-
         order2_corrs[i, 0] = Gt1_3
         order2_corrs[i, 1] = Gt2_3
         order2_states_fit[i, 0] = bootfit_state1
@@ -805,7 +804,6 @@ def main():
         bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_4, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_4, t_range, aexp_function, norm=1)
-
         order3_corrs[i, 0] = Gt1_4
         order3_corrs[i, 1] = Gt2_4
         order3_states_fit[i, 0] = bootfit_state1

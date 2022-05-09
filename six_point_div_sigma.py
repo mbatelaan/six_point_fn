@@ -734,10 +734,10 @@ def main():
     order1_evals = np.zeros((len(lambdas), pars.nboot, 2))
     order2_evals = np.zeros((len(lambdas), pars.nboot, 2))
     order3_evals = np.zeros((len(lambdas), pars.nboot, 2))
-    order0_evecs = np.zeros((len(lambdas), pars.nboot, 2,2))
-    order1_evecs = np.zeros((len(lambdas), pars.nboot, 2,2))
-    order2_evecs = np.zeros((len(lambdas), pars.nboot, 2,2))
-    order3_evecs = np.zeros((len(lambdas), pars.nboot, 2,2))
+    order0_evecs = np.zeros((len(lambdas), pars.nboot, 2, 2))
+    order1_evecs = np.zeros((len(lambdas), pars.nboot, 2, 2))
+    order2_evecs = np.zeros((len(lambdas), pars.nboot, 2, 2))
+    order3_evecs = np.zeros((len(lambdas), pars.nboot, 2, 2))
     red_chisq_list = np.zeros((4, len(lambdas)))
 
     order0_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
@@ -746,12 +746,23 @@ def main():
     order3_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
     order3_states_fit_divsigma = np.zeros((len(lambdas), 2, pars.nboot, 2))
 
+    order0_corrs = np.zeros((len(lambdas), 2, pars.nboot, pars.T))
+    order1_corrs = np.zeros((len(lambdas), 2, pars.nboot, pars.T))
+    order2_corrs = np.zeros((len(lambdas), 2, pars.nboot, pars.T))
+    order3_corrs = np.zeros((len(lambdas), 2, pars.nboot, pars.T))
+
+    corr_matrices = np.zeros((len(lambdas), 4, 2, 2, pars.nboot, pars.T))
+
     for i, lmb_val in enumerate(lambdas):
         print(f"\n====================\nLambda = {lmb_val}\n====================")
         # Construct a correlation matrix for each order in lambda(skipping order 0)
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
         )
+        corr_matrices[i, 0] = matrix_1
+        corr_matrices[i, 1] = matrix_2
+        corr_matrices[i, 2] = matrix_3
+        corr_matrices[i, 3] = matrix_4
 
         Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_1, time_choice, delta_t, name="_test", show=False
@@ -763,6 +774,8 @@ def main():
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_1, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_1, t_range, aexp_function, norm=1)
+        order0_corrs[i, 0] = Gt1_1
+        order0_corrs[i, 1] = Gt2_1
         order0_states_fit[i, 0] = bootfit_state1
         order0_states_fit[i, 1] = bootfit_state2
 
@@ -791,6 +804,8 @@ def main():
         bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_2, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_2, t_range, aexp_function, norm=1)
+        order1_corrs[i, 0] = Gt1_2
+        order1_corrs[i, 1] = Gt2_2
         order1_states_fit[i, 0] = bootfit_state1
         order1_states_fit[i, 1] = bootfit_state2
         order1_fit[i] = bootfit2[:, 1]  # /2
@@ -811,6 +826,8 @@ def main():
         bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_3, t_range, aexp_function, norm=1)
         bootfit_state2, redchisq_2 = fit_value3(Gt2_3, t_range, aexp_function, norm=1)
+        order2_corrs[i, 0] = Gt1_3
+        order2_corrs[i, 1] = Gt2_3
         order2_states_fit[i, 0] = bootfit_state1
         order2_states_fit[i, 1] = bootfit_state2
         order2_fit[i] = bootfit3[:, 1]  # /2
@@ -829,8 +846,14 @@ def main():
         ratio4 = Gt1_4 / Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1)
         bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
-        bootfit_state1, redchisq_1 = fit_value3(Gt1_4, t_range, aexp_function, norm=1e30)
-        bootfit_state2, redchisq_2 = fit_value3(Gt2_4, t_range, aexp_function, norm=1e30)
+        bootfit_state1, redchisq_1 = fit_value3(
+            Gt1_4, t_range, aexp_function, norm=1e30
+        )
+        bootfit_state2, redchisq_2 = fit_value3(
+            Gt2_4, t_range, aexp_function, norm=1e30
+        )
+        order3_corrs[i, 0] = Gt1_4
+        order3_corrs[i, 1] = Gt2_4
         order3_states_fit[i, 0] = bootfit_state1
         order3_states_fit[i, 1] = bootfit_state2
         order3_fit[i] = bootfit4[:, 1]  # /2
@@ -903,6 +926,11 @@ def main():
         "bootfit_unpert_sigma": bootfit_unpert_sigma,
         "bootfit_ratio": bootfit_ratio,
         "bootfit_effratio": bootfit_effratio,
+        "corr_matrices": corr_matrices,
+        "order0_corrs": order0_corrs,
+        "order1_corrs": order1_corrs,
+        "order2_corrs": order2_corrs,
+        "order3_corrs": order3_corrs,
         "order0_fit": order0_fit,
         "order1_fit": order1_fit,
         "order2_fit": order2_fit,
