@@ -1,0 +1,13 @@
+pickle_dir1 : /home/mischab/Documents/PhD/analysis_results/six_point_fn_theta2/kappa1/pickle/
+pickle_dir2 : /home/mischab/Documents/PhD/analysis_results/six_point_fn_theta2/kappa2/pickle/
+analysis_dir : /home/mischab/Documents/PhD/analysis_results/six_point_fn_theta2/analysis2/
+time_choice : 4
+delta_t : 2
+t_range0 : 8
+t_range1 : 24
+lmb_val : 0.04
+lmb_i : 0
+lmb_f : 0.05
+lmb_init : 5
+lmb_final : 11
+time_loop : False

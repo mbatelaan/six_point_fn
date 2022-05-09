@@ -1,0 +1,16 @@
+pickle_dir1 : /run/media/mischa/79df0519-18bd-4036-aaa4-c58d2c782760/Lattice_results/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/kappa1/pickle/
+pickle_dir2 : /run/media/mischa/79df0519-18bd-4036-aaa4-c58d2c782760/Lattice_results/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/kappa2/pickle/
+analysis_dir : /run/media/mischa/79df0519-18bd-4036-aaa4-c58d2c782760/Lattice_results/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/
+qmax : True
+time_choice : 4
+delta_t : 2
+t_range0 : 8
+t_range1 : 24
+lmb_val : 0.04
+lmb_i : 0
+lmb_f : 0.05
+lmb_init : 13
+lmb_final : 18
+plotting : False
+time_loop : False
+

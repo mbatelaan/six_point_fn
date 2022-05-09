@@ -1,0 +1,11 @@
+pickle_dir1 : /home/mischab/Documents/PhD/analysis_results/twisted_gauge5/kappa1/pickle/
+pickle_dir2 : /home/mischab/Documents/PhD/analysis_results/twisted_gauge5/kappa2/pickle/
+analysis_dir : /home/mischab/Documents/PhD/analysis_results/twisted_gauge5/analysis2/
+time_choice : 4
+delta_t : 2
+t_range0 : 8
+t_range1 : 24
+onlytwist : True
+lmb_val : 0.04
+lmb_init : 5
+lmb_final : 10
