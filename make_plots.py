@@ -1115,7 +1115,7 @@ def plotting_script_diff_2(
     show=False,
 ):
     spacing = 2
-    xlim = 15
+    xlim = 20
     time = np.arange(0, np.shape(diffG1)[1])
     efftime = time[:-spacing] + 0.5
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
@@ -1207,7 +1207,7 @@ def plotting_script_diff_2(
 
     axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
-    plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.4))
+    plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.25))
     plt.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
     plt.xlabel("$t/a$")
     plt.legend(fontsize="x-small")
@@ -1682,10 +1682,6 @@ def main():
     plt.tight_layout()
     plt.savefig(plotdir / (f"delta_t_dep_l{lmb_val}_eigenvector.pdf"))
     plt.close()
-
-    
-
-
 
 
 def main_loop():
