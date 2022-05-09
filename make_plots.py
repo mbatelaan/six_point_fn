@@ -368,6 +368,9 @@ def plot_lmb_dep(all_data, plotdir, fit_data=None):
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_fit.pdf"))
 
+        plt.ylim(-0.005, -.11)
+        plt.savefig(plotdir / ("lambda_dep_fit_ylim.pdf"))
+
         # plt.xlim(-0.005, 0.08)
         # plt.ylim(0.015, 0.065)
         plt.xlim(-0.0001, 0.025)
@@ -671,6 +674,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
+        plt.ylim(0, .11)
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim.pdf"))
+
 
     plt.close()
     return
@@ -1115,7 +1121,7 @@ def plotting_script_diff_2(
     show=False,
 ):
     spacing = 2
-    xlim = 20
+    xlim = 25
     time = np.arange(0, np.shape(diffG1)[1])
     efftime = time[:-spacing] + 0.5
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
@@ -1254,7 +1260,7 @@ def plot_energy_diffs(data, config, plotdir):
             effmass_ratio1,
             effmass_ratio2,
             effmass_ratio3,
-            [bootfit1, bootfit1, bootfit2, bootfit3],
+            [bootfit0, bootfit1, bootfit2, bootfit3],
             t_range,
             lmb_val,
             plotdir,
