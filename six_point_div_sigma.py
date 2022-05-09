@@ -758,7 +758,7 @@ def main():
         )
         # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_1, evec_right[:, :, 0])
         # Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_1, evec_right[:, :, 1])
-        print(f"evec_1 = {np.average(evec_left,axis=0)}")
+        # print(f"evec_1 = {np.average(evec_left,axis=0)}")
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
         bootfit_state1, redchisq_1 = fit_value3(Gt1_1, t_range, aexp_function, norm=1)
