@@ -39,27 +39,27 @@ m_S = 0.4641829
 
 def fitfunction2(lmb, E_nucl_p, E_sigma_p, matrix_element):
     deltaE = 0.5 * (E_nucl_p + E_sigma_p) - 0.5 * np.sqrt(
-        (E_nucl_p - E_sigma_p) ** 2 + 4 * lmb ** 2 * matrix_element ** 2
+        (E_nucl_p - E_sigma_p) ** 2 + 4 * lmb**2 * matrix_element**2
     )
     return deltaE
 
 
 def fitfunction3(lmb, pars0, pars2):
     deltaE = 0.5 * (pars0 + pars1) + 0.5 * np.sqrt(
-        (pars0 - pars1) ** 2 + 4 * lmb ** 2 * pars2 ** 2
+        (pars0 - pars1) ** 2 + 4 * lmb**2 * pars2**2
     )
     return deltaE
 
 
 def fitfunction4(lmb, E_nucl_p, E_sigma_p, matrix_element):
     deltaE = 0.5 * np.sqrt(
-        (E_nucl_p - E_sigma_p) ** 2 + 4 * lmb ** 2 * matrix_element ** 2
+        (E_nucl_p - E_sigma_p) ** 2 + 4 * lmb**2 * matrix_element**2
     )
     return deltaE
 
 
 def fitfunction5(lmb, Delta_E, matrix_element):
-    deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
+    deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * matrix_element**2)
     return deltaE
 
 
@@ -1102,6 +1102,168 @@ def plot_lmb_dep3(all_data, plotdir, fit_data=None):
     return
 
 
+def plotting_script_diff_2(
+    diffG1,
+    diffG2,
+    diffG3,
+    diffG4,
+    fitvals,
+    t_range,
+    lmb_val,
+    plotdir,
+    name="",
+    show=False,
+):
+    spacing = 2
+    xlim = 15
+    time = np.arange(0, np.shape(diffG1)[1])
+    efftime = time[:-spacing] + 0.5
+    f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
+
+    yeffavg_1 = np.average(diffG1, axis=0)
+    yeffstd_1 = np.std(diffG1, axis=0)
+    axs.errorbar(
+        efftime[:xlim],
+        yeffavg_1[:xlim],
+        yeffstd_1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$\mathcal{O}(\lambda^1)$",
+    )
+    axs.plot(t_range, len(t_range) * [np.average(fitvals[0])], color=_colors[0])
+    axs.fill_between(
+        t_range,
+        np.average(fitvals[0]) - np.std(fitvals[0]),
+        np.average(fitvals[0]) + np.std(fitvals[0]),
+        alpha=0.3,
+        color=_colors[0],
+    )
+    yeffavg_2 = np.average(diffG2, axis=0)
+    yeffstd_2 = np.std(diffG2, axis=0)
+    axs.errorbar(
+        efftime[:xlim] + 0.2,
+        yeffavg_2[:xlim],
+        yeffstd_2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$\mathcal{O}(\lambda^2)$",
+    )
+    axs.plot(t_range, len(t_range) * [np.average(fitvals[1])], color=_colors[1])
+    axs.fill_between(
+        t_range,
+        np.average(fitvals[1]) - np.std(fitvals[1]),
+        np.average(fitvals[1]) + np.std(fitvals[1]),
+        alpha=0.3,
+        color=_colors[1],
+    )
+    yeffavg_3 = np.average(diffG3, axis=0)
+    yeffstd_3 = np.std(diffG3, axis=0)
+    axs.errorbar(
+        efftime[:xlim] + 0.4,
+        yeffavg_3[:xlim],
+        yeffstd_3[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$\mathcal{O}(\lambda^3)$",
+    )
+    axs.plot(t_range, len(t_range) * [np.average(fitvals[2])], color=_colors[2])
+    axs.fill_between(
+        t_range,
+        np.average(fitvals[2]) - np.std(fitvals[2]),
+        np.average(fitvals[2]) + np.std(fitvals[2]),
+        alpha=0.3,
+        color=_colors[2],
+    )
+    yeffavg_4 = np.average(diffG4, axis=0)
+    yeffstd_4 = np.std(diffG4, axis=0)
+    axs.errorbar(
+        efftime[:xlim] + 0.6,
+        yeffavg_4[:xlim],
+        yeffstd_4[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[3],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$\mathcal{O}(\lambda^4)$",
+    )
+    axs.plot(t_range, len(t_range) * [np.average(fitvals[3])], color=_colors[3])
+    axs.fill_between(
+        t_range,
+        np.average(fitvals[3]) - np.std(fitvals[3]),
+        np.average(fitvals[3]) + np.std(fitvals[3]),
+        alpha=0.3,
+        color=_colors[3],
+    )
+
+    axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
+    plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.4))
+    plt.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
+    plt.xlabel("$t/a$")
+    plt.legend(fontsize="x-small")
+    plt.title("$\lambda=" + str(lmb_val) + "$")
+    plt.savefig(plotdir / ("diff_G" + name + ".pdf"))
+    if show:
+        plt.show()
+    plt.close()
+    return
+
+
+def plot_energy_diffs(data, config, plotdir:
+    """Make plots of the effective energy of the ratio of the two correlators from the GEVP. These can be made for all or some lambda values."""
+    lambdas = data["lamdbas"]
+    t_range = np.arange(config["t_range0"], config["t_range1"])
+    for i, lmb_val in enumerate(lambdas):
+        print(f"Lambda = {lmb_val}\n")
+        Gt1_0 = data["order0_corrs"][i, 0]
+        Gt2_0 = data["order0_corrs"][i, 1]
+        ratio0 = Gt1_0 / Gt2_0
+        effmass_ratio0 = stats.bs_effmass(ratio0, time_axis=1, spacing=1)
+        bootfit0 = data["order0_fit"][i]
+
+        Gt1_1 = data["order1_corrs"][i, 0]
+        Gt2_1 = data["order1_corrs"][i, 1]
+        ratio1 = Gt1_1 / Gt2_1
+        effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
+        bootfit1 = data["order1_fit"][i]
+
+        Gt1_2 = data["order2_corrs"][i, 0]
+        Gt2_2 = data["order2_corrs"][i, 1]
+        ratio2 = Gt1_2 / Gt2_2
+        effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
+        bootfit2 = data["order2_fit"][i]
+
+        Gt1_3 = data["order3_corrs"][i, 0]
+        Gt2_3 = data["order3_corrs"][i, 1]
+        ratio3 = Gt1_3 / Gt2_3
+        effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
+        bootfit3 = data["order3_fit"][i]
+
+        plotting_script_diff_2(
+            effmass_ratio0,
+            effmass_ratio1,
+            effmass_ratio2,
+            effmass_ratio3,
+            [bootfit1[:, 0], bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1]],
+            t_range,
+            lmb_val,
+            plotdir,
+            name="_l" + str(lmb_val) + "_all",
+            show=False,
+        )
+    return
+
+
 def main():
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     plt.rc("text", usetex=True)
@@ -1321,7 +1483,6 @@ def main():
     order3_evals = data["order3_evals"]
     order3_evecs = data["order3_evecs"]
 
-
     plt.figure(figsize=(9, 6))
     plt.errorbar(
         time_choice_range,
@@ -1382,8 +1543,8 @@ def main():
 
     # --------------------------------------------------------------------------------
     # plot the eigenvector values against t0
-    evec1 = order3_evecs[:, delta_t_choice, :,0,0]**2
-    evec2 = order3_evecs[:, delta_t_choice, :,0,1]**2
+    evec1 = order3_evecs[:, delta_t_choice, :, 0, 0] ** 2
+    evec2 = order3_evecs[:, delta_t_choice, :, 0, 1] ** 2
     plt.figure(figsize=(9, 6))
     plt.errorbar(
         time_choice_range,
@@ -1418,7 +1579,6 @@ def main():
     plt.tight_layout()
     plt.savefig(plotdir / (f"time_choice_dep_l{lmb_val}_eigenvectors.pdf"))
     plt.close()
-
 
     # --------------------------------------------------------------------------------
     t0_choice = np.where(time_choice_range == config["time_choice"])[0][0]
@@ -1483,8 +1643,8 @@ def main():
 
     # --------------------------------------------------------------------------------
     # plot the eigenvector values against delta t
-    evec1 = order3_evecs[t0_choice, :, :,0,0]**2
-    evec2 = order3_evecs[t0_choice, :, :,0,1]**2
+    evec1 = order3_evecs[t0_choice, :, :, 0, 0] ** 2
+    evec2 = order3_evecs[t0_choice, :, :, 0, 1] ** 2
     plt.figure(figsize=(9, 6))
     plt.errorbar(
         delta_t_range,
@@ -1661,6 +1821,8 @@ def main_loop():
 
     # plot_lmb_dep(all_data, plotdir, fit_data)
     # plot_lmb_depR(all_data, plotdir, fit_data)
+
+    plot_energy_diffs(data, config, plotdir)
 
 
 if __name__ == "__main__":
