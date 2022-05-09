@@ -1219,9 +1219,9 @@ def plotting_script_diff_2(
     return
 
 
-def plot_energy_diffs(data, config, plotdir:
+def plot_energy_diffs(data, config, plotdir):
     """Make plots of the effective energy of the ratio of the two correlators from the GEVP. These can be made for all or some lambda values."""
-    lambdas = data["lamdbas"]
+    lambdas = data["lambdas"]
     t_range = np.arange(config["t_range0"], config["t_range1"])
     for i, lmb_val in enumerate(lambdas):
         print(f"Lambda = {lmb_val}\n")
@@ -1254,7 +1254,7 @@ def plot_energy_diffs(data, config, plotdir:
             effmass_ratio1,
             effmass_ratio2,
             effmass_ratio3,
-            [bootfit1[:, 0], bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1]],
+            [bootfit1, bootfit1, bootfit2, bootfit3],
             t_range,
             lmb_val,
             plotdir,
@@ -1300,6 +1300,9 @@ def main():
         "rb",
     ) as file_in:
         data = pickle.load(file_in)
+
+    plot_energy_diffs(data, config, plotdir)
+
     lambdas = data["lambdas"]
     order0_fit = data["order0_fit"]
     order1_fit = data["order1_fit"]
@@ -1680,6 +1683,10 @@ def main():
     plt.savefig(plotdir / (f"delta_t_dep_l{lmb_val}_eigenvector.pdf"))
     plt.close()
 
+    
+
+
+
 
 def main_loop():
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
@@ -1821,8 +1828,6 @@ def main_loop():
 
     # plot_lmb_dep(all_data, plotdir, fit_data)
     # plot_lmb_depR(all_data, plotdir, fit_data)
-
-    plot_energy_diffs(data, config, plotdir)
 
 
 if __name__ == "__main__":
