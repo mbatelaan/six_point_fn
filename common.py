@@ -1055,25 +1055,27 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
             # print('evec sq = ', evec_left[:,0]**2)
             # print('evec sq = ', evec_left, evec_right,'\n')
 
-        # Ordering by the square of the first value of the eigenvectors
-        if evec_left[0,0]**2 < evec_left[0,1]**2:
-            print("sorting left")
-            eval_left = eval_left[:,::-1]
-            evec_left = evec_left[:,::-1]
-        # if eval_right[0] > eval_right[1]:
-        #     print("sorting right")
-        #     eval_right = eval_right.T[::-1].T
-        #     evec_right = evec_right.T[::-1].T
-
-        # # Ordering of the eigenvalues
-        # if eval_left[0] > eval_left[1]:
+        # # Ordering by the square of the first value of the eigenvectors
+        # if evec_left[0,0]**2 < evec_left[0,1]**2:
         #     print("sorting left")
-        #     eval_left = eval_left.T[::-1].T
-        #     evec_left = evec_left.T[::-1].T
-        # if eval_right[0] > eval_right[1]:
+        #     eval_left = eval_left[:,::-1]
+        #     evec_left = evec_left[:,::-1]
+        # if evec_right[0,0]**2 < evec_right[0,1]**2:
         #     print("sorting right")
-        #     eval_right = eval_right.T[::-1].T
-        #     evec_right = evec_right.T[::-1].T
+        #     eval_right = eval_right[:,::-1]
+        #     evec_right = evec_right[:,::-1]
+
+        # Ordering of the eigenvalues
+        if eval_left[0] > eval_left[1]:
+            # print("sorting left")
+            eval_left = eval_left[::-1]
+            evec_left = evec_left[:,::-1]
+        if eval_right[0] > eval_right[1]:
+            # print("sorting right")
+            eval_right = eval_right[::-1]
+            evec_right = evec_right[:,::-1]
+            # eval_right = eval_right.T[::-1].T
+            # evec_right = evec_right.T[::-1].T
 
         evec_left_list.append(evec_left)
         evec_right_list.append(evec_right)
