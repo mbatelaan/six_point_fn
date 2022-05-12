@@ -1307,7 +1307,7 @@ def main():
     ) as file_in:
         data = pickle.load(file_in)
 
-    plot_energy_diffs(data, config, plotdir)
+    # plot_energy_diffs(data, config, plotdir)
 
     lambdas = data["lambdas"]
     order0_fit = data["order0_fit"]

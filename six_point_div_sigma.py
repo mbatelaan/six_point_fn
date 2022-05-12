@@ -252,7 +252,7 @@ def plotting_script_diff_2(
     show=False,
 ):
     spacing = 2
-    xlim = 20
+    xlim = 28
     time = np.arange(0, np.shape(diffG1)[1])
     efftime = time[:-spacing] + 0.5
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
@@ -371,7 +371,7 @@ def plotting_script_unpert(
     show=False,
 ):
     spacing = 2
-    xlim = 25
+    xlim = 28
     time = np.arange(0, np.shape(correlator1)[1])
     efftime = time[:-spacing] + 0.5
     correlator1 = stats.bs_effmass(correlator1, time_axis=1, spacing=1)
@@ -471,7 +471,10 @@ def plotting_script_unpert(
         color=_colors[1],
         label=rf"$E_{{\Sigma}}(\mathbf{{0}})$ = {err_brackets(np.average(fitvals2),np.std(fitvals2))}",
     )
-
+    axs[0].plot(1000,
+                1,
+                label=rf"$\Delta E$ = {err_brackets(np.average(fitvals2-fitvals1),np.std(fitvals2-fitvals1))}"
+    )
     axs[0].legend(fontsize="x-small")
 
     axs[1].errorbar(
@@ -687,7 +690,7 @@ def main():
     )
 
     if time_loop:
-        time_limits = [[1, 20], [1, 20]]
+        time_limits = [[1, 20], [1, 25]]
         fitlist = stats.fit_loop_bayes(
             ratio_unpert,
             aexp_function,
@@ -926,11 +929,11 @@ def main():
         "bootfit_unpert_sigma": bootfit_unpert_sigma,
         "bootfit_ratio": bootfit_ratio,
         "bootfit_effratio": bootfit_effratio,
-        "corr_matrices": corr_matrices,
-        "order0_corrs": order0_corrs,
-        "order1_corrs": order1_corrs,
-        "order2_corrs": order2_corrs,
-        "order3_corrs": order3_corrs,
+        # "corr_matrices": corr_matrices,
+        # "order0_corrs": order0_corrs,
+        # "order1_corrs": order1_corrs,
+        # "order2_corrs": order2_corrs,
+        # "order3_corrs": order3_corrs,
         "order0_fit": order0_fit,
         "order1_fit": order1_fit,
         "order2_fit": order2_fit,
