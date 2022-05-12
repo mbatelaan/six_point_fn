@@ -471,9 +471,10 @@ def plotting_script_unpert(
         color=_colors[1],
         label=rf"$E_{{\Sigma}}(\mathbf{{0}})$ = {err_brackets(np.average(fitvals2),np.std(fitvals2))}",
     )
-    axs[0].plot(1000,
-                1,
-                label=rf"$\Delta E$ = {err_brackets(np.average(fitvals2-fitvals1),np.std(fitvals2-fitvals1))}"
+    axs[0].plot(
+        1000,
+        1,
+        label=rf"$\Delta E$ = {err_brackets(np.average(fitvals2-fitvals1),np.std(fitvals2-fitvals1))}",
     )
     axs[0].legend(fontsize="x-small")
 
@@ -689,10 +690,12 @@ def main():
         show=False,
     )
 
+    # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
     if time_loop:
         time_limits = [[1, 20], [1, 25]]
         fitlist = stats.fit_loop_bayes(
-            ratio_unpert,
+            # ratio_unpert,
+            G2_nucl[0][:, :, 0],
             aexp_function,
             time_limits,
             plot=False,

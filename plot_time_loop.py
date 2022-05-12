@@ -52,7 +52,7 @@ def main():
     plt.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})
 
-    pars = params(0) # Get the parameters for this lattice
+    pars = params(0)  # Get the parameters for this lattice
 
     # Read in the directory data from the yaml file if one is given
     if len(sys.argv) == 2:
@@ -68,38 +68,40 @@ def main():
     datadir = Path(config["analysis_dir"]) / Path("data")
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
-
-    time_limits = [[2,15],[2,15]]
-    # with open(datadir / (f"time_window_loop_lambda.pkl"), "rb") as file_in:
     with open(datadir / (f"time_window_loop_lambda.pkl"), "rb") as file_in:
         fitlist = pickle.load(file_in)
+
     x_coord = np.array([i["x"][0] for i in fitlist])
     y_coord = np.array([i["x"][-1] for i in fitlist])
+
+    # Find the unique values of tmin and tmax to make a grid showing the reduced chi-squared values.
     unique_x = np.unique(x_coord)
     unique_y = np.unique(y_coord)
     min_x = np.min(x_coord)
     min_y = np.min(y_coord)
     matrix = np.zeros((len(unique_x), len(unique_y)))
-    for i,x in enumerate(x_coord):
-        matrix[x-min_x, y_coord[i]-min_y] = fitlist[i]["redchisq"]
+    for i, x in enumerate(x_coord):
+        matrix[x - min_x, y_coord[i] - min_y] = fitlist[i]["redchisq"]
 
     plt.figure(figsize=(5, 4))
-    mat = plt.pcolormesh(unique_x, unique_y, matrix.T, cmap = 'RdBu', vmin=0.0, vmax=2)
+    mat = plt.pcolormesh(unique_x, unique_y, matrix.T, cmap="RdBu", vmin=0.0, vmax=2)
     # mat = plt.pcolormesh(unique_x, unique_y, matrix.T, cmap = 'GnBu', norm=colors.LogNorm(vmin=0.5, vmax=np.max(matrix)))
-    plt.colorbar(mat, label = r"$\chi^2_{\textrm{dof}}$")
+    plt.colorbar(mat, label=r"$\chi^2_{\textrm{dof}}$")
     plt.xlabel(r"$t_{\textrm{min}}$")
     plt.ylabel(r"$t_{\textrm{max}}$")
     plt.savefig(plotdir / (f"chisq_matrix_time.pdf"))
     plt.close()
 
     matrix = np.zeros((len(unique_x), len(unique_y)))
-    for i,x in enumerate(x_coord):
-        matrix[x-min_x, y_coord[i]-min_y] = fitlist[i]["weight"]
+    for i, x in enumerate(x_coord):
+        matrix[x - min_x, y_coord[i] - min_y] = fitlist[i]["weight"]
 
     plt.figure(figsize=(5, 4))
-    mat = plt.pcolormesh(unique_x, unique_y, matrix.T, cmap = 'GnBu', vmin=0.0, vmax=np.max(matrix))
+    mat = plt.pcolormesh(
+        unique_x, unique_y, matrix.T, cmap="GnBu", vmin=0.0, vmax=np.max(matrix)
+    )
     # mat = plt.pcolormesh(unique_x, unique_y, matrix.T, cmap = 'GnBu', norm=colors.LogNorm(vmin=0.5, vmax=np.max(matrix)))
-    plt.colorbar(mat, label = "weight")
+    plt.colorbar(mat, label="weight")
     plt.xlabel(r"$t_{\textrm{min}}$")
     plt.ylabel(r"$t_{\textrm{max}}$")
     plt.savefig(plotdir / (f"weights_matrix_time.pdf"))
@@ -108,4 +110,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
