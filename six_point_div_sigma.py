@@ -364,8 +364,9 @@ def plotting_script_unpert(
     fitvals2,
     fitvals,
     fitvals_effratio,
-    t_range12,
-    t_range,
+    nucl_t_range,
+    sigma_t_range,
+    ratio_t_range,
     plotdir,
     redchisqs,
     name="",
@@ -399,10 +400,12 @@ def plotting_script_unpert(
         markerfacecolor="none",
     )
     plt.plot(
-        t_range12, len(t_range12) * [np.average(fitvals_effratio)], color=_colors[0]
+        ratio_t_range,
+        len(ratio_t_range) * [np.average(fitvals_effratio)],
+        color=_colors[0],
     )
     plt.fill_between(
-        t_range12,
+        ratio_t_range,
         np.average(fitvals_effratio) - np.std(fitvals_effratio),
         np.average(fitvals_effratio) + np.std(fitvals_effratio),
         alpha=0.3,
@@ -442,9 +445,9 @@ def plotting_script_unpert(
         markerfacecolor="none",
         # label=f"{redchisqs[1]:.2f}"
     )
-    plt.plot(t_range12, len(t_range12) * [np.average(fitvals1)], color=_colors[0])
+    plt.plot(nucl_t_range, len(nucl_t_range) * [np.average(fitvals1)], color=_colors[0])
     plt.fill_between(
-        t_range12,
+        nucl_t_range,
         np.average(fitvals1) - np.std(fitvals1),
         np.average(fitvals1) + np.std(fitvals1),
         alpha=0.3,
@@ -452,9 +455,11 @@ def plotting_script_unpert(
         # label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
         label=rf"$E_N(\mathbf{{0}}) = {err_brackets(np.average(fitvals1),np.std(fitvals1))}$; $\chi^2_{{\textrm{{dof}}}} = {redchisqs[0]:.2f}$",
     )
-    plt.plot(t_range12, len(t_range12) * [np.average(fitvals2)], color=_colors[1])
+    plt.plot(
+        sigma_t_range, len(sigma_t_range) * [np.average(fitvals2)], color=_colors[1]
+    )
     plt.fill_between(
-        t_range12,
+        sigma_t_range,
         np.average(fitvals2) - np.std(fitvals2),
         np.average(fitvals2) + np.std(fitvals2),
         alpha=0.3,
@@ -499,9 +504,11 @@ def plotting_script_unpert(
         markerfacecolor="none",
         # label=r"$\Sigma$",
     )
-    axs[0].plot(t_range12, len(t_range12) * [np.average(fitvals1)], color=_colors[0])
+    axs[0].plot(
+        nucl_t_range, len(nucl_t_range) * [np.average(fitvals1)], color=_colors[0]
+    )
     axs[0].fill_between(
-        t_range12,
+        nucl_t_range,
         np.average(fitvals1) - np.std(fitvals1),
         np.average(fitvals1) + np.std(fitvals1),
         alpha=0.3,
@@ -509,9 +516,11 @@ def plotting_script_unpert(
         # label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
         label=rf"$E_N(\mathbf{{0}})$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
     )
-    axs[0].plot(t_range12, len(t_range12) * [np.average(fitvals2)], color=_colors[1])
+    axs[0].plot(
+        sigma_t_range, len(sigma_t_range) * [np.average(fitvals2)], color=_colors[1]
+    )
     axs[0].fill_between(
-        t_range12,
+        sigma_t_range,
         np.average(fitvals2) - np.std(fitvals2),
         np.average(fitvals2) + np.std(fitvals2),
         alpha=0.3,
@@ -536,9 +545,11 @@ def plotting_script_unpert(
         markerfacecolor="none",
         # label=r"$G_{N}/G_{\Sigma}$",
     )
-    axs[1].plot(t_range, len(t_range) * [np.average(fitvals)], color=_colors[0])
+    axs[1].plot(
+        ratio_t_range, len(ratio_t_range) * [np.average(fitvals)], color=_colors[0]
+    )
     axs[1].fill_between(
-        t_range,
+        ratio_t_range,
         np.average(fitvals) - np.std(fitvals),
         np.average(fitvals) + np.std(fitvals),
         alpha=0.3,
@@ -623,77 +634,69 @@ def plot_lmb_dep(all_data, plotdir):
     plt.savefig(plotdir / ("lambda_dep.pdf"))
     # plt.show()
 
-def fit_loop(G2_nucl, G2_sigm):
-        # Nucleon fit loop
-        time_limits = [[1, 20], [10, 26]]
-        fitlist_nucl = stats.fit_loop_bayes(
-            G2_nucl[0][:, :, 0],
-            aexp_function,
-            time_limits,
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_nucl.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_nucl, file_out)
 
-        # Sigma fit loop
-        fitlist_sigma = stats.fit_loop_bayes(
-            G2_sigm[0][:, :, 0],
-            aexp_function,
-            time_limits,
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_sigma.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_sigma, file_out)
+def fit_loop(G2_nucl, G2_sigm, aexp_function, time_choice, delta_t, datadir):
+    # Nucleon fit loop
+    time_limits = [[1, 20], [10, 26]]
+    fitlist_nucl = stats.fit_loop_bayes(
+        G2_nucl[0][:, :, 0],
+        aexp_function,
+        time_limits,
+        plot=False,
+        disp=True,
+        time=False,
+        weights_=True,
+    )
+    with open(datadir / (f"time_window_loop_nucl.pkl"), "wb") as file_out:
+        pickle.dump(fitlist_nucl, file_out)
 
-        # small lambda fit loop
-        lmb_val = 0.003
-        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
-            G2_nucl, G2_sigm, lmb_val
-        )
-        Gt1_4, Gt2_4, evals = gevp(
-            matrix_4, time_choice, delta_t, name="_test", show=False
-        )
-        ratio4 = Gt1_4 / Gt2_4
-        fitlist_small = stats.fit_loop(
-            ratio4,
-            aexp_function,
-            time_limits,
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_lambda_small.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_small, file_out)
+    # Sigma fit loop
+    fitlist_sigma = stats.fit_loop_bayes(
+        G2_sigm[0][:, :, 0],
+        aexp_function,
+        time_limits,
+        plot=False,
+        disp=True,
+        time=False,
+        weights_=True,
+    )
+    with open(datadir / (f"time_window_loop_sigma.pkl"), "wb") as file_out:
+        pickle.dump(fitlist_sigma, file_out)
 
-        # large lambda fit loop
-        lmb_val = 0.05
-        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
-            G2_nucl, G2_sigm, lmb_val
-        )
-        Gt1_4, Gt2_4, evals = gevp(
-            matrix_4, time_choice, delta_t, name="_test", show=False
-        )
-        ratio4 = Gt1_4 / Gt2_4
-        fitlist_large = stats.fit_loop(
-            ratio4,
-            aexp_function,
-            time_limits,
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_lambda_large.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_large, file_out)
+    # small lambda fit loop
+    lmb_val = 0.003
+    matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
+    Gt1_4, Gt2_4, evals = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
+    ratio4 = Gt1_4 / Gt2_4
+    fitlist_small = stats.fit_loop(
+        ratio4,
+        aexp_function,
+        time_limits,
+        plot=False,
+        disp=True,
+        time=False,
+        weights_=True,
+    )
+    with open(datadir / (f"time_window_loop_lambda_small.pkl"), "wb") as file_out:
+        pickle.dump(fitlist_small, file_out)
+
+    # large lambda fit loop
+    lmb_val = 0.05
+    matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
+    Gt1_4, Gt2_4, evals = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
+    ratio4 = Gt1_4 / Gt2_4
+    fitlist_large = stats.fit_loop(
+        ratio4,
+        aexp_function,
+        time_limits,
+        plot=False,
+        disp=True,
+        time=False,
+        weights_=True,
+    )
+    with open(datadir / (f"time_window_loop_lambda_large.pkl"), "wb") as file_out:
+        pickle.dump(fitlist_large, file_out)
     return fitlist_nucl, fitlist_sigma, fitlist_small, fitlist_large
-
 
 
 def main():
@@ -756,7 +759,6 @@ def main():
 
     # Set the analysis parameters that will be used (from the yaml file)
     lambdas = np.linspace(config["lmb_i"], config["lmb_f"], 15)
-    t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
     plotting = config["plotting"]
@@ -766,23 +768,55 @@ def main():
     twoexp_function = ff.initffncs("Twoexp")
     print(aexp_function.label)
 
+    # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
+    if time_loop:
+        fitlist_nucl, fitlist_sigma, fitlist_small, fitlist_large = fit_loop(
+            G2_nucl, G2_sigm, aexp_function, time_choice, delta_t, datadir
+        )
+        weights_nucl = np.array([i["weight"] for i in fitlist_nucl])
+        high_weight_nucl = np.argmax(weights_nucl)
+        print(fitlist_nucl[high_weight_nucl]["redchisq"])
+        nucl_t_range = np.arange(
+            fitlist_nucl[high_weight_nucl]["x"][0],
+            fitlist_nucl[high_weight_nucl]["x"][-1],
+        )
+        print(f"nucl_t_range = {nucl_t_range}")
+
+        weights_sigma = np.array([i["weight"] for i in fitlist_sigma])
+        high_weight_sigma = np.argmax(weights_sigma)
+        sigma_t_range = np.arange(
+            fitlist_sigma[high_weight_sigma]["x"][0],
+            fitlist_sigma[high_weight_sigma]["x"][-1],
+        )
+        print(f"sigma_t_range = {sigma_t_range}")
+
+        weights_small = np.array([i["weight"] for i in fitlist_small])
+        high_weight_small = np.argmax(weights_small)
+        weights_large = np.array([i["weight"] for i in fitlist_large])
+        high_weight_large = np.argmax(weights_large)
+        ratio_t_range = np.arange(
+            np.min(
+                fitlist_small[high_weight_small]["x"][0],
+                fitlist_large[high_weight_large]["x"][0],
+            ),
+            fitlist_large[high_weight_large]["x"][-1],
+        )
+        print(f"ratio_t_range = {ratio_t_range}")
+    else:
+        ratio_t_range = np.arange(config["t_range0"], config["t_range1"])
+
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
-    fit_range = t_range
-    # twoexp_function.initparfnc(G2_nucl[0][:, :, 0], timeslice=7)
-    # fitparam = stats.fit_bootstrap(twoexp_function.eval, twoexp_function.initpar, fitrange, G2_nucl[0][:, :, 0], bounds=None, time=False, fullcov=False):
-    # fitlist = stats.fit_loop(G2_nucl[0][:, :, 0], twoexp_function, [[fitrange[0], fitrange[0]+1],[fitrange[-1], fitrange[-1]+1]])
-
     bootfit_unpert_nucl, redchisq1 = fit_value3(
-        G2_nucl[0][:, :, 0], fit_range, aexp_function, norm=1
+        G2_nucl[0][:, :, 0], nucl_t_range, aexp_function, norm=1
     )
     bootfit_unpert_sigma, redchisq2 = fit_value3(
-        G2_sigm[0][:, :, 0], fit_range, aexp_function, norm=1
+        G2_sigm[0][:, :, 0], sigma_t_range, aexp_function, norm=1
     )
     ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:, :, 0]
-    bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, fit_range)
+    bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, ratio_t_range)
     bootfit_effratio, redchisq_effratio = fit_value3(
-        ratio_unpert, fit_range, aexp_function, norm=1
+        ratio_unpert, ratio_t_range, aexp_function, norm=1
     )
     diff = bootfit_unpert_nucl[:, 1] - bootfit_unpert_sigma[:, 1]
     print(f"diff = {np.average(diff,axis=0)}")
@@ -795,84 +829,14 @@ def main():
         bootfit_unpert_sigma[:, 1],
         bootfit_ratio[:, 0],
         bootfit_effratio[:, 1],
-        fit_range,
-        fit_range,
+        nucl_t_range,
+        sigma_t_range,
+        ratio_t_range,
         plotdir,
         [redchisq1, redchisq2, redchisq_ratio],
         name="_unpert_ratio",
         show=False,
     )
-
-    # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
-    if time_loop:
-        # Nucleon fit loop
-        time_limits = [[1, 20], [10, 26]]
-        fitlist_nucl = stats.fit_loop_bayes(
-            G2_nucl[0][:, :, 0],
-            aexp_function,
-            time_limits,
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_nucl.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_nucl, file_out)
-
-        # Sigma fit loop
-        fitlist_sigma = stats.fit_loop_bayes(
-            G2_sigm[0][:, :, 0],
-            aexp_function,
-            time_limits,
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_sigma.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_sigma, file_out)
-
-        # small lambda fit loop
-        lmb_val = 0.003
-        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
-            G2_nucl, G2_sigm, lmb_val
-        )
-        Gt1_4, Gt2_4, evals = gevp(
-            matrix_4, time_choice, delta_t, name="_test", show=False
-        )
-        ratio4 = Gt1_4 / Gt2_4
-        fitlist_small = stats.fit_loop(
-            ratio4,
-            aexp_function,
-            time_limits,
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_lambda_small.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_small, file_out)
-
-        # large lambda fit loop
-        lmb_val = 0.05
-        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
-            G2_nucl, G2_sigm, lmb_val
-        )
-        Gt1_4, Gt2_4, evals = gevp(
-            matrix_4, time_choice, delta_t, name="_test", show=False
-        )
-        ratio4 = Gt1_4 / Gt2_4
-        fitlist_large = stats.fit_loop(
-            ratio4,
-            aexp_function,
-            time_limits,
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_lambda_large.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_large, file_out)
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))
@@ -920,14 +884,18 @@ def main():
         # print(f"evec_1 = {np.average(evec_left,axis=0)}")
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
-        bootfit_state1, redchisq_1 = fit_value3(Gt1_1, t_range, aexp_function, norm=1)
-        bootfit_state2, redchisq_2 = fit_value3(Gt2_1, t_range, aexp_function, norm=1)
+        bootfit_state1, redchisq_1 = fit_value3(
+            Gt1_1, ratio_t_range, aexp_function, norm=1
+        )
+        bootfit_state2, redchisq_2 = fit_value3(
+            Gt2_1, ratio_t_range, aexp_function, norm=1
+        )
         order0_corrs[i, 0] = Gt1_1
         order0_corrs[i, 1] = Gt2_1
         order0_states_fit[i, 0] = bootfit_state1
         order0_states_fit[i, 1] = bootfit_state2
 
-        bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function, norm=1)
+        bootfit1, redchisq1 = fit_value3(ratio1, ratio_t_range, aexp_function, norm=1)
         order0_fit[i] = bootfit1[:, 1]  # /2
 
         order0_evals[i] = eval_left
@@ -949,9 +917,13 @@ def main():
         # print(f"evec_2 = {evec_left}")
         ratio2 = Gt1_2 / Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
-        bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function, norm=1)
-        bootfit_state1, redchisq_1 = fit_value3(Gt1_2, t_range, aexp_function, norm=1)
-        bootfit_state2, redchisq_2 = fit_value3(Gt2_2, t_range, aexp_function, norm=1)
+        bootfit2, redchisq2 = fit_value3(ratio2, ratio_t_range, aexp_function, norm=1)
+        bootfit_state1, redchisq_1 = fit_value3(
+            Gt1_2, ratio_t_range, aexp_function, norm=1
+        )
+        bootfit_state2, redchisq_2 = fit_value3(
+            Gt2_2, ratio_t_range, aexp_function, norm=1
+        )
         order1_corrs[i, 0] = Gt1_2
         order1_corrs[i, 1] = Gt2_2
         order1_states_fit[i, 0] = bootfit_state1
@@ -971,9 +943,13 @@ def main():
         print(f"evec_3 = {np.average(evec_left,axis=0)}")
         ratio3 = Gt1_3 / Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
-        bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function, norm=1)
-        bootfit_state1, redchisq_1 = fit_value3(Gt1_3, t_range, aexp_function, norm=1)
-        bootfit_state2, redchisq_2 = fit_value3(Gt2_3, t_range, aexp_function, norm=1)
+        bootfit3, redchisq3 = fit_value3(ratio3, ratio_t_range, aexp_function, norm=1)
+        bootfit_state1, redchisq_1 = fit_value3(
+            Gt1_3, ratio_t_range, aexp_function, norm=1
+        )
+        bootfit_state2, redchisq_2 = fit_value3(
+            Gt2_3, ratio_t_range, aexp_function, norm=1
+        )
         order2_corrs[i, 0] = Gt1_3
         order2_corrs[i, 1] = Gt2_3
         order2_states_fit[i, 0] = bootfit_state1
@@ -993,12 +969,12 @@ def main():
         print(f"evec_4 = {np.average(evec_left,axis=0)}")
         ratio4 = Gt1_4 / Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1)
-        bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function, norm=1)
+        bootfit4, redchisq4 = fit_value3(ratio4, ratio_t_range, aexp_function, norm=1)
         bootfit_state1, redchisq_1 = fit_value3(
-            Gt1_4, t_range, aexp_function, norm=1e30
+            Gt1_4, ratio_t_range, aexp_function, norm=1e30
         )
         bootfit_state2, redchisq_2 = fit_value3(
-            Gt2_4, t_range, aexp_function, norm=1e30
+            Gt2_4, ratio_t_range, aexp_function, norm=1e30
         )
         order3_corrs[i, 0] = Gt1_4
         order3_corrs[i, 1] = Gt2_4
@@ -1023,10 +999,10 @@ def main():
 
             # aexp_function.initparfnc(Gt1_4_divsigma, timeslice=7)
             bootfit_state1_divsigma, redchisq_1_divsigma = fit_value3(
-                Gt1_4_divsigma, t_range, aexp_function, norm=1
+                Gt1_4_divsigma, ratio_t_range, aexp_function, norm=1
             )
             bootfit_state2_divsigma, redchisq_2_divsigma = fit_value3(
-                Gt2_4_divsigma, t_range, aexp_function, norm=1
+                Gt2_4_divsigma, ratio_t_range, aexp_function, norm=1
             )
 
             order3_states_fit_divsigma[i, 0] = bootfit_state1_divsigma
@@ -1059,7 +1035,7 @@ def main():
                 effmass_ratio3,
                 effmass_ratio4,
                 [bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1], bootfit4[:, 1]],
-                t_range,
+                ratio_t_range,
                 lmb_val,
                 plotdir,
                 name="_l" + str(lmb_val) + "_all",
@@ -1102,7 +1078,9 @@ def main():
     }
     with open(
         datadir
-        / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"),
+        / (
+            f"lambda_dep_t{time_choice}_dt{delta_t}_fit{ratio_t_range[0]}-{ratio_t_range[-1]}.pkl"
+        ),
         "wb",
     ) as file_out:
         pickle.dump(all_data, file_out)
