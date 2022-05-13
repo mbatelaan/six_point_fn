@@ -76,7 +76,7 @@ def main():
     x_coord = np.array([i["x"][0] for i in fitlist])
     y_coord = np.array([i["x"][-1] for i in fitlist])
 
-    print(weights)
+    # print(weights)
     print(max(weights))
     argument_w = np.argmax(weights)
     print(argument_w)

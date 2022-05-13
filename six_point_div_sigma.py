@@ -367,6 +367,7 @@ def plotting_script_unpert(
     t_range12,
     t_range,
     plotdir,
+    redchisqs,
     name="",
     show=False,
 ):
@@ -397,16 +398,6 @@ def plotting_script_unpert(
         fmt="s",
         markerfacecolor="none",
     )
-
-    # plt.plot(t_range12, len(t_range12) * [np.average(fitvals1 -fitvals2)], color=_colors[0])
-    # plt.fill_between(
-    #     t_range12,
-    #     np.average(fitvals1 -fitvals2) - np.std(fitvals1 -fitvals2),
-    #     np.average(fitvals1 -fitvals2) + np.std(fitvals1 -fitvals2),
-    #     alpha=0.3,
-    #     color=_colors[0],
-    #     label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1 -fitvals2),np.std(fitvals1 -fitvals2))}",
-    # )
     plt.plot(
         t_range12, len(t_range12) * [np.average(fitvals_effratio)], color=_colors[0]
     )
@@ -427,6 +418,62 @@ def plotting_script_unpert(
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.ylim(-0.1, 0.1)
     plt.savefig(plotdir / ("unpert_effmass.pdf"))
+
+    plt.figure(figsize=(5, 5))
+    plt.errorbar(
+        efftime[:xlim],
+        yavg_1[:xlim],
+        ystd_1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        # label=f"{redchisqs[0]:.2f}"
+    )
+    plt.errorbar(
+        efftime[:xlim],
+        yavg_2[:xlim],
+        ystd_2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        # label=f"{redchisqs[1]:.2f}"
+    )
+    plt.plot(t_range12, len(t_range12) * [np.average(fitvals1)], color=_colors[0])
+    plt.fill_between(
+        t_range12,
+        np.average(fitvals1) - np.std(fitvals1),
+        np.average(fitvals1) + np.std(fitvals1),
+        alpha=0.3,
+        color=_colors[0],
+        # label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
+        label=rf"$E_N(\mathbf{{0}}) = {err_brackets(np.average(fitvals1),np.std(fitvals1))}$; $\chi^2_{{\textrm{{dof}}}} = {redchisqs[0]:.2f}$",
+    )
+    plt.plot(t_range12, len(t_range12) * [np.average(fitvals2)], color=_colors[1])
+    plt.fill_between(
+        t_range12,
+        np.average(fitvals2) - np.std(fitvals2),
+        np.average(fitvals2) + np.std(fitvals2),
+        alpha=0.3,
+        color=_colors[1],
+        label=rf"$E_{{\Sigma}}(\mathbf{{0}}) = {err_brackets(np.average(fitvals2),np.std(fitvals2))}$; $\chi^2_{{\textrm{{dof}}}} = {redchisqs[1]:.2f}$",
+    )
+    plt.plot(
+        1000,
+        1,
+        label=rf"$\Delta E = {err_brackets(np.average(fitvals2-fitvals1),np.std(fitvals2-fitvals1))}$",
+    )
+    plt.legend(fontsize="x-small")
+    plt.ylabel(r"$\textrm{Effective energy}$")
+    plt.xlabel(r"$t/a$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    # plt.setp(axs, xlim=(0, xlim), ylim=(0, 2))
+    plt.xlim(0, xlim)
+    plt.ylim(0, 2)
+    plt.savefig(plotdir / ("unpert_energies.pdf"))
 
     f, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True)
     f.tight_layout()
@@ -496,7 +543,7 @@ def plotting_script_unpert(
         np.average(fitvals) + np.std(fitvals),
         alpha=0.3,
         color=_colors[2],
-        label=rf"Fit = {err_brackets(np.average(fitvals),np.std(fitvals))}",
+        label=rf"Fit = ${err_brackets(np.average(fitvals),np.std(fitvals))}$; $\chi^2_{{\textrm{{dof}}}} = {redchisqs[2]:.2f}$",
     )
 
     # axs[0].axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
@@ -686,13 +733,14 @@ def main():
         fit_range,
         fit_range,
         plotdir,
+        [redchisq1,redchisq2, redchisq_ratio],
         name="_unpert_ratio",
         show=False,
     )
 
     # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
     if time_loop:
-        time_limits = [[1, 20], [1, 25]]
+        time_limits = [[1, 17], [17, 20]]
         fitlist = stats.fit_loop_bayes(
             # ratio_unpert,
             G2_nucl[0][:, :, 0],
