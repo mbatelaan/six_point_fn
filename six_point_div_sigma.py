@@ -733,16 +733,16 @@ def main():
         fit_range,
         fit_range,
         plotdir,
-        [redchisq1,redchisq2, redchisq_ratio],
+        [redchisq1, redchisq2, redchisq_ratio],
         name="_unpert_ratio",
         show=False,
     )
 
     # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
     if time_loop:
-        time_limits = [[1, 17], [17, 20]]
+        # Nucleon fit loop
+        time_limits = [[1, 20], [10, 26]]
         fitlist = stats.fit_loop_bayes(
-            # ratio_unpert,
             G2_nucl[0][:, :, 0],
             aexp_function,
             time_limits,
@@ -751,16 +751,24 @@ def main():
             time=False,
             weights_=True,
         )
-        print(fitlist[0]["redchisq"])
-        print([i["x"] for i in fitlist])
-        print([i["chisq"] for i in fitlist])
-        print([i["redchisq"] for i in fitlist])
-        print([i["paramavg"] for i in fitlist])
-
-        with open(datadir / (f"time_window_loop.pkl"), "wb") as file_out:
+        with open(datadir / (f"time_window_loop_nucl.pkl"), "wb") as file_out:
             pickle.dump(fitlist, file_out)
 
-        lmb_val = 0.04
+        # Sigma fit loop
+        fitlist = stats.fit_loop_bayes(
+            G2_sigm[0][:, :, 0],
+            aexp_function,
+            time_limits,
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_sigma.pkl"), "wb") as file_out:
+            pickle.dump(fitlist, file_out)
+
+        # small lambda fit loop
+        lmb_val = 0.003
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
         )
@@ -777,7 +785,28 @@ def main():
             time=False,
             weights_=True,
         )
-        with open(datadir / (f"time_window_loop_lambda.pkl"), "wb") as file_out:
+        with open(datadir / (f"time_window_loop_lambda_small.pkl"), "wb") as file_out:
+            pickle.dump(fitlist, file_out)
+
+        # large lambda fit loop
+        lmb_val = 0.05
+        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
+            G2_nucl, G2_sigm, lmb_val
+        )
+        Gt1_4, Gt2_4, evals = gevp(
+            matrix_4, time_choice, delta_t, name="_test", show=False
+        )
+        ratio4 = Gt1_4 / Gt2_4
+        fitlist = stats.fit_loop(
+            ratio4,
+            aexp_function,
+            time_limits,
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_lambda_large.pkl"), "wb") as file_out:
             pickle.dump(fitlist, file_out)
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
