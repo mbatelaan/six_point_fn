@@ -623,6 +623,78 @@ def plot_lmb_dep(all_data, plotdir):
     plt.savefig(plotdir / ("lambda_dep.pdf"))
     # plt.show()
 
+def fit_loop(G2_nucl, G2_sigm):
+        # Nucleon fit loop
+        time_limits = [[1, 20], [10, 26]]
+        fitlist_nucl = stats.fit_loop_bayes(
+            G2_nucl[0][:, :, 0],
+            aexp_function,
+            time_limits,
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_nucl.pkl"), "wb") as file_out:
+            pickle.dump(fitlist_nucl, file_out)
+
+        # Sigma fit loop
+        fitlist_sigma = stats.fit_loop_bayes(
+            G2_sigm[0][:, :, 0],
+            aexp_function,
+            time_limits,
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_sigma.pkl"), "wb") as file_out:
+            pickle.dump(fitlist_sigma, file_out)
+
+        # small lambda fit loop
+        lmb_val = 0.003
+        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
+            G2_nucl, G2_sigm, lmb_val
+        )
+        Gt1_4, Gt2_4, evals = gevp(
+            matrix_4, time_choice, delta_t, name="_test", show=False
+        )
+        ratio4 = Gt1_4 / Gt2_4
+        fitlist_small = stats.fit_loop(
+            ratio4,
+            aexp_function,
+            time_limits,
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_lambda_small.pkl"), "wb") as file_out:
+            pickle.dump(fitlist_small, file_out)
+
+        # large lambda fit loop
+        lmb_val = 0.05
+        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
+            G2_nucl, G2_sigm, lmb_val
+        )
+        Gt1_4, Gt2_4, evals = gevp(
+            matrix_4, time_choice, delta_t, name="_test", show=False
+        )
+        ratio4 = Gt1_4 / Gt2_4
+        fitlist_large = stats.fit_loop(
+            ratio4,
+            aexp_function,
+            time_limits,
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_lambda_large.pkl"), "wb") as file_out:
+            pickle.dump(fitlist_large, file_out)
+    return fitlist_nucl, fitlist_sigma, fitlist_small, fitlist_large
+
+
 
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
@@ -701,12 +773,9 @@ def main():
     # fitparam = stats.fit_bootstrap(twoexp_function.eval, twoexp_function.initpar, fitrange, G2_nucl[0][:, :, 0], bounds=None, time=False, fullcov=False):
     # fitlist = stats.fit_loop(G2_nucl[0][:, :, 0], twoexp_function, [[fitrange[0], fitrange[0]+1],[fitrange[-1], fitrange[-1]+1]])
 
-    # exit()
-
     bootfit_unpert_nucl, redchisq1 = fit_value3(
         G2_nucl[0][:, :, 0], fit_range, aexp_function, norm=1
     )
-
     bootfit_unpert_sigma, redchisq2 = fit_value3(
         G2_sigm[0][:, :, 0], fit_range, aexp_function, norm=1
     )
@@ -715,10 +784,6 @@ def main():
     bootfit_effratio, redchisq_effratio = fit_value3(
         ratio_unpert, fit_range, aexp_function, norm=1
     )
-    # print(f"redchisq = {redchisq_ratio}")
-    # print(f"fit = {np.average(bootfit_unpert_nucl,axis=0)}")
-    # print(f"fit = {np.average(bootfit_unpert_sigma,axis=0)}")
-    # print(f"fit = {np.average(bootfit_ratio,axis=0)}")
     diff = bootfit_unpert_nucl[:, 1] - bootfit_unpert_sigma[:, 1]
     print(f"diff = {np.average(diff,axis=0)}")
     print(f"diff = {err_brackets(np.average(diff),np.std(diff))}")
@@ -742,7 +807,7 @@ def main():
     if time_loop:
         # Nucleon fit loop
         time_limits = [[1, 20], [10, 26]]
-        fitlist = stats.fit_loop_bayes(
+        fitlist_nucl = stats.fit_loop_bayes(
             G2_nucl[0][:, :, 0],
             aexp_function,
             time_limits,
@@ -752,10 +817,10 @@ def main():
             weights_=True,
         )
         with open(datadir / (f"time_window_loop_nucl.pkl"), "wb") as file_out:
-            pickle.dump(fitlist, file_out)
+            pickle.dump(fitlist_nucl, file_out)
 
         # Sigma fit loop
-        fitlist = stats.fit_loop_bayes(
+        fitlist_sigma = stats.fit_loop_bayes(
             G2_sigm[0][:, :, 0],
             aexp_function,
             time_limits,
@@ -765,7 +830,7 @@ def main():
             weights_=True,
         )
         with open(datadir / (f"time_window_loop_sigma.pkl"), "wb") as file_out:
-            pickle.dump(fitlist, file_out)
+            pickle.dump(fitlist_sigma, file_out)
 
         # small lambda fit loop
         lmb_val = 0.003
@@ -776,7 +841,7 @@ def main():
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
         ratio4 = Gt1_4 / Gt2_4
-        fitlist = stats.fit_loop(
+        fitlist_small = stats.fit_loop(
             ratio4,
             aexp_function,
             time_limits,
@@ -786,7 +851,7 @@ def main():
             weights_=True,
         )
         with open(datadir / (f"time_window_loop_lambda_small.pkl"), "wb") as file_out:
-            pickle.dump(fitlist, file_out)
+            pickle.dump(fitlist_small, file_out)
 
         # large lambda fit loop
         lmb_val = 0.05
@@ -797,7 +862,7 @@ def main():
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
         ratio4 = Gt1_4 / Gt2_4
-        fitlist = stats.fit_loop(
+        fitlist_large = stats.fit_loop(
             ratio4,
             aexp_function,
             time_limits,
@@ -807,7 +872,7 @@ def main():
             weights_=True,
         )
         with open(datadir / (f"time_window_loop_lambda_large.pkl"), "wb") as file_out:
-            pickle.dump(fitlist, file_out)
+            pickle.dump(fitlist_large, file_out)
 
     order0_fit = np.zeros((len(lambdas), pars.nboot))
     order1_fit = np.zeros((len(lambdas), pars.nboot))
