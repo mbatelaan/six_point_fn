@@ -3,6 +3,7 @@ from pathlib import Path
 import pickle
 import yaml
 import sys
+from os.path import exists
 import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
@@ -635,67 +636,75 @@ def plot_lmb_dep(all_data, plotdir):
     # plt.show()
 
 
-def fit_loop(G2_nucl, G2_sigm, aexp_function, time_choice, delta_t, datadir):
+def fit_loop(G2_nucl, G2_sigm, aexp_function, time_choice, delta_t, datadir, time_limits, which_corr=[True, True, True]):
     # Nucleon fit loop
-    time_limits = [[1, 20], [10, 26]]
-    fitlist_nucl = stats.fit_loop_bayes(
-        G2_nucl[0][:, :, 0],
-        aexp_function,
-        time_limits,
-        plot=False,
-        disp=True,
-        time=False,
-        weights_=True,
-    )
-    with open(datadir / (f"time_window_loop_nucl.pkl"), "wb") as file_out:
-        pickle.dump(fitlist_nucl, file_out)
+    # time_limits = [[5, 18], [10, 25]]
+    fitlist_nucl, fitlist_sigma, fitlist_small, fitlist_large = [],[],[],[]
+    if which_corr[0]:
+        print("\n\nNucleon fitting")
+        fitlist_nucl = stats.fit_loop(
+            G2_nucl[0][:, :, 0],
+            aexp_function,
+            time_limits[0],
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_nucl.pkl"), "wb") as file_out:
+            pickle.dump(fitlist_nucl, file_out)
 
-    # Sigma fit loop
-    fitlist_sigma = stats.fit_loop_bayes(
-        G2_sigm[0][:, :, 0],
-        aexp_function,
-        time_limits,
-        plot=False,
-        disp=True,
-        time=False,
-        weights_=True,
-    )
-    with open(datadir / (f"time_window_loop_sigma.pkl"), "wb") as file_out:
-        pickle.dump(fitlist_sigma, file_out)
+    if which_corr[1]:
+        print("\n\nSigma fitting")
+        # Sigma fit loop
+        fitlist_sigma = stats.fit_loop(
+            G2_sigm[0][:, :, 0],
+            aexp_function,
+            time_limits[1],
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_sigma.pkl"), "wb") as file_out:
+            pickle.dump(fitlist_sigma, file_out)
+            
+    if which_corr[2]:
+        print("\n\nSmall lambda fitting")
+        # small lambda fit loop
+        lmb_val = 0.003
+        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
+        Gt1_4, Gt2_4, evals = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
+        ratio4 = Gt1_4 / Gt2_4
+        fitlist_small = stats.fit_loop(
+            ratio4,
+            aexp_function,
+            time_limits[2],
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_lambda_small.pkl"), "wb") as file_out:
+            pickle.dump(fitlist_small, file_out)
 
-    # small lambda fit loop
-    lmb_val = 0.003
-    matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
-    Gt1_4, Gt2_4, evals = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
-    ratio4 = Gt1_4 / Gt2_4
-    fitlist_small = stats.fit_loop(
-        ratio4,
-        aexp_function,
-        time_limits,
-        plot=False,
-        disp=True,
-        time=False,
-        weights_=True,
-    )
-    with open(datadir / (f"time_window_loop_lambda_small.pkl"), "wb") as file_out:
-        pickle.dump(fitlist_small, file_out)
-
-    # large lambda fit loop
-    lmb_val = 0.05
-    matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
-    Gt1_4, Gt2_4, evals = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
-    ratio4 = Gt1_4 / Gt2_4
-    fitlist_large = stats.fit_loop(
-        ratio4,
-        aexp_function,
-        time_limits,
-        plot=False,
-        disp=True,
-        time=False,
-        weights_=True,
-    )
-    with open(datadir / (f"time_window_loop_lambda_large.pkl"), "wb") as file_out:
-        pickle.dump(fitlist_large, file_out)
+        # large lambda fit loop
+        print("\n\nLarge lambda fitting")
+        lmb_val = 0.05
+        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(G2_nucl, G2_sigm, lmb_val)
+        Gt1_4, Gt2_4, evals = gevp(matrix_4, time_choice, delta_t, name="_test", show=False)
+        ratio4 = Gt1_4 / Gt2_4
+        fitlist_large = stats.fit_loop(
+            ratio4,
+            aexp_function,
+            time_limits[2],
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(datadir / (f"time_window_loop_lambda_large.pkl"), "wb") as file_out:
+            pickle.dump(fitlist_large, file_out)
     return fitlist_nucl, fitlist_sigma, fitlist_small, fitlist_large
 
 
@@ -770,15 +779,42 @@ def main():
 
     # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
     if time_loop:
+        # nucl_exist = exists(datadir / (f"time_window_loop_nucl.pkl"))
+        # sigma_exist = exists(datadir / (f"time_window_loop_sigma.pkl"))
+        # small_exist = exists(datadir / (f"time_window_loop_lambda_small.pkl"))
+        # large_exist = exists(datadir / (f"time_window_loop_lambda_large.pkl"))
+        # which_corr = [not nucl_exist, False, not (small_exist and large_exist)]
+        which_corr = [True, False, True]
+        time_limits = np.array([[[5, 20], [config["tmax_nucl"], config["tmax_nucl"]+1]],
+                                [[5, 20], [config["tmax_sigma"], config["tmax_sigma"]+1]],
+                                [[5, 20], [config["tmax_ratio"], config["tmax_ratio"]+1]],
+                            ])
         fitlist_nucl, fitlist_sigma, fitlist_small, fitlist_large = fit_loop(
-            G2_nucl, G2_sigm, aexp_function, time_choice, delta_t, datadir
+            G2_nucl, G2_sigm, aexp_function, time_choice, delta_t, datadir, time_limits, which_corr
         )
+        with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
+            fitlist_sigma = pickle.load(file_in)
+        # if nucl_exist:
+        #     with open(datadir / (f"time_window_loop_nucl.pkl"), "rb") as file_in:
+        #         fitlist_nucl = pickle.load(file_in)
+        # if sigma_exist:
+        #     with open(datadir / (f"time_window_loop_sigma.pkl"), "rb") as file_in:
+        #         fitlist_sigma = pickle.load(file_in)
+        # else:
+        #     with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
+        #         fitlist_sigma = pickle.load(file_in)
+        # if small_exist and large_exist:
+        #     with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:
+        #         fitlist_small = pickle.load(file_in)
+        #     with open(datadir / (f"time_window_loop_lambda_large.pkl"), "rb") as file_in:
+        #         fitlist_large = pickle.load(file_in)
+
         weights_nucl = np.array([i["weight"] for i in fitlist_nucl])
         high_weight_nucl = np.argmax(weights_nucl)
         print(fitlist_nucl[high_weight_nucl]["redchisq"])
         nucl_t_range = np.arange(
             fitlist_nucl[high_weight_nucl]["x"][0],
-            fitlist_nucl[high_weight_nucl]["x"][-1],
+            fitlist_nucl[high_weight_nucl]["x"][-1]+1,
         )
         print(f"nucl_t_range = {nucl_t_range}")
 
@@ -786,7 +822,50 @@ def main():
         high_weight_sigma = np.argmax(weights_sigma)
         sigma_t_range = np.arange(
             fitlist_sigma[high_weight_sigma]["x"][0],
-            fitlist_sigma[high_weight_sigma]["x"][-1],
+            fitlist_sigma[high_weight_sigma]["x"][-1]+1,
+        )
+        print(f"sigma_t_range = {sigma_t_range}")
+        # sigma_t_range = np.arange(
+        #     config["t_range0"],
+        #     config["t_range1"],
+        # )
+        # print(f"sigma_t_range = {sigma_t_range}")
+
+        weights_small = np.array([i["weight"] for i in fitlist_small])
+        high_weight_small = np.argmax(weights_small)
+        weights_large = np.array([i["weight"] for i in fitlist_large])
+        high_weight_large = np.argmax(weights_large)
+        ratio_t_range = np.arange(
+            min(
+                fitlist_small[high_weight_small]["x"][0],
+                fitlist_large[high_weight_large]["x"][0],
+            ),
+            fitlist_large[high_weight_large]["x"][-1]+1,
+        )
+        print(f"ratio_t_range = {ratio_t_range}")
+    else:
+        with open(datadir / (f"time_window_loop_nucl.pkl"), "rb") as file_in:
+            fitlist_nucl = pickle.load(file_in)
+        with open(datadir / (f"time_window_loop_sigma.pkl"), "rb") as file_in:
+            fitlist_sigma = pickle.load(file_in)
+        with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:
+            fitlist_small = pickle.load(file_in)
+        with open(datadir / (f"time_window_loop_lambda_large.pkl"), "rb") as file_in:
+            fitlist_large = pickle.load(file_in)
+        weights_nucl = np.array([i["weight"] for i in fitlist_nucl])
+        high_weight_nucl = np.argmax(weights_nucl)
+        print(fitlist_nucl[high_weight_nucl]["redchisq"])
+        nucl_t_range = np.arange(
+            fitlist_nucl[high_weight_nucl]["x"][0],
+            fitlist_nucl[high_weight_nucl]["x"][-1]+1,
+        )
+        print(f"nucl_t_range = {nucl_t_range}")
+
+        weights_sigma = np.array([i["weight"] for i in fitlist_sigma])
+        high_weight_sigma = np.argmax(weights_sigma)
+        sigma_t_range = np.arange(
+            fitlist_sigma[high_weight_sigma]["x"][0],
+            fitlist_sigma[high_weight_sigma]["x"][-1]+1,
         )
         print(f"sigma_t_range = {sigma_t_range}")
 
@@ -795,15 +874,15 @@ def main():
         weights_large = np.array([i["weight"] for i in fitlist_large])
         high_weight_large = np.argmax(weights_large)
         ratio_t_range = np.arange(
-            np.min(
+            min(
                 fitlist_small[high_weight_small]["x"][0],
                 fitlist_large[high_weight_large]["x"][0],
             ),
-            fitlist_large[high_weight_large]["x"][-1],
+            fitlist_large[high_weight_large]["x"][-1]+1,
         )
         print(f"ratio_t_range = {ratio_t_range}")
-    else:
-        ratio_t_range = np.arange(config["t_range0"], config["t_range1"])
+
+        # ratio_t_range = np.arange(config["t_range0"], config["t_range1"])
 
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
