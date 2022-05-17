@@ -2,3 +2,6 @@
 __pycache__*
 analysis
 *.pdf
+*.out
+*.sh
+*.job

@@ -10,5 +10,5 @@ lmb_init : 20
 lmb_final : 30
 lmb_i : 0
 lmb_f : 0.05
-time_loop : False
+time_loop : True
 plotting : True
