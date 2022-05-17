@@ -674,7 +674,7 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
-        plt.ylim(0, .11)
+        plt.ylim(0, .15)
         plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim.pdf"))
 
 
