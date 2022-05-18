@@ -368,7 +368,7 @@ def plot_lmb_dep(all_data, plotdir, fit_data=None):
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_fit.pdf"))
 
-        plt.ylim(-0.005, -.11)
+        plt.ylim(-0.005, -0.11)
         plt.savefig(plotdir / ("lambda_dep_fit_ylim.pdf"))
 
         # plt.xlim(-0.005, 0.08)
@@ -674,9 +674,8 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
-        plt.ylim(0, .15)
+        plt.ylim(0, 0.15)
         plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim.pdf"))
-
 
     plt.close()
     return
@@ -1302,8 +1301,7 @@ def main():
     # Read data from the pickle file
     # Need to read in the correct file!!!
     with open(
-        datadir
-        / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"),
+        datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"),
         "rb",
     ) as file_in:
         data = pickle.load(file_in)
