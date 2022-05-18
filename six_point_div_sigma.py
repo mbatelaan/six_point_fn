@@ -779,12 +779,12 @@ def main():
 
     # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
     if time_loop:
-        # nucl_exist = exists(datadir / (f"time_window_loop_nucl.pkl"))
-        # sigma_exist = exists(datadir / (f"time_window_loop_sigma.pkl"))
-        # small_exist = exists(datadir / (f"time_window_loop_lambda_small.pkl"))
-        # large_exist = exists(datadir / (f"time_window_loop_lambda_large.pkl"))
-        # which_corr = [not nucl_exist, False, not (small_exist and large_exist)]
-        which_corr = [True, False, True]
+        nucl_exist = exists(datadir / (f"time_window_loop_nucl.pkl"))
+        sigma_exist = exists(datadir / (f"time_window_loop_sigma.pkl"))
+        small_exist = exists(datadir / (f"time_window_loop_lambda_small.pkl"))
+        large_exist = exists(datadir / (f"time_window_loop_lambda_large.pkl"))
+        which_corr = [not nucl_exist, False, not (small_exist and large_exist)]
+        # which_corr = [True, False, True]
         time_limits = np.array([[[5, 20], [config["tmax_nucl"], config["tmax_nucl"]+1]],
                                 [[5, 20], [config["tmax_sigma"], config["tmax_sigma"]+1]],
                                 [[5, 20], [config["tmax_ratio"], config["tmax_ratio"]+1]],
@@ -794,20 +794,20 @@ def main():
         )
         with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
             fitlist_sigma = pickle.load(file_in)
-        # if nucl_exist:
-        #     with open(datadir / (f"time_window_loop_nucl.pkl"), "rb") as file_in:
-        #         fitlist_nucl = pickle.load(file_in)
+        if nucl_exist:
+            with open(datadir / (f"time_window_loop_nucl.pkl"), "rb") as file_in:
+                fitlist_nucl = pickle.load(file_in)
         # if sigma_exist:
         #     with open(datadir / (f"time_window_loop_sigma.pkl"), "rb") as file_in:
         #         fitlist_sigma = pickle.load(file_in)
         # else:
         #     with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
         #         fitlist_sigma = pickle.load(file_in)
-        # if small_exist and large_exist:
-        #     with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:
-        #         fitlist_small = pickle.load(file_in)
-        #     with open(datadir / (f"time_window_loop_lambda_large.pkl"), "rb") as file_in:
-        #         fitlist_large = pickle.load(file_in)
+        if small_exist and large_exist:
+            with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:
+                fitlist_small = pickle.load(file_in)
+            with open(datadir / (f"time_window_loop_lambda_large.pkl"), "rb") as file_in:
+                fitlist_large = pickle.load(file_in)
 
         weights_nucl = np.array([i["weight"] for i in fitlist_nucl])
         high_weight_nucl = np.argmax(weights_nucl)
@@ -884,6 +884,9 @@ def main():
 
         # ratio_t_range = np.arange(config["t_range0"], config["t_range1"])
 
+    # ratio_t_range = np.arange(5,19)
+    # print(f"ratio_t_range = {ratio_t_range}")
+    
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
     bootfit_unpert_nucl, redchisq1 = fit_value3(
@@ -1155,11 +1158,15 @@ def main():
         "time_choice": time_choice,
         "delta_t": delta_t,
     }
+    # with open(
+    #     datadir
+    #     / (
+    #         f"lambda_dep_t{time_choice}_dt{delta_t}_fit{ratio_t_range[0]}-{ratio_t_range[-1]}.pkl"
+    #     ),
+    #     "wb",
+    # ) as file_out:
     with open(
-        datadir
-        / (
-            f"lambda_dep_t{time_choice}_dt{delta_t}_fit{ratio_t_range[0]}-{ratio_t_range[-1]}.pkl"
-        ),
+        datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"),
         "wb",
     ) as file_out:
         pickle.dump(all_data, file_out)

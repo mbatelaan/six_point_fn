@@ -703,7 +703,7 @@ def main():
     if len(sys.argv) == 2:
         config_file = sys.argv[1]
     else:
-        config_file = "data_dir_theta2.yaml"
+        config_file = "data_dir_qmax.yaml"
     print("Reading directories from: ", config_file)
     with open(config_file) as f:
         config = yaml.safe_load(f)

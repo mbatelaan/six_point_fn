@@ -1300,9 +1300,10 @@ def main():
     lmb_val = config["lmb_val"]
 
     # Read data from the pickle file
+    # Need to read in the correct file!!!
     with open(
         datadir
-        / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"),
+        / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"),
         "rb",
     ) as file_in:
         data = pickle.load(file_in)
