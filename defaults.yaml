@@ -5,6 +5,6 @@ plotting : False
 time_loop : False
 lmb_i : 0
 lmb_f : 0.08
-tmax_nucl : 18
+tmax_nucl : 19
 tmax_sigma : 18
 tmax_ratio : 18
