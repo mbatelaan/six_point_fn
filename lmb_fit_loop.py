@@ -838,7 +838,8 @@ def main_loop():
     fit_data_list = []
     # min_len = np.min([len(lambdas0), len(lambdas1), len(lambdas2), len(lambdas3)])
     min_len = len(lambdas3)
-    print(min_len)
+    print('len(lambdas3) = ', min_len)
+    # print(min_len)
     for lmb_initial in np.arange(0,min_len):
         for lmb_final in np.arange(lmb_initial+3,min_len):
             lmb_range = np.arange(lmb_initial, lmb_final)

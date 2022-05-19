@@ -1094,7 +1094,7 @@ def plot_lmb_dep3(all_data, plotdir, fit_data=None):
 
     # plt.xlim(-0.01, 0.065)
     plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
-    plt.ylim(0, 3)
+    plt.ylim(0, 5)
 
     plt.xlabel("$\lambda$")
     plt.ylabel("$\Delta E / \lambda$")
@@ -1333,7 +1333,7 @@ def main():
     plot_lmb_dep(all_data0, plotdir)
 
     # Filter out data points with a high reduced chi-squared value
-    chisq_tol = 2  # 1.7
+    chisq_tol = 1.5  # 1.7
     order0_fit = order0_fit[np.where(redchisq[0] <= chisq_tol)]
     lambdas0 = lambdas[np.where(redchisq[0] <= chisq_tol)]
     order1_fit = order1_fit[np.where(redchisq[1] <= chisq_tol)]

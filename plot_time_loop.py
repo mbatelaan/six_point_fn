@@ -75,7 +75,6 @@ def main():
     # with open(datadir / (f"time_window_loop_sigma.pkl"), "rb") as file_in:
     with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
         fitlist_sigma = pickle.load(file_in)
-
     with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:
         fitlist_small = pickle.load(file_in)
     with open(datadir / (f"time_window_loop_lambda_large.pkl"), "rb") as file_in:
@@ -88,9 +87,16 @@ def main():
         fitlist_nucl[high_weight_nucl]["x"][0],
         fitlist_nucl[high_weight_nucl]["x"][-1]+1,
     )
-    print(f"nucl_t_range = {nucl_t_range}")
+    print(f"\nnucl_t_range = {nucl_t_range}")
     print("redchisq", fitlist_nucl[high_weight_nucl]["redchisq"])
     print("maxweight",max(weights_nucl))
+    print("max-1: redchisq = ", fitlist_nucl[high_weight_nucl-1]["redchisq"])
+    print("max-1: range = ", fitlist_nucl[high_weight_nucl-1]["x"])
+    print("max-2: redchisq = ", fitlist_nucl[high_weight_nucl-2]["redchisq"])
+    print("max-2: range = ", fitlist_nucl[high_weight_nucl-2]["x"])
+    print("max-3: redchisq = ", fitlist_nucl[high_weight_nucl-3]["redchisq"])
+    print("max-3: weight = ", fitlist_nucl[high_weight_nucl-3]["weight"])
+    print("max-3: range = ", fitlist_nucl[high_weight_nucl-3]["x"])
     
     weights_sigma = np.array([i["weight"] for i in fitlist_sigma])
     high_weight_sigma = np.argmax(weights_sigma)
@@ -98,9 +104,16 @@ def main():
         fitlist_sigma[high_weight_sigma]["x"][0],
         fitlist_sigma[high_weight_sigma]["x"][-1]+1,
     )
-    print(f"sigma_t_range = {sigma_t_range}")
+    print(f"\nsigma_t_range = {sigma_t_range}")
     print(fitlist_sigma[high_weight_sigma]["redchisq"])
     print("maxweight",max(weights_sigma))
+    print("max-1: redchisq = ", fitlist_sigma[high_weight_sigma-1]["redchisq"])
+    print("max-1: range = ", fitlist_sigma[high_weight_sigma-1]["x"])
+    print("max-2: redchisq = ", fitlist_sigma[high_weight_sigma-2]["redchisq"])
+    print("max-2: range = ", fitlist_sigma[high_weight_sigma-2]["x"])
+    print("max-3: redchisq = ", fitlist_sigma[high_weight_sigma-3]["redchisq"])
+    print("max-3: weight = ", fitlist_sigma[high_weight_sigma-3]["weight"])
+    print("max-3: range = ", fitlist_sigma[high_weight_sigma-3]["x"])
 
     weights_small = np.array([i["weight"] for i in fitlist_small])
     high_weight_small = np.argmax(weights_small)
@@ -113,7 +126,7 @@ def main():
         ),
         fitlist_large[high_weight_large]["x"][-1]+1,
     )
-    print(f"ratio_t_range = {ratio_t_range}")
+    print(f"\nratio_t_range = {ratio_t_range}")
     print(fitlist_small[high_weight_small]["redchisq"])
     print("maxweight",max(weights_small))
     print(fitlist_large[high_weight_large]["redchisq"])
@@ -121,6 +134,20 @@ def main():
 
     print(f"small: {fitlist_small[high_weight_small]['x']}")
     print(f"large: {fitlist_large[high_weight_large]['x']}")
+    print("max-1: redchisq = ", fitlist_small[high_weight_small-1]["redchisq"])
+    print("max-1: range = ", fitlist_small[high_weight_small-1]["x"])
+    print("max-2: redchisq = ", fitlist_small[high_weight_small-2]["redchisq"])
+    print("max-2: range = ", fitlist_small[high_weight_small-2]["x"])
+    print("max-3: redchisq = ", fitlist_small[high_weight_small-3]["redchisq"])
+    print("max-3: range = ", fitlist_small[high_weight_small-3]["x"])
+
+    print("\nmax-1: redchisq = ", fitlist_large[high_weight_large-1]["redchisq"])
+    print("max-1: range = ", fitlist_large[high_weight_large-1]["x"])
+    print("max-2: redchisq = ", fitlist_large[high_weight_large-2]["redchisq"])
+    print("max-2: range = ", fitlist_large[high_weight_large-2]["x"])
+    print("max-3: redchisq = ", fitlist_large[high_weight_large-3]["redchisq"])
+    print("max-3: range = ", fitlist_large[high_weight_large-3]["x"])
+
     exit()
     
     weights = np.array([i["weight"] for i in fitlist])
