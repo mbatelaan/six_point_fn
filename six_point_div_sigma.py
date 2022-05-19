@@ -783,31 +783,35 @@ def main():
         sigma_exist = exists(datadir / (f"time_window_loop_sigma.pkl"))
         small_exist = exists(datadir / (f"time_window_loop_lambda_small.pkl"))
         large_exist = exists(datadir / (f"time_window_loop_lambda_large.pkl"))
-        which_corr = [not nucl_exist, False, not (small_exist and large_exist)]
-        # which_corr = [True, False, True]
-        time_limits = np.array([[[5, 20], [config["tmax_nucl"], config["tmax_nucl"]+1]],
-                                [[5, 20], [config["tmax_sigma"], config["tmax_sigma"]+1]],
-                                [[5, 20], [config["tmax_ratio"], config["tmax_ratio"]+1]],
+        # which_corr = [not nucl_exist, False, not (small_exist and large_exist)]
+        which_corr = [True, True, True]
+        # time_limits = np.array([[[5, 20], [config["tmax_nucl"], config["tmax_nucl"]+1]],
+        #                         [[5, 20], [config["tmax_sigma"], config["tmax_sigma"]+1]],
+        #                         [[5, 20], [config["tmax_ratio"], config["tmax_ratio"]+1]],
+        #                     ])
+        time_limits = np.array([[[5, 20], [config["tmax_nucl"]-2, config["tmax_nucl"]+5]],
+                                [[5, 20], [config["tmax_sigma"]-2, config["tmax_sigma"]+5]],
+                                [[5, 20], [config["tmax_ratio"]-2, config["tmax_ratio"]+5]],
                             ])
         fitlist_nucl, fitlist_sigma, fitlist_small, fitlist_large = fit_loop(
             G2_nucl, G2_sigm, aexp_function, time_choice, delta_t, datadir, time_limits, which_corr
         )
-        with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
-            fitlist_sigma = pickle.load(file_in)
-        if nucl_exist:
-            with open(datadir / (f"time_window_loop_nucl.pkl"), "rb") as file_in:
-                fitlist_nucl = pickle.load(file_in)
-        # if sigma_exist:
-        #     with open(datadir / (f"time_window_loop_sigma.pkl"), "rb") as file_in:
-        #         fitlist_sigma = pickle.load(file_in)
-        # else:
-        #     with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
-        #         fitlist_sigma = pickle.load(file_in)
-        if small_exist and large_exist:
-            with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:
-                fitlist_small = pickle.load(file_in)
-            with open(datadir / (f"time_window_loop_lambda_large.pkl"), "rb") as file_in:
-                fitlist_large = pickle.load(file_in)
+        # with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
+        #     fitlist_sigma = pickle.load(file_in)
+        # if nucl_exist:
+        #     with open(datadir / (f"time_window_loop_nucl.pkl"), "rb") as file_in:
+        #         fitlist_nucl = pickle.load(file_in)
+        # # if sigma_exist:
+        # #     with open(datadir / (f"time_window_loop_sigma.pkl"), "rb") as file_in:
+        # #         fitlist_sigma = pickle.load(file_in)
+        # # else:
+        # #     with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
+        # #         fitlist_sigma = pickle.load(file_in)
+        # if small_exist and large_exist:
+        #     with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:
+        #         fitlist_small = pickle.load(file_in)
+        #     with open(datadir / (f"time_window_loop_lambda_large.pkl"), "rb") as file_in:
+        #         fitlist_large = pickle.load(file_in)
 
         weights_nucl = np.array([i["weight"] for i in fitlist_nucl])
         high_weight_nucl = np.argmax(weights_nucl)
