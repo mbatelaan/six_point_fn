@@ -10,5 +10,5 @@ lmb_val : 0.04
 lmb_i : 0
 lmb_f : 0.05
 lmb_init : 5
-lmb_final : 11
+lmb_final : 9
 time_loop : True
