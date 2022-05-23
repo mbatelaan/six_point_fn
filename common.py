@@ -1001,11 +1001,15 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
 
     # Ordering of the eigenvalues
     if eval_left[0] > eval_left[1]:
-        eval_left = eval_left.T[::-1].T
-        evec_left = evec_left.T[::-1].T
+        eval_left = eval_left[::-1]
+        evec_left = evec_left[:,::-1]
+        # eval_left = eval_left.T[::-1].T
+        # evec_left = evec_left.T[::-1].T
     if eval_right[0] > eval_right[1]:
-        eval_right = eval_right.T[::-1].T
-        evec_right = evec_right.T[::-1].T
+        eval_right = eval_right[::-1]
+        evec_right = evec_right[:,::-1]
+        # eval_right = eval_right.T[::-1].T
+        # evec_right = evec_right.T[::-1].T
     # print("left:", eval_left, evec_left)
     # print("right:", eval_right, evec_right)
 
@@ -1065,7 +1069,7 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
         #     eval_right = eval_right[:,::-1]
         #     evec_right = evec_right[:,::-1]
 
-        # Ordering of the eigenvalues
+        # # Ordering of the eigenvalues
         if eval_left[0] > eval_left[1]:
             # print("sorting left")
             eval_left = eval_left[::-1]
@@ -1086,6 +1090,14 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     evec_right = np.average(evec_right_list, axis=0)
     evec_left = np.average(evec_left_list, axis=0)
     evec_right = np.average(evec_right_list, axis=0)
+
+    # # Ordering of the eigenvalues
+    # if eval_left[0] > eval_left[1]:
+    #     eval_left_list = [evalu[::-1] for evalu in eval_left_list]
+    #     evec_left_list = [evec[:,::-1] for evec in evec_left_list]
+    # if eval_right[0] > eval_right[1]:
+    #     eval_right_list = [evalu[::-1] for evalu in eval_right_list]
+    #     evec_right_list = [evec[:,::-1] for evec in evec_right_list]
 
     Gt1 = np.einsum("i,ijkl,j->kl", evec_left[:, 0], corr_matrix, evec_right[:, 0])
     Gt2 = np.einsum("i,ijkl,j->kl", evec_left[:, 1], corr_matrix, evec_right[:, 1])

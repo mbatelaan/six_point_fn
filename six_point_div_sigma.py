@@ -762,8 +762,23 @@ def fit_loop(
     )
 
 
-def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False):
+def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=None):
     """Take two lists of dictionaries, one for a fit using the one-exponential function and one using a two-exponential function, Return the weighted average of the energies across these fits"""
+
+    if tmax_choice:
+        tmax_1exp = np.array([i["x"][-1] for i in fitlist_1exp])
+        tmin_1exp = np.array([i["x"][0] for i in fitlist_1exp])
+        indices = np.where(tmax_1exp == tmax_choice)
+        indices = indices[0][np.where(3 < tmin_1exp[indices])]
+        indices = indices[np.where(tmin_1exp[indices] < 16)]
+        fitlist_1exp = [fitlist_1exp[index] for index in indices]
+
+        tmax_2exp = np.array([i["x"][-1] for i in fitlist_2exp])
+        tmin_2exp = np.array([i["x"][0] for i in fitlist_2exp])
+        indices_2exp = np.where(tmax_2exp == tmax_choice)
+        indices_2exp = indices_2exp[0][np.where(tmin_2exp[indices_2exp] < 4)]
+        fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
+
     dE_1exp = np.std([i["param"][:, 1] for i in fitlist_1exp], axis=1)
     dof_1exp = np.array([i["dof"] for i in fitlist_1exp])
     chisq_1exp = np.array([i["chisq"] for i in fitlist_1exp])
@@ -803,7 +818,7 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False):
         print(
             f"\n+++++\nweighted energy = {err_brackets(np.average(weighted_energy), np.std(weighted_energy))}\n+++++"
         )
-    return weighted_energy
+    return weighted_energy, fitweights
 
 
 def main():
@@ -968,12 +983,12 @@ def main():
             ) as file_in:
                 fitlist_large = pickle.load(file_in)
 
-        # =====================================================
-        weighted_energy_nucl = weighted_avg_1_2_exp(
-            fitlist_nucl_1exp, fitlist_nucl_2exp, print=False
+        # =========================================
+        weighted_energy_nucl, fitweights = weighted_avg_1_2_exp(
+            fitlist_nucl_1exp, fitlist_nucl_2exp, print=False, tmax_choice=config["tmax_nucl"],
         )
-        weighted_energy_sigma = weighted_avg_1_2_exp(
-            fitlist_sigma_1exp, fitlist_sigma_2exp, print=False
+        weighted_energy_sigma, fitweights = weighted_avg_1_2_exp(
+            fitlist_sigma_1exp, fitlist_sigma_2exp, print=False, tmax_choice=config["tmax_sigma"],
         )
         # =========================================
 
@@ -1007,6 +1022,10 @@ def main():
         )
         print(f"ratio_t_range = {ratio_t_range}")
 
+    # ===============================
+    # HARD CODED RANGE!!!
+    ratio_t_range = np.arange(7,18)
+    # ===============================
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
 
@@ -1022,9 +1041,10 @@ def main():
     bootfit_effratio, redchisq_effratio = fit_value3(
         ratio_unpert, ratio_t_range, aexp_function, norm=1
     )
-    # diff = bootfit_unpert_nucl[:, 1] - bootfit_unpert_sigma[:, 1]
-    # print(f"diff = {np.average(diff,axis=0)}")
-    # print(f"diff = {err_brackets(np.average(diff),np.std(diff))}")
+    # bootfit_effratio, redchisq_effratio = fit_value3(
+    #     ratio_unpert, nucl_t_range, aexp_function, norm=1
+    # )
+
     plotting_script_unpert(
         G2_nucl[0][:, :, 0],
         G2_sigm[0][:, :, 0],
@@ -1082,7 +1102,7 @@ def main():
         corr_matrices[i, 2] = matrix_3
         corr_matrices[i, 3] = matrix_4
 
-        Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
+        Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp(
             matrix_1, time_choice, delta_t, name="_test", show=False
         )
         # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_1, evec_right[:, :, 0])
@@ -1111,15 +1131,15 @@ def main():
         # print("\n\ne-vecs r: ",np.average(evec_right, axis=0))
         red_chisq_list[0, i] = redchisq1
 
-        print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
-        print(f"redchisq1 = {redchisq1}")
+        # print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
+        # print(f"redchisq1 = {redchisq1}")
 
-        Gt1_2, Gt2_2, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
+        Gt1_2, Gt2_2, [eval_left, evec_left, eval_right, evec_right] = gevp(
             matrix_2, time_choice, delta_t, name="_test", show=False
         )
         # Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_2, evec_right[:, :, 0])
         # Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_2, evec_right[:, :, 1])
-        print(f"evec_2 = {np.average(evec_left,axis=0)}")
+        # print(f"evec_2 = {np.average(evec_left,axis=0)}")
         # print(f"evec_2 = {evec_left}")
         ratio2 = Gt1_2 / Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
@@ -1138,15 +1158,15 @@ def main():
         order1_evals[i] = eval_left
         order1_evecs[i] = evec_left
         red_chisq_list[1, i] = redchisq2
-        print(f"redchisq2 = {redchisq2}")
+        # print(f"redchisq2 = {redchisq2}")
 
-        Gt1_3, Gt2_3, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
+        Gt1_3, Gt2_3, [eval_left, evec_left, eval_right, evec_right] = gevp(
             matrix_3, time_choice, delta_t, name="_test", show=False
         )
         # Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_3, evec_right[:, :, 0])
         # Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_3, evec_right[:, :, 1])
 
-        print(f"evec_3 = {np.average(evec_left,axis=0)}")
+        # print(f"evec_3 = {np.average(evec_left,axis=0)}")
         ratio3 = Gt1_3 / Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
         bootfit3, redchisq3 = fit_value3(ratio3, ratio_t_range, aexp_function, norm=1)
@@ -1164,23 +1184,24 @@ def main():
         order2_evals[i] = eval_left
         order2_evecs[i] = evec_left
         red_chisq_list[2, i] = redchisq3
-        print(f"redchisq3 = {redchisq3}")
+        # print(f"redchisq3 = {redchisq3}")
 
-        Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
+        Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp(
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
         # Gt1_4 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_4, evec_right[:, :, 0])
         # Gt2_4 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_4, evec_right[:, :, 1])
 
-        print(f"evec_4 = {np.average(evec_left,axis=0)}")
+        # print(f"evec_4 = {np.average(evec_left,axis=0)}")
         ratio4 = Gt1_4 / Gt2_4
         effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1)
         bootfit4, redchisq4 = fit_value3(ratio4, ratio_t_range, aexp_function, norm=1)
+        print(f"redchisq4 = {redchisq4}")
         bootfit_state1, redchisq_1 = fit_value3(
-            Gt1_4, ratio_t_range, aexp_function, norm=1e30
+            Gt1_4, ratio_t_range, aexp_function, norm=1e20
         )
         bootfit_state2, redchisq_2 = fit_value3(
-            Gt2_4, ratio_t_range, aexp_function, norm=1e30
+            Gt2_4, ratio_t_range, aexp_function, norm=1e20
         )
         order3_corrs[i, 0] = Gt1_4
         order3_corrs[i, 1] = Gt2_4
