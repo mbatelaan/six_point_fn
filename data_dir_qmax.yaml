@@ -15,4 +15,4 @@ tmax_nucl : 18
 tmax_sigma : 18
 tmax_ratio : 18
 plotting : True
-time_loop : True
+time_loop : False
