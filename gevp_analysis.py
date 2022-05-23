@@ -17,6 +17,7 @@ from common import read_pickle
 from common import fit_value3
 from common import read_correlators
 from common import read_correlators2
+from common import read_correlators5
 from common import make_matrices
 from common import gevp
 from common import gevp_bootstrap
@@ -238,6 +239,10 @@ if __name__ == "__main__":
 
     if "onlytwist" in config and config["onlytwist"]:
         G2_nucl, G2_sigm = read_correlators2(pars, pickledir, pickledir2, mom_strings)
+    elif "onlytwist2" in config and config["onlytwist2"]:
+        G2_nucl, G2_sigm = read_correlators5(
+            pars, pickledir, pickledir2, mom_strings
+        )
     else:
         G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
     lambdas = np.linspace(0, 0.16, 30)[1:]
