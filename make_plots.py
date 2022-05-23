@@ -63,6 +63,11 @@ def fitfunction5(lmb, Delta_E, matrix_element):
     return deltaE
 
 
+def fitfunction_4(lmb, Delta_E, A, B):
+    deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * A**2, lmb**4 * B**2)
+    return deltaE
+
+
 def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv=False):
     """Fit the lambda dependence
 
@@ -163,6 +168,61 @@ def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv=False):
     plt.close()
 
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
+    popt_avg, pcov_avg = curve_fit(
+        function,
+        lambdas,
+        ydata_avg,
+        sigma=diag_sigma,
+        p0=p0,
+        maxfev=4000,
+        bounds=bounds,
+    )
+    chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, covmat_inverse)
+    # print("fit_avg", popt_avg)
+    p0 = popt_avg
+    redchisq = chisq / dof
+    bootfit = []
+    for iboot, values in enumerate(ydata):
+        # print(iboot)
+        popt, pcov = curve_fit(
+            function,
+            lambdas,
+            values,
+            sigma=diag_sigma,
+            # maxfev=4000,
+            p0=p0,
+            bounds=bounds,
+        )  # , p0=popt_avg)
+        # print(popt)
+        bootfit.append(popt)
+    bootfit = np.array(bootfit)
+    print("bootfit", np.average(bootfit, axis=0))
+    return bootfit, redchisq, chisq
+
+
+def fit_lmb_4(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv=False):
+    """Fit the lambda dependence
+
+    data is a correlator with tht bootstraps on the first index and the time on the second
+    lambdas is an array of time values to fit over
+    the function will return an array of fit parameters for each bootstrap
+    """
+
+    bounds = ([0, 0], [np.inf, np.inf])
+    ydata = ydata.T
+    # print(np.shape(ydata))
+    data_set = ydata
+    ydata_avg = np.average(data_set, axis=0)
+
+    covmat = np.cov(data_set.T)
+    diag = np.diagonal(covmat)
+    norms = np.einsum("i,j->ij", diag, diag) ** 0.5
+    covmat_norm = covmat / norms
+
+    covmat_inverse = linalg.pinv(covmat)
+    dof = len(lambdas)
+    diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
+
     popt_avg, pcov_avg = curve_fit(
         function,
         lambdas,
@@ -1444,6 +1504,16 @@ def main():
         print("fit order 4:", np.average(bootfit3, axis=0))
         print("fit std order 4:", np.std(bootfit3, axis=0), "\n")
 
+        # Fit with the expanded fit function
+        bootfit3_4, redchisq3_4, chisq3_4 = fit_lmb_4(
+            order3_fit[lmb_range3],
+            fitfunction_4,
+            lambdas3[lmb_range3],
+            plotdir,
+            p0=p0,
+            order=4,
+        )
+
         fit_data = {
             "lmb_range": lmb_range,
             "lmb_range0": lmb_range0,
@@ -1455,10 +1525,12 @@ def main():
             "bootfit1": bootfit1,
             "bootfit2": bootfit2,
             "bootfit3": bootfit3,
+            "bootfit3_4": bootfit3_4,
             "redchisq0": redchisq0,
             "redchisq1": redchisq1,
             "redchisq2": redchisq2,
             "redchisq3": redchisq3,
+            "redchisq3_4": redchisq3_4,
         }
         with open(datadir / (f"matrix_element.pkl"), "wb") as file_out:
             pickle.dump(fit_data, file_out)
