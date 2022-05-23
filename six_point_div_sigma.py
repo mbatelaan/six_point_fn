@@ -649,7 +649,14 @@ def fit_loop(
 ):
     # Nucleon fit loop
     # time_limits = [[5, 18], [10, 25]]
-    fitlist_nucl, fitlist_nucl_2exp, fitlist_sigma, fitlist_sigma_2exp, fitlist_small, fitlist_large = [], [], [], [], [], []
+    (
+        fitlist_nucl,
+        fitlist_nucl_2exp,
+        fitlist_sigma,
+        fitlist_sigma_2exp,
+        fitlist_small,
+        fitlist_large,
+    ) = ([], [], [], [], [], [])
     if which_corr[0]:
         print("\n\nNucleon fitting")
         fitlist_nucl = stats.fit_loop(
@@ -778,6 +785,20 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False):
         axis=0,
     )
     weighted_energy = np.dot(fitweights, energies_comb)
+
+    # Rescale the bootstrap error to include the systematic error
+    E_avg = np.average(weighted_energy)
+    E_statter = np.std(weighted_energy)
+    E_systerr = np.sqrt(
+        np.dot(
+            fitweights,
+            np.array([(E_avg - np.average(energy)) ** 2 for energy in energies_comb]),
+        )
+    )
+    E_comberr = np.sqrt(E_staterr**2 + E_systerr**2)
+    for ival, value in enumerate(weighted_energy):
+        weighted_energy[ival] = E_avg + (value - E_avg) * E_comberr / E_staterr
+
     if print:
         print(
             f"\n+++++\nweighted energy = {err_brackets(np.average(weighted_energy), np.std(weighted_energy))}\n+++++"

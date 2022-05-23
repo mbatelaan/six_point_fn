@@ -129,7 +129,21 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name):
     )
     print(np.shape(np.array([i["param"][:, 1] for i in fitlist_1exp])))
     print(np.shape(energies_comb))
+
     weighted_energy = np.dot(fitweights, energies_comb)
+    # Rescale the bootstrap error to include the systematic error
+    E_avg = np.average(weighted_energy)
+    E_statter = np.std(weighted_energy)
+    E_systerr = np.sqrt(
+        np.dot(
+            fitweights,
+            np.array([(E_avg - np.average(energy)) ** 2 for energy in energies_comb]),
+        )
+    )
+    E_comberr = np.sqrt(E_staterr**2 + E_systerr**2)
+    for ival, value in enumerate(weighted_energy):
+        weighted_energy[ival] = E_avg + (value - E_avg) * E_comberr / E_staterr
+
     print(
         f"\n+++++\nweighted energy = {err_brackets(np.average(weighted_energy), np.std(weighted_energy))}\n+++++"
     )
