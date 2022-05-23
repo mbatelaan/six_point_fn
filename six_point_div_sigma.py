@@ -649,7 +649,7 @@ def fit_loop(
 ):
     # Nucleon fit loop
     # time_limits = [[5, 18], [10, 25]]
-    fitlist_nucl, fitlist_sigma, fitlist_small, fitlist_large = [], [], [], []
+    fitlist_nucl, fitlist_nucl_2exp, fitlist_sigma, fitlist_sigma_2exp, fitlist_small, fitlist_large = [], [], [], [], [], []
     if which_corr[0]:
         print("\n\nNucleon fitting")
         fitlist_nucl = stats.fit_loop(
@@ -956,20 +956,20 @@ def main():
         )
         # =========================================
 
-        weights_nucl = np.array([i["weight"] for i in fitlist_nucl])
+        weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
         high_weight_nucl = np.argmax(weights_nucl)
-        # print(fitlist_nucl[high_weight_nucl]["redchisq"])
+        # print(fitlist_nucl_1exp[high_weight_nucl]["redchisq"])
         nucl_t_range = np.arange(
-            fitlist_nucl[high_weight_nucl]["x"][0],
-            fitlist_nucl[high_weight_nucl]["x"][-1] + 1,
+            fitlist_nucl_1exp[high_weight_nucl]["x"][0],
+            fitlist_nucl_1exp[high_weight_nucl]["x"][-1] + 1,
         )
         print(f"nucl_t_range = {nucl_t_range}")
 
-        weights_sigma = np.array([i["weight"] for i in fitlist_sigma])
+        weights_sigma = np.array([i["weight"] for i in fitlist_sigma_1exp])
         high_weight_sigma = np.argmax(weights_sigma)
         sigma_t_range = np.arange(
-            fitlist_sigma[high_weight_sigma]["x"][0],
-            fitlist_sigma[high_weight_sigma]["x"][-1] + 1,
+            fitlist_sigma_1exp[high_weight_sigma]["x"][0],
+            fitlist_sigma_1exp[high_weight_sigma]["x"][-1] + 1,
         )
         print(f"sigma_t_range = {sigma_t_range}")
 
