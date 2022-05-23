@@ -41,6 +41,146 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
+def plot_matrix(fitlist, plotdir, name):
+    weights = np.array([i["weight"] for i in fitlist])
+    x_coord = np.array([i["x"][0] for i in fitlist])
+    y_coord = np.array([i["x"][-1] for i in fitlist])
+
+    # print(max(weights))
+    argument_w = np.argmax(weights)
+    # print(argument_w)
+
+    # print(fitlist[argument_w]["x"][0])
+    # print(fitlist[argument_w]["x"][-1])
+    # print(fitlist[argument_w]["redchisq"])
+
+    # Find the unique values of tmin and tmax to make a grid showing the reduced chi-squared values.
+    unique_x = np.unique(x_coord)
+    unique_y = np.unique(y_coord)
+    min_x = np.min(x_coord)
+    min_y = np.min(y_coord)
+    plot_x = np.append(unique_x, unique_x[-1]+1)
+    plot_y = np.append(unique_y, unique_y[-1]+1)
+
+    # print(f"\n\n{unique_x}")
+    # print(f"{min_x}")
+    # print(f"{unique_y}")
+    # print(f"{min_y}")
+
+    matrix = np.zeros((len(unique_x), len(unique_y)))
+    for i, x in enumerate(x_coord):
+        matrix[x - min_x, y_coord[i] - min_y] = fitlist[i]["redchisq"]
+
+    plt.figure(figsize=(5, 4))
+    mat = plt.pcolormesh(plot_x, plot_y, matrix.T, cmap="RdBu", vmin=0.0, vmax=2)
+    # mat = plt.pcolormesh(unique_x, unique_y, matrix.T, cmap = 'GnBu', norm=colors.LogNorm(vmin=0.5, vmax=np.max(matrix)))
+    plt.colorbar(mat, label=r"$\chi^2_{\textrm{dof}}$")
+    plt.xlabel(r"$t_{\textrm{min}}$")
+    plt.ylabel(r"$t_{\textrm{max}}$")
+    plt.savefig(plotdir / (f"chisq_matrix_time_"+name+".pdf"))
+    plt.close()
+
+    matrix = np.zeros((len(unique_x), len(unique_y)))
+    for i, x in enumerate(x_coord):
+        matrix[x - min_x, y_coord[i] - min_y] = fitlist[i]["weight"]
+
+    # print("len: ", np.shape(matrix))
+
+    plt.figure(figsize=(5, 4))
+    mat = plt.pcolormesh(
+        plot_x, plot_y, matrix.T, cmap="GnBu", vmin=0.0, vmax=np.max(matrix)
+    )
+    # mat = plt.pcolormesh(
+    #     matrix.T, cmap="GnBu", vmin=0.0, vmax=np.max(matrix)
+    # )
+    # mat = plt.pcolormesh(unique_x, unique_y, matrix.T, cmap = 'GnBu', norm=colors.LogNorm(vmin=0.5, vmax=np.max(matrix)))
+    plt.colorbar(mat, label="weight")
+    plt.xlabel(r"$t_{\textrm{min}}$")
+    plt.ylabel(r"$t_{\textrm{max}}$")
+    plt.savefig(plotdir / (f"weights_matrix_time_"+name+".pdf"))
+    plt.close()
+    return
+
+def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name):
+    print("\n")
+    # print(np.average(fitlist_nucl_1exp[0]["param"],axis=0))
+    dE_1exp = np.std([ i["param"][:,1] for i in fitlist_1exp],axis=1)
+    dof_1exp = np.array([ i["dof"] for i in fitlist_1exp])
+    chisq_1exp = np.array([ i["chisq"] for i in fitlist_1exp])
+
+    dE_2exp = np.std([ i["param"][:,1] for i in fitlist_2exp],axis=1)
+    dof_2exp = np.array([ i["dof"] for i in fitlist_2exp])
+    chisq_2exp = np.array([ i["chisq"] for i in fitlist_2exp])
+
+
+    fitweights = np.array(stats.fitweights(np.append(dof_1exp, dof_2exp), np.append(chisq_1exp, chisq_2exp), np.append(dE_1exp, dE_2exp)))
+    print(np.shape(fitweights))
+    energies_comb = np.append( np.array([ i["param"][:,1] for i in fitlist_1exp]), np.array([ i["param"][:,1] for i in fitlist_2exp]), axis=0)
+    print(np.shape(np.array([ i["param"][:,1] for i in fitlist_1exp])))
+    print(np.shape(energies_comb))
+    weighted_energy = np.dot(fitweights, energies_comb)
+    print(f"\n+++++\nweighted energy = {err_brackets(np.average(weighted_energy), np.std(weighted_energy))}\n+++++")
+
+    weights = fitweights[:len(dE_1exp)]
+    weights_2 = fitweights[len(dE_1exp):]
+    print(np.shape(weights))
+    print(np.shape(weights_2))
+
+    energies_1exp = np.array([ i["param"][:,1] for i in fitlist_1exp])
+    tmax_1exp = np.array([ i["x"][-1] for i in fitlist_1exp])
+    tmin_1exp = np.array([ i["x"][0] for i in fitlist_1exp])
+    indices = np.where(tmax_1exp==17)
+    indices = indices[0][np.where(3<tmin_1exp[indices])]
+    tmax_ = tmax_1exp[indices]
+    tmin_ = tmin_1exp[indices]
+    energies_avg = np.average(energies_1exp[indices],axis=1)
+    energies_std = np.std(energies_1exp[indices],axis=1)
+    # weights = np.array([i["weight"] for i in fitlist_1exp])
+    weights_ = weights[indices]
+
+    energies_2exp = np.array([ i["param"][:,1] for i in fitlist_2exp])
+    tmax_2exp = np.array([ i["x"][-1] for i in fitlist_2exp])
+    tmin_2exp = np.array([ i["x"][0] for i in fitlist_2exp])
+    indices_2exp = np.where(tmax_2exp==17)
+    indices_2exp = indices_2exp[0][np.where(tmin_2exp[indices_2exp]<4)]
+    tmin_2 = tmin_2exp[indices_2exp]
+    energies_avg_2 = np.average(energies_2exp[indices_2exp],axis=1)
+    energies_std_2 = np.std(energies_2exp[indices_2exp],axis=1)
+    # weights_2 = np.array([i["weight"] for i in fitlist_2exp])
+    weights_2 = weights_2[indices_2exp]
+
+    fig, ax1 = plt.subplots(figsize=(5, 4))
+    ax1.errorbar(tmin_,
+                 energies_avg, 
+                 energies_std,
+                 fmt="s",
+                 label=r"1-exp",
+                 color=_colors[0],
+                 capsize=4,
+                 elinewidth=1,
+                 markerfacecolor="none",
+             )
+    ax1.errorbar(tmin_2,
+                 energies_avg_2, 
+                 energies_std_2,
+                 fmt="s",
+                 label=r"2-exp",
+                 color=_colors[1],
+                 capsize=4,
+                 elinewidth=1,
+                 markerfacecolor="none",
+             )
+    ax1.fill_between(np.arange(-1, 20), np.ones(21)*(np.average(weighted_energy)-np.std(weighted_energy)), np.ones(21)*(np.average(weighted_energy)+np.std(weighted_energy)), color='r', alpha=0.4, linewidth=0, label=rf"$E={err_brackets(np.average(weighted_energy), np.std(weighted_energy))}$")
+    ax1.set_xlabel(r"$\textrm{tmin}$")
+    ax1.set_ylabel(r"$E$")
+    ax2 = ax1.twinx()
+    ax2.bar(tmin_, weights_, color=_colors[0], alpha=0.3)
+    ax2.bar(tmin_2, weights_2, color=_colors[1], alpha=0.3)
+    ax2.set_ylabel(r"$\textrm{Weights}$")
+    ax1.set_xlim(0,tmin_[-1]+1)
+    ax1.legend(fontsize="xx-small")
+    fig.savefig(plotdir / ("tmin_energies_weights_"+name+".pdf"))
+    return
 
 def main():
     """Plot the chi-squared values and weights of a range of time fitting windows
@@ -68,52 +208,61 @@ def main():
     datadir = Path(config["analysis_dir"]) / Path("data")
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
-    # with open(datadir / (f"time_window_loop_lambda.pkl"), "rb") as file_in:
-    with open(datadir / (f"time_window_loop_nucl.pkl"), "rb") as file_in:
-        fitlist_nucl = pickle.load(file_in)
 
-    # with open(datadir / (f"time_window_loop_sigma.pkl"), "rb") as file_in:
-    with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma.pkl", "rb") as file_in:
-        fitlist_sigma = pickle.load(file_in)
+    with open(datadir / (f"time_window_loop_nucl_1exp.pkl"), "rb") as file_in:
+        fitlist_nucl_1exp = pickle.load(file_in)
+    with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_1exp.pkl", "rb") as file_in:
+        fitlist_sigma_1exp = pickle.load(file_in)
+    with open(datadir / (f"time_window_loop_nucl_2exp.pkl"), "rb") as file_in:
+        fitlist_nucl_2exp = pickle.load(file_in)
+    with open( "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_2exp.pkl", "rb") as file_in:
+        fitlist_sigma_2exp = pickle.load(file_in)
     with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:
         fitlist_small = pickle.load(file_in)
     with open(datadir / (f"time_window_loop_lambda_large.pkl"), "rb") as file_in:
         fitlist_large = pickle.load(file_in)
 
-    weights_nucl = np.array([i["weight"] for i in fitlist_nucl])
+    # ===== Nucleon data =====
+    weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
+    weights_nucl_2 = np.array([i["weight"] for i in fitlist_nucl_2exp])
     high_weight_nucl = np.argmax(weights_nucl)
-    # print(fitlist_nucl[high_weight_nucl]["redchisq"])
+    # print(fitlist_nucl_1exp[high_weight_nucl]["redchisq"])
     nucl_t_range = np.arange(
-        fitlist_nucl[high_weight_nucl]["x"][0],
-        fitlist_nucl[high_weight_nucl]["x"][-1]+1,
+        fitlist_nucl_1exp[high_weight_nucl]["x"][0],
+        fitlist_nucl_1exp[high_weight_nucl]["x"][-1]+1,
     )
     print(f"\nnucl_t_range = {nucl_t_range}")
-    print("redchisq", fitlist_nucl[high_weight_nucl]["redchisq"])
-    print("maxweight",max(weights_nucl))
-    print("max-1: redchisq = ", fitlist_nucl[high_weight_nucl-1]["redchisq"])
-    print("max-1: range = ", fitlist_nucl[high_weight_nucl-1]["x"])
-    print("max-2: redchisq = ", fitlist_nucl[high_weight_nucl-2]["redchisq"])
-    print("max-2: range = ", fitlist_nucl[high_weight_nucl-2]["x"])
-    print("max-3: redchisq = ", fitlist_nucl[high_weight_nucl-3]["redchisq"])
-    print("max-3: weight = ", fitlist_nucl[high_weight_nucl-3]["weight"])
-    print("max-3: range = ", fitlist_nucl[high_weight_nucl-3]["x"])
+    # print("redchisq", fitlist_nucl_1exp[high_weight_nucl]["redchisq"])
+    # print("maxweight",max(weights_nucl))
+    print("max: redchisq = ", fitlist_nucl_1exp[high_weight_nucl]["redchisq"])
+    print("max: range = ", fitlist_nucl_1exp[high_weight_nucl]["x"])
+    # print("max-1: redchisq = ", fitlist_nucl_1exp[high_weight_nucl-1]["redchisq"])
+    # print("max-1: range = ", fitlist_nucl_1exp[high_weight_nucl-1]["x"])
+    # print("max-2: redchisq = ", fitlist_nucl_1exp[high_weight_nucl-2]["redchisq"])
+    # print("max-2: range = ", fitlist_nucl_1exp[high_weight_nucl-2]["x"])
+    # print("max-3: redchisq = ", fitlist_nucl_1exp[high_weight_nucl-3]["redchisq"])
+    # print("max-3: weight = ", fitlist_nucl_1exp[high_weight_nucl-3]["weight"])
+    # print("max-3: range = ", fitlist_nucl_1exp[high_weight_nucl-3]["x"])
     
-    weights_sigma = np.array([i["weight"] for i in fitlist_sigma])
+    # ===== Sigma data =====
+    weights_sigma = np.array([i["weight"] for i in fitlist_sigma_1exp])
     high_weight_sigma = np.argmax(weights_sigma)
     sigma_t_range = np.arange(
-        fitlist_sigma[high_weight_sigma]["x"][0],
-        fitlist_sigma[high_weight_sigma]["x"][-1]+1,
+        fitlist_sigma_1exp[high_weight_sigma]["x"][0],
+        fitlist_sigma_1exp[high_weight_sigma]["x"][-1]+1,
     )
     print(f"\nsigma_t_range = {sigma_t_range}")
-    print(fitlist_sigma[high_weight_sigma]["redchisq"])
-    print("maxweight",max(weights_sigma))
-    print("max-1: redchisq = ", fitlist_sigma[high_weight_sigma-1]["redchisq"])
-    print("max-1: range = ", fitlist_sigma[high_weight_sigma-1]["x"])
-    print("max-2: redchisq = ", fitlist_sigma[high_weight_sigma-2]["redchisq"])
-    print("max-2: range = ", fitlist_sigma[high_weight_sigma-2]["x"])
-    print("max-3: redchisq = ", fitlist_sigma[high_weight_sigma-3]["redchisq"])
-    print("max-3: weight = ", fitlist_sigma[high_weight_sigma-3]["weight"])
-    print("max-3: range = ", fitlist_sigma[high_weight_sigma-3]["x"])
+    # print(fitlist_sigma_1exp[high_weight_sigma]["redchisq"])
+    # print("maxweight",max(weights_sigma))
+    print("max: redchisq = ", fitlist_sigma_1exp[high_weight_sigma]["redchisq"])
+    print("max: range = ", fitlist_sigma_1exp[high_weight_sigma]["x"])
+    # print("max-1: redchisq = ", fitlist_sigma_1exp[high_weight_sigma-1]["redchisq"])
+    # print("max-1: range = ", fitlist_sigma_1exp[high_weight_sigma-1]["x"])
+    # print("max-2: redchisq = ", fitlist_sigma_1exp[high_weight_sigma-2]["redchisq"])
+    # print("max-2: range = ", fitlist_sigma_1exp[high_weight_sigma-2]["x"])
+    # print("max-3: redchisq = ", fitlist_sigma_1exp[high_weight_sigma-3]["redchisq"])
+    # print("max-3: weight = ", fitlist_sigma_1exp[high_weight_sigma-3]["weight"])
+    # print("max-3: range = ", fitlist_sigma_1exp[high_weight_sigma-3]["x"])
 
     weights_small = np.array([i["weight"] for i in fitlist_small])
     high_weight_small = np.argmax(weights_small)
@@ -127,88 +276,110 @@ def main():
         fitlist_large[high_weight_large]["x"][-1]+1,
     )
     print(f"\nratio_t_range = {ratio_t_range}")
-    print(fitlist_small[high_weight_small]["redchisq"])
-    print("maxweight",max(weights_small))
-    print(fitlist_large[high_weight_large]["redchisq"])
-    print("maxweight",max(weights_large))
+    # print(fitlist_small[high_weight_small]["redchisq"])
+    # print("maxweight",max(weights_small))
+    # print(fitlist_large[high_weight_large]["redchisq"])
+    # print("maxweight",max(weights_large))
 
     print(f"small: {fitlist_small[high_weight_small]['x']}")
     print(f"large: {fitlist_large[high_weight_large]['x']}")
-    print("max-1: redchisq = ", fitlist_small[high_weight_small-1]["redchisq"])
-    print("max-1: range = ", fitlist_small[high_weight_small-1]["x"])
-    print("max-2: redchisq = ", fitlist_small[high_weight_small-2]["redchisq"])
-    print("max-2: range = ", fitlist_small[high_weight_small-2]["x"])
-    print("max-3: redchisq = ", fitlist_small[high_weight_small-3]["redchisq"])
-    print("max-3: range = ", fitlist_small[high_weight_small-3]["x"])
+    print("max: redchisq = ", fitlist_small[high_weight_small]["redchisq"])
+    print("max: range = ", fitlist_small[high_weight_small]["x"])
+    # print("max-1: redchisq = ", fitlist_small[high_weight_small-1]["redchisq"])
+    # print("max-1: range = ", fitlist_small[high_weight_small-1]["x"])
+    # print("max-2: redchisq = ", fitlist_small[high_weight_small-2]["redchisq"])
+    # print("max-2: range = ", fitlist_small[high_weight_small-2]["x"])
+    # print("max-3: redchisq = ", fitlist_small[high_weight_small-3]["redchisq"])
+    # print("max-3: range = ", fitlist_small[high_weight_small-3]["x"])
 
-    print("\nmax-1: redchisq = ", fitlist_large[high_weight_large-1]["redchisq"])
-    print("max-1: range = ", fitlist_large[high_weight_large-1]["x"])
-    print("max-2: redchisq = ", fitlist_large[high_weight_large-2]["redchisq"])
-    print("max-2: range = ", fitlist_large[high_weight_large-2]["x"])
-    print("max-3: redchisq = ", fitlist_large[high_weight_large-3]["redchisq"])
-    print("max-3: range = ", fitlist_large[high_weight_large-3]["x"])
+    print("\nmax: redchisq = ", fitlist_large[high_weight_large]["redchisq"])
+    print("max: range = ", fitlist_large[high_weight_large]["x"])
+    # print("max-1: redchisq = ", fitlist_large[high_weight_large-1]["redchisq"])
+    # print("max-1: range = ", fitlist_large[high_weight_large-1]["x"])
+    # print("max-2: redchisq = ", fitlist_large[high_weight_large-2]["redchisq"])
+    # print("max-2: range = ", fitlist_large[high_weight_large-2]["x"])
+    # print("max-3: redchisq = ", fitlist_large[high_weight_large-3]["redchisq"])
+    # print("max-3: range = ", fitlist_large[high_weight_large-3]["x"])
 
+    plot_matrix(fitlist_nucl_1exp, plotdir, "nucl_1exp")
+    plot_matrix(fitlist_nucl_2exp, plotdir, "nucl_2exp")
+    plot_matrix(fitlist_sigma_1exp, plotdir, "sigma_1exp")
+    plot_matrix(fitlist_sigma_2exp, plotdir, "sigma_2exp")
+
+    weighted_avg(fitlist_nucl_1exp, fitlist_nucl_2exp, plotdir, "nucl")
+    weighted_avg(fitlist_sigma_1exp, fitlist_sigma_2exp, plotdir, "sigma")
     exit()
+    print("\n")
+
+    print(np.average(fitlist_nucl_1exp[0]["param"],axis=0))
+    energies_nucl_1exp = np.array([ i["param"][:,1] for i in fitlist_nucl_1exp])
+    tmax_nucl_1exp = np.array([ i["x"][-1] for i in fitlist_nucl_1exp])
+    tmin_nucl_1exp = np.array([ i["x"][0] for i in fitlist_nucl_1exp])
+    indices = np.where(tmax_nucl_1exp==17)
+    indices = indices[0][np.where(3<tmin_nucl_1exp[indices])]
+    tmax_ = tmax_nucl_1exp[indices]
+    tmin_ = tmin_nucl_1exp[indices]
+    energies_avg = np.average(energies_nucl_1exp[indices],axis=1)
+    energies_std = np.std(energies_nucl_1exp[indices],axis=1)
+    weights_ = weights_nucl[indices]
+
+    energies_nucl_2exp = np.array([ i["param"][:,1] for i in fitlist_nucl_2exp])
+    tmax_nucl_2exp = np.array([ i["x"][-1] for i in fitlist_nucl_2exp])
+    tmin_nucl_2exp = np.array([ i["x"][0] for i in fitlist_nucl_2exp])
+    indices_2exp = np.where(tmax_nucl_2exp==17)
+    indices_2exp = indices_2exp[0][np.where(tmin_nucl_2exp[indices_2exp]<4)]
+    tmin_2 = tmin_nucl_2exp[indices_2exp]
+    energies_avg_2 = np.average(energies_nucl_2exp[indices_2exp],axis=1)
+    energies_std_2 = np.std(energies_nucl_2exp[indices_2exp],axis=1)
+    weights_2 = weights_nucl_2[indices_2exp]
+
+    fig, ax1 = plt.subplots(figsize=(5, 4))
+    ax1.errorbar(tmin_,
+                 energies_avg, 
+                 energies_std,         
+                 fmt="s",
+                 label=r"1-exp",
+                 color=_colors[0],
+                 capsize=4,
+                 elinewidth=1,
+                 markerfacecolor="none",
+             )
+    ax1.errorbar(tmin_2,
+                 energies_avg_2, 
+                 energies_std_2,         
+                 fmt="s",
+                 label=r"2-exp",
+                 color=_colors[1],
+                 capsize=4,
+                 elinewidth=1,
+                 markerfacecolor="none",
+             )
+    ax1.set_xlabel(r"$\textrm{tmin}$")
+    ax1.set_ylabel(r"$E$")
+    ax2 = ax1.twinx()
+    ax2.bar(tmin_, weights_, color=_colors[0], alpha=0.3)
+    ax2.bar(tmin_2, weights_2, color=_colors[1], alpha=0.3)
+    ax2.set_ylabel(r"$\textrm{Weights}$")
+    fig.savefig(plotdir / ("tmin_energies_weights_nucl.pdf"))
+
+
+
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(tmin_,
+                 energies_avg, 
+                 energies_std,         
+                 fmt="s",
+                 # label=r"$\mathcal{O}(\lambda^1)$",
+                 color=_colors[0],
+                 capsize=4,
+                 elinewidth=1,
+                 markerfacecolor="none",
+             )
+    plt.xlabel(r"$\textrm{tmin}$")
+    plt.ylabel(r"$E$")
+    plt.tight_layout()
+    plt.savefig(plotdir / ("tmin_energies_nucl_1exp.pdf"))
+
     
-    weights = np.array([i["weight"] for i in fitlist])
-    x_coord = np.array([i["x"][0] for i in fitlist])
-    y_coord = np.array([i["x"][-1] for i in fitlist])
-
-    # print(weights)
-    print(max(weights))
-    argument_w = np.argmax(weights)
-    print(argument_w)
-
-    print(fitlist[argument_w]["x"][0])
-    print(fitlist[argument_w]["x"][-1])
-    print(fitlist[argument_w]["redchisq"])
-
-    # Find the unique values of tmin and tmax to make a grid showing the reduced chi-squared values.
-    unique_x = np.unique(x_coord)
-    unique_y = np.unique(y_coord)
-    min_x = np.min(x_coord)
-    min_y = np.min(y_coord)
-    plot_x = np.append(unique_x, unique_x[-1]+1)
-    plot_y = np.append(unique_y, unique_y[-1]+1)
-
-    print(f"\n\n{unique_x}")
-    print(f"{min_x}")
-    print(f"{unique_y}")
-    print(f"{min_y}")
-
-    matrix = np.zeros((len(unique_x), len(unique_y)))
-    for i, x in enumerate(x_coord):
-        matrix[x - min_x, y_coord[i] - min_y] = fitlist[i]["redchisq"]
-
-    plt.figure(figsize=(5, 4))
-    mat = plt.pcolormesh(plot_x, plot_y, matrix.T, cmap="RdBu", vmin=0.0, vmax=2)
-    # mat = plt.pcolormesh(unique_x, unique_y, matrix.T, cmap = 'GnBu', norm=colors.LogNorm(vmin=0.5, vmax=np.max(matrix)))
-    plt.colorbar(mat, label=r"$\chi^2_{\textrm{dof}}$")
-    plt.xlabel(r"$t_{\textrm{min}}$")
-    plt.ylabel(r"$t_{\textrm{max}}$")
-    plt.savefig(plotdir / (f"chisq_matrix_time.pdf"))
-    plt.close()
-
-    matrix = np.zeros((len(unique_x), len(unique_y)))
-    for i, x in enumerate(x_coord):
-        matrix[x - min_x, y_coord[i] - min_y] = fitlist[i]["weight"]
-
-    print("len: ", np.shape(matrix))
-
-    plt.figure(figsize=(5, 4))
-    mat = plt.pcolormesh(
-        plot_x, plot_y, matrix.T, cmap="GnBu", vmin=0.0, vmax=np.max(matrix)
-    )
-    # mat = plt.pcolormesh(
-    #     matrix.T, cmap="GnBu", vmin=0.0, vmax=np.max(matrix)
-    # )
-    # mat = plt.pcolormesh(unique_x, unique_y, matrix.T, cmap = 'GnBu', norm=colors.LogNorm(vmin=0.5, vmax=np.max(matrix)))
-    plt.colorbar(mat, label="weight")
-    plt.xlabel(r"$t_{\textrm{min}}$")
-    plt.ylabel(r"$t_{\textrm{max}}$")
-    plt.savefig(plotdir / (f"weights_matrix_time.pdf"))
-    plt.close()
-
-
 if __name__ == "__main__":
     main()
