@@ -162,7 +162,8 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name):
     # weights_2 = np.array([i["weight"] for i in fitlist_2exp])
     weights_2 = weights_2[indices_2exp]
 
-    fig, ax1 = plt.subplots(figsize=(5, 4))
+    # fig, ax1 = plt.subplots(figsize=(5, 4))
+    fig, ax1 = plt.subplots(figsize=(7, 5))
     ax1.errorbar(
         tmin_,
         energies_avg,
@@ -203,7 +204,9 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name):
     ax2.bar(tmin_2, weights_2, color=_colors[1], alpha=0.3)
     ax2.set_ylabel(r"$\textrm{Weights}$")
 
-    ax1.legend(fontsize="xx-small")
+    # ax1.legend(fontsize="xx-small", framealpha=1, facecolor='blue')
+    # fig.legend(fontsize="xx-small", framealpha=0.8, loc="upper right")
+    fig.legend(fontsize="x-small", framealpha=1)
     fig.savefig(plotdir / ("tmin_energies_weights_" + name + ".pdf"))
     return
 
