@@ -13,3 +13,6 @@ lmb_init : 4
 lmb_final : 8
 plotting : True
 time_loop : False
+tmax_nucl : 18
+tmax_sigma : 17
+tmax_ratio : 17

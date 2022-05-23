@@ -9,7 +9,10 @@ t_range1 : 24
 lmb_val : 0.04
 lmb_i : 0
 lmb_f : 0.05
-lmb_init : 0
-lmb_final : 4
+lmb_init : 4
+lmb_final : 8
 plotting : True
 time_loop : False
+tmax_nucl : 18
+tmax_sigma : 17
+tmax_ratio : 17

@@ -11,8 +11,8 @@ lmb_i : 0
 lmb_f : 0.05
 lmb_init : 8
 lmb_final : 13
-tmax_nucl : 18
-tmax_sigma : 18
-tmax_ratio : 18
+tmax_nucl : 22
+tmax_sigma : 17
+tmax_ratio : 17
 plotting : True
 time_loop : False
