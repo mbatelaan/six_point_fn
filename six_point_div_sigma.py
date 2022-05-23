@@ -1102,7 +1102,7 @@ def main():
         corr_matrices[i, 2] = matrix_3
         corr_matrices[i, 3] = matrix_4
 
-        Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp(
+        Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_1, time_choice, delta_t, name="_test", show=False
         )
         # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_1, evec_right[:, :, 0])
@@ -1134,7 +1134,7 @@ def main():
         # print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
         # print(f"redchisq1 = {redchisq1}")
 
-        Gt1_2, Gt2_2, [eval_left, evec_left, eval_right, evec_right] = gevp(
+        Gt1_2, Gt2_2, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_2, time_choice, delta_t, name="_test", show=False
         )
         # Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_2, evec_right[:, :, 0])
@@ -1160,7 +1160,7 @@ def main():
         red_chisq_list[1, i] = redchisq2
         # print(f"redchisq2 = {redchisq2}")
 
-        Gt1_3, Gt2_3, [eval_left, evec_left, eval_right, evec_right] = gevp(
+        Gt1_3, Gt2_3, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_3, time_choice, delta_t, name="_test", show=False
         )
         # Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_3, evec_right[:, :, 0])
@@ -1186,7 +1186,7 @@ def main():
         red_chisq_list[2, i] = redchisq3
         # print(f"redchisq3 = {redchisq3}")
 
-        Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp(
+        Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
             matrix_4, time_choice, delta_t, name="_test", show=False
         )
         # Gt1_4 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_4, evec_right[:, :, 0])
