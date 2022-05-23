@@ -133,7 +133,7 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name):
     weighted_energy = np.dot(fitweights, energies_comb)
     # Rescale the bootstrap error to include the systematic error
     E_avg = np.average(weighted_energy)
-    E_statter = np.std(weighted_energy)
+    E_staterr = np.std(weighted_energy)
     E_systerr = np.sqrt(
         np.dot(
             fitweights,

@@ -788,7 +788,7 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False):
 
     # Rescale the bootstrap error to include the systematic error
     E_avg = np.average(weighted_energy)
-    E_statter = np.std(weighted_energy)
+    E_staterr = np.std(weighted_energy)
     E_systerr = np.sqrt(
         np.dot(
             fitweights,
