@@ -68,7 +68,7 @@ def plot_matrix(fitlist, plotdir, name):
     # print(f"{unique_y}")
     # print(f"{min_y}")
 
-    matrix = np.zeros((len(unique_x), len(unique_y)))
+    # matrix = np.zeros((len(unique_x), len(unique_y)))
     matrix = np.full((len(unique_x), len(unique_y)), np.nan)
     for i, x in enumerate(x_coord):
         matrix[x - min_x, y_coord[i] - min_y] = fitlist[i]["redchisq"]

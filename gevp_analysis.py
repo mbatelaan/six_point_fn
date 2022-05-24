@@ -42,6 +42,32 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
+def plot_matrix(fitlist, plotdir, name):
+    weights = np.array([i["weight"] for i in fitlist])
+    x_coord = np.array([i["x"][0] for i in fitlist])
+    y_coord = np.array([i["x"][-1] for i in fitlist])
+
+    # print(max(weights))
+    argument_w = np.argmax(weights)
+    # Find the unique values of tmin and tmax to make a grid showing the reduced chi-squared values.
+    unique_x = np.unique(x_coord)
+    unique_y = np.unique(y_coord)
+    min_x = np.min(x_coord)
+    min_y = np.min(y_coord)
+    plot_x = np.append(unique_x, unique_x[-1] + 1)
+    plot_y = np.append(unique_y, unique_y[-1] + 1)
+
+    matrix = np.full((len(unique_x), len(unique_y)), np.nan)
+    for i, x in enumerate(x_coord):
+        matrix[x - min_x, y_coord[i] - min_y] = fitlist[i]["redchisq"]
+    plt.figure(figsize=(5, 4))
+    mat = plt.pcolormesh(plot_x, plot_y, matrix.T, cmap="RdBu", vmin=0.0, vmax=2)
+    plt.colorbar(mat, label=r"$\chi^2_{\textrm{dof}}$")
+    plt.xlabel(r"$t_{\textrm{min}}$")
+    plt.ylabel(r"$t_{\textrm{max}}$")
+    plt.savefig(plotdir / (f"chisq_matrix_time_" + name + ".pdf"))
+    plt.close()
+
 
 def plotting_script_diff_2(
     diffG1, diffG2, diffG3, diffG4, fitvals, t_range, lmb_val, name="", show=False
@@ -212,6 +238,57 @@ def plot_eigenstates(
     pypl.close()
     return
 
+def gevp_loop(G2_nucl, G2_sigm, lmb_val, datadir):
+    time_choice_range = np.arange(1, 12)
+    delta_t_range = np.arange(1, 7)
+    lambdas = np.linspace(0, 0.05, 30)[1:]
+    t_range = np.arange(7, 18)
+    aexp_function = ff.initffncs("Aexp")
+    fitlist = []
+
+    for i, time_choice in enumerate(time_choice_range):
+        for j, delta_t in enumerate(delta_t_range):
+            print(f"t_0 =  {time_choice}\tDelta t = {delta_t}\n")
+            # Construct a correlation matrix for each order in lambda (skipping order 0)
+            matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
+                G2_nucl, G2_sigm, lmb_val
+            )
+            # order 4
+            Gt1_4, Gt2_4, gevp_data = gevp(
+                matrix_4, time_choice, delta_t, name="_test", show=False
+            )
+            Gt1_4_bs, Gt2_4_bs, gevp_data_bs = gevp_bootstrap(
+                matrix_4, time_choice, delta_t, name="_test", show=False
+            )
+
+            ratio3 = Gt1_4 / Gt2_4
+            bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function)
+            ratio3_bs = Gt1_4_bs / Gt2_4_bs
+            bootfit3_bs, redchisq3_bs = fit_value3(ratio3_bs, t_range, aexp_function)
+
+            fitparams = {
+                "t_0": time_choice,
+                "delta_t": delta_t,
+                "order3_eval_left": gevp_data[0],
+                "order3_evec_left": gevp_data[1],
+                "order3_eval_right": gevp_data[2],
+                "order3_evec_right": gevp_data[3],
+                "order3_eval_left_bs": gevp_data_bs[0],
+                "order3_evec_left_bs": gevp_data_bs[1],
+                "order3_eval_right_bs": gevp_data_bs[2],
+                "order3_evec_right_bs": gevp_data_bs[3],
+                "order3_fit": bootfit3,
+                "order3_fit_bs": bootfit3_bs,
+                "red_chisq": redchisq3,
+                "red_chisq_bs": redchisq3_bs,
+            }
+            fitlist.append(fitparams)
+
+    with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "wb") as file_out:
+        pickle.dump(fitparams, file_out)
+
+    return fitlist
+
 
 if __name__ == "__main__":
     pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
@@ -245,123 +322,174 @@ if __name__ == "__main__":
         )
     else:
         G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
-    lambdas = np.linspace(0, 0.16, 30)[1:]
-    t_range = np.arange(4, 9)
-    # lmb_val = 0.06 #0.16
-    # lmb_val = 0.04 #0.16
-    time_choice_range = np.arange(2, 12)
-    delta_t_range = np.arange(1, 6)
-    plotting = True
+    # lambdas = np.linspace(0, 0.05, 30)[1:]
+    # t_range = np.arange(7, 18)
+    # time_choice_range = np.arange(1, 12)
+    # delta_t_range = np.arange(1, 7)
+    fitlist = gevp_loop(G2_nucl, G2_sigm, lmb_val, datadir)
 
-    order0_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
-    order1_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
-    order2_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
-    order3_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
-    red_chisq_list = np.zeros((4, len(time_choice_range), len(delta_t_range)))
-    order0_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
-    order0_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
-    order1_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
-    order1_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
-    order2_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
-    order2_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
-    order3_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
-    order3_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
+    # # order0_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
+    # # order1_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
+    # # order2_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot))
+    # order3_fit = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    # order3_fit_bs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    # red_chisq_list = np.zeros((4, len(time_choice_range), len(delta_t_range)))
+    # red_chisq_list_bs = np.zeros((4, len(time_choice_range), len(delta_t_range)))
+    # # order0_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    # # order0_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
+    # # order1_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    # # order1_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
+    # # order2_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    # # order2_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
+    # # order3_evals = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2))
+    # # order3_evecs = np.zeros((len(time_choice_range), len(delta_t_range), pars.nboot, 2, 2))
+    # order3_eval_left = np.zeros((len(time_choice_range), len(delta_t_range),2))
+    # order3_eval_right = np.zeros((len(time_choice_range), len(delta_t_range),2))
+    # order3_evec_left = np.zeros((len(time_choice_range), len(delta_t_range),2,2))
+    # order3_evec_right = np.zeros((len(time_choice_range), len(delta_t_range),2,2))
+    # order3_eval_left_bs = np.zeros((len(time_choice_range), len(delta_t_range),pars.nboot,2))
+    # order3_eval_right_bs = np.zeros((len(time_choice_range), len(delta_t_range),pars.nboot,2))
+    # order3_evec_left_bs = np.zeros((len(time_choice_range), len(delta_t_range),pars.nboot,2,2))
+    # order3_evec_right_bs = np.zeros((len(time_choice_range), len(delta_t_range),pars.nboot,2,2))
 
-    aexp_function = ff.initffncs("Aexp")
-    # aexp_eval = aexp_function.eval
-    print(aexp_function.label)
+    # aexp_function = ff.initffncs("Aexp")
+    # print(aexp_function.label)
 
-    for i, time_choice in enumerate(time_choice_range):
-        for j, delta_t in enumerate(delta_t_range):
-            print(f"t_0 =  {time_choice}\tDelta t = {delta_t}\n")
-            # Construct a correlation matrix for each order in lambda (skipping order 0)
-            matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
-                G2_nucl, G2_sigm, lmb_val
-            )
+    # for i, time_choice in enumerate(time_choice_range):
+    #     for j, delta_t in enumerate(delta_t_range):
+    #         print(f"t_0 =  {time_choice}\tDelta t = {delta_t}\n")
+    #         # Construct a correlation matrix for each order in lambda (skipping order 0)
+    #         ### ----------------------------------------------------------------------
+    #         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
+    #             G2_nucl, G2_sigm, lmb_val
+    #         )
 
-            ### ----------------------------------------------------------------------
-            # Gt1_1, Gt2_1, evals = gevp(
-            #     matrix_1, time_choice, delta_t, name="_test", show=False
-            # )
-            Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
-                matrix_1, time_choice, delta_t, name="_test", show=False
-            )
-            order0_evals[i,j] = eval_left
-            order0_evecs[i,j] = evec_left
-            ratio1 = Gt1_1 / Gt2_1
-            effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1) 
-            bootfit1, redchisq1 = fit_value3(ratio1, t_range, aexp_function)
-            order0_fit[i, j] = bootfit1[:, 1]
-            red_chisq_list[0, i, j] = redchisq1
+    #         # # Order 0
+    #         # Gt1_1, Gt2_1, gevp_data = gevp(
+    #         #     matrix_1, time_choice, delta_t, name="_test", show=False
+    #         # )
+    #         # Gt1_1_bs, Gt2_1_bs, gevp_data_bs = gevp_bootstrap(
+    #         #     matrix_1, time_choice, delta_t, name="_test", show=False
+    #         # )
+    #         # order0_gevp_data[i, j] = gevp_data
+    #         # order0_gevp_data_bs[i, j] = gevp_data_bs
 
-            Gt1_2, Gt2_2, evals = gevp(
-                matrix_2, time_choice, delta_t, name="_test", show=False
-            )
-            ratio2 = Gt1_2 / Gt2_2
-            effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1) 
-            bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function)
-            order1_fit[i, j] = bootfit2[:, 1]
-            red_chisq_list[1, i, j] = redchisq2
+    #         # ratio0 = Gt1_1 / Gt2_1
+    #         # bootfit0, redchisq1 = fit_value3(ratio0, t_range, aexp_function)
+    #         # order0_fit[i, j] = bootfit0
+    #         # ratio0_bs = Gt1_1_bs / Gt2_1_bs
+    #         # bootfit0_bs, redchisq1_bs = fit_value3(ratio0_bs, t_range, aexp_function)
+    #         # order0_fit_bs[i, j] = bootfit0_bs
+    #         # red_chisq_list[0, i, j] = redchisq1
+    #         # red_chisq_list_bs[0, i, j] = redchisq1_bs
 
-            Gt1_3, Gt2_3, evals = gevp(
-                matrix_3, time_choice, delta_t, name="_test", show=False
-            )
-            ratio3 = Gt1_3 / Gt2_3
-            effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1) 
-            bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function)
-            order2_fit[i, j] = bootfit3[:, 1]
-            red_chisq_list[2, i, j] = redchisq3
+    #         # Gt1_2, Gt2_2, evals = gevp(
+    #         #     matrix_2, time_choice, delta_t, name="_test", show=False
+    #         # )
+    #         # ratio2 = Gt1_2 / Gt2_2
+    #         # bootfit2, redchisq2 = fit_value3(ratio2, t_range, aexp_function)
+    #         # order1_fit[i, j] = bootfit2[:, 1]
+    #         # red_chisq_list[1, i, j] = redchisq2
 
-            # Gt1_4, Gt2_4, evals = gevp(
-            #     matrix_4, time_choice, delta_t, name="_test", show=False
-            # )
-            Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
-                matrix_4, time_choice, delta_t, name="_test", show=False
-            )
-            order3_evals[i,j] = eval_left
-            order3_evecs[i,j] = evec_left
-            ratio4 = Gt1_4 / Gt2_4
-            effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1) 
-            effmass_1 = stats.bs_effmass(Gt1_4, time_axis=1, spacing=1)
-            effmass_2 = stats.bs_effmass(Gt2_4, time_axis=1, spacing=1)
-            bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function)
-            order3_fit[i, j] = bootfit4[:, 1]
-            red_chisq_list[3, i, j] = redchisq4
+    #         # Gt1_3, Gt2_3, evals = gevp(
+    #         #     matrix_3, time_choice, delta_t, name="_test", show=False
+    #         # )
+    #         # ratio3 = Gt1_3 / Gt2_3
+    #         # bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function)
+    #         # order2_fit[i, j] = bootfit3[:, 1]
+    #         # red_chisq_list[2, i, j] = redchisq3
 
-            if plotting:
-                plotting_script_diff_2(
-                    effmass_ratio1,
-                    effmass_ratio2,
-                    effmass_ratio3,
-                    effmass_ratio4,
-                    [bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1], bootfit4[:, 1]],
-                    # [bootfit1, bootfit2, bootfit3, bootfit4],
-                    t_range,
-                    lmb_val,
-                    name="_l" + str(lmb_val) + "_time_choice" + str(time_choice),
-                    show=False,
-                )
-                plot_eigenstates(effmass_1, effmass_2, t_range, lmb_val,
-                    name="_l" + str(lmb_val) + "_time_choice" + str(time_choice),
-                    show=False)
+    #         # Gt1_4, Gt2_4, evals = gevp(
+    #         #     matrix_4, time_choice, delta_t, name="_test", show=False
+    #         # )
+    #         # Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
+    #         #     matrix_4, time_choice, delta_t, name="_test", show=False
+    #         # )
+    #         # order3_evals[i,j] = eval_left
+    #         # order3_evecs[i,j] = evec_left
+    #         # ratio4 = Gt1_4 / Gt2_4
+    #         # bootfit4, redchisq4 = fit_value3(ratio4, t_range, aexp_function)
+    #         # order3_fit[i, j] = bootfit4[:, 1]
+    #         # red_chisq_list[3, i, j] = redchisq4
+
+    #         # order 4
+    #         Gt1_4, Gt2_4, gevp_data = gevp(
+    #             matrix_4, time_choice, delta_t, name="_test", show=False
+    #         )
+    #         Gt1_4_bs, Gt2_4_bs, gevp_data_bs = gevp_bootstrap(
+    #             matrix_4, time_choice, delta_t, name="_test", show=False
+    #         )
+    #         # print(len(gevp_data[0]))
+    #         # print(len(gevp_data[1]))
+    #         # print(len(gevp_data_bs[0]))
+    #         # print(len(gevp_data_bs[1]))
+    #         # print(np.shape(gevp_data[0]))
+    #         # print(np.shape(gevp_data[1]))
+    #         # print(np.shape(gevp_data_bs[0]))
+    #         # print(np.shape(gevp_data_bs[1]))
+    #         order3_eval_left[i, j] = gevp_data[0]
+    #         order3_evec_left[i, j] = gevp_data[1]
+    #         order3_eval_right[i, j] = gevp_data[2]
+    #         order3_evec_right[i, j] = gevp_data[3]
+
+    #         order3_eval_left_bs[i, j] = gevp_data_bs[0]
+    #         order3_evec_left_bs[i, j] = gevp_data_bs[1]
+    #         order3_eval_right_bs[i, j] = gevp_data_bs[2]
+    #         order3_evec_right_bs[i, j] = gevp_data_bs[3]
+
+    #         # order3_gevp_data_bs[i, j] = gevp_data_bs
+    #         ratio3 = Gt1_4 / Gt2_4
+    #         bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function)
+    #         order3_fit[i, j] = bootfit3
+    #         ratio3_bs = Gt1_4_bs / Gt2_4_bs
+    #         bootfit3_bs, redchisq3_bs = fit_value3(ratio3_bs, t_range, aexp_function)
+    #         order3_fit_bs[i, j] = bootfit3_bs
+    #         red_chisq_list[3, i, j] = redchisq3
+    #         red_chisq_list_bs[3, i, j] = redchisq3_bs
+
+    #         if False:
+    #             plotting_script_diff_2(
+    #                 effmass_ratio0,
+    #                 effmass_ratio1,
+    #                 effmass_ratio2,
+    #                 effmass_ratio3,
+    #                 [bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1], bootfit4[:, 1]],
+    #                 # [bootfit1, bootfit2, bootfit3, bootfit4],
+    #                 t_range,
+    #                 lmb_val,
+    #                 name="_l" + str(lmb_val) + "_time_choice" + str(time_choice),
+    #                 show=False,
+    #             )
+    #             plot_eigenstates(effmass_1, effmass_2, t_range, lmb_val,
+    #                 name="_l" + str(lmb_val) + "_time_choice" + str(time_choice),
+    #                 show=False)
 
 
-    # ----------------------------------------------------------------------
-    # Save the fit data to a pickle file
-    all_data = {
-        "lambdas": np.array([lmb_val]),
-        "order0_fit": order0_fit,
-        "order1_fit": order1_fit,
-        "order2_fit": order2_fit,
-        "order3_fit": order3_fit,
-        "order3_evals": order3_evals,
-        "order3_evecs": order3_evecs,
-        "redchisq": red_chisq_list,
-        "time_choice": time_choice_range,
-        "delta_t": delta_t_range,
-    }
-    with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "wb") as file_out:
-        pickle.dump(all_data, file_out)
+    # # ----------------------------------------------------------------------
+    # # Save the fit data to a pickle file
+    # all_data = {
+    #     "lambdas": np.array([lmb_val]),
+    #     # "order0_fit": order0_fit,
+    #     # "order1_fit": order1_fit,
+    #     # "order2_fit": order2_fit,
+    #     "order3_fit": order3_fit,
+    #     "order3_eval_left": order3_eval_left,
+    #     "order3_eval_right": order3_eval_right,
+    #     "order3_evec_left": order3_evec_left,
+    #     "order3_evec_right": order3_evec_right,
+    #     "order3_eval_left_bs": order3_eval_left_bs,
+    #     "order3_eval_right_bs": order3_eval_right_bs,
+    #     "order3_evec_left_bs": order3_evec_left_bs,
+    #     "order3_evec_right_bs": order3_evec_right_bs,
+    #     "redchisq": red_chisq_list,
+    #     "redchisq_bs": red_chisq_list_bs,
+    #     "time_choice": time_choice_range,
+    #     "delta_t": delta_t_range,
+    # }
+    # with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "wb") as file_out:
+    #     pickle.dump(all_data, file_out)
+
+    exit()
 
     # ----------------------------------------------------------------------
     # Make a plot of the dependence of the energy shift on the time parameters in the GEVP
