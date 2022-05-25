@@ -200,7 +200,7 @@ def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv=False):
     return bootfit, redchisq, chisq
 
 
-def fit_lmb_4(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv=False):
+def fit_lmb_4(ydata, function, lambdas, plotdir, p0=None):
     """Fit the lambda dependence
 
     data is a correlator with tht bootstraps on the first index and the time on the second
@@ -208,7 +208,7 @@ def fit_lmb_4(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv=False
     the function will return an array of fit parameters for each bootstrap
     """
 
-    bounds = ([0, 0], [np.inf, np.inf])
+    # bounds = ([0, 0, 0], [np.inf, np.inf, np.inf])
     ydata = ydata.T
     # print(np.shape(ydata))
     data_set = ydata
@@ -228,9 +228,9 @@ def fit_lmb_4(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv=False
         lambdas,
         ydata_avg,
         sigma=diag_sigma,
-        p0=p0,
-        maxfev=4000,
-        bounds=bounds,
+        # p0=p0,
+        # maxfev=4000,
+        # bounds=bounds,
     )
     chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, covmat_inverse)
     # print("fit_avg", popt_avg)
@@ -245,8 +245,8 @@ def fit_lmb_4(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv=False
             values,
             sigma=diag_sigma,
             # maxfev=4000,
-            p0=p0,
-            bounds=bounds,
+            # p0=p0,
+            # bounds=bounds,
         )  # , p0=popt_avg)
         # print(popt)
         bootfit.append(popt)
@@ -1505,14 +1505,20 @@ def main():
         print("fit std order 4:", np.std(bootfit3, axis=0), "\n")
 
         # Fit with the expanded fit function
+        p0 = (1e-3, 0.7, 0,7)
         bootfit3_4, redchisq3_4, chisq3_4 = fit_lmb_4(
             order3_fit[lmb_range3],
             fitfunction_4,
             lambdas3[lmb_range3],
             plotdir,
             p0=p0,
-            order=4,
         )
+        print("\nNew fit function")
+        print("redchisq order 4:", redchisq3_4)
+        print("chisq order 4:", chisq3_4)
+        print("fit order 4:", np.average(bootfit3_4, axis=0))
+        print("fit std order 4:", np.std(bootfit3_4, axis=0), "\n")
+
 
         fit_data = {
             "lmb_range": lmb_range,
