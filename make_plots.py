@@ -1368,14 +1368,18 @@ def main():
 
     # plot_energy_diffs(data, config, plotdir)
 
-    lambdas = data["lambdas"]
-    order0_fit = data["order0_fit"]
-    order1_fit = data["order1_fit"]
-    order2_fit = data["order2_fit"]
-    order3_fit = data["order3_fit"]
-    redchisq = data["redchisq"]
-    time_choice = data["time_choice"]
-    delta_t = data["delta_t"]
+    lambdas = np.array([d["lambdas"] for d in data])
+    order0_fit = np.array([d["order0_fit"] for d in data])
+    order1_fit = np.array([d["order1_fit"] for d in data])
+    order2_fit = np.array([d["order2_fit"] for d in data])
+    order3_fit = np.array([d["order3_fit"] for d in data])
+    # order1_fit = data["order1_fit"]
+    # order2_fit = data["order2_fit"]
+    # order3_fit = data["order3_fit"]
+    # redchisq = data["redchisq"]
+    redchisq = np.array([d["redchisq"] for d in data])
+    time_choice = data[0]["time_choice"]
+    delta_t = data[0]["delta_t"]
 
     all_data0 = {
         "lambdas0": lambdas,
@@ -1505,7 +1509,7 @@ def main():
         print("fit std order 4:", np.std(bootfit3, axis=0), "\n")
 
         # Fit with the expanded fit function
-        p0 = (1e-3, 0.7, 0,7)
+        p0 = (1e-3, 0.7, 0, 7)
         bootfit3_4, redchisq3_4, chisq3_4 = fit_lmb_4(
             order3_fit[lmb_range3],
             fitfunction_4,
@@ -1518,7 +1522,6 @@ def main():
         print("chisq order 4:", chisq3_4)
         print("fit order 4:", np.average(bootfit3_4, axis=0))
         print("fit std order 4:", np.std(bootfit3_4, axis=0), "\n")
-
 
         fit_data = {
             "lmb_range": lmb_range,
