@@ -682,6 +682,34 @@ def fit_loop(
         with open(datadir / (f"time_window_loop_nucl_2exp.pkl"), "wb") as file_out:
             pickle.dump(fitlist_nucl_2exp, file_out)
 
+        ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:, :, 0]
+        fitlist_nucldivsigma = stats.fit_loop(
+            ratio_unpert,
+            aexp_function,
+            time_limits[0],
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(
+            datadir / (f"time_window_loop_nucldivsigma_1exp.pkl"), "wb"
+        ) as file_out:
+            pickle.dump(fitlist_nucldivsigma, file_out)
+        fitlist_nucldivsigma_2exp = stats.fit_loop(
+            ratio_unpert,
+            twoexp_function,
+            time_limits[0],
+            plot=False,
+            disp=True,
+            time=False,
+            weights_=True,
+        )
+        with open(
+            datadir / (f"time_window_loop_nucldivsigma_2exp.pkl"), "wb"
+        ) as file_out:
+            pickle.dump(fitlist_nucldivsigma_2exp, file_out)
+
     if which_corr[1]:
         print("\n\nSigma fitting")
         # Sigma fit loop
@@ -962,6 +990,14 @@ def main():
                 fitlist_nucl_1exp = pickle.load(file_in)
             with open(datadir / (f"time_window_loop_nucl_2exp.pkl"), "rb") as file_in:
                 fitlist_nucl_2exp = pickle.load(file_in)
+            with open(
+                datadir / (f"time_window_loop_nucldivsigma_1exp.pkl"), "rb"
+            ) as file_in:
+                fitlist_nucldivsigma_1exp = pickle.load(file_in)
+            with open(
+                datadir / (f"time_window_loop_nucldivsigma_2exp.pkl"), "rb"
+            ) as file_in:
+                fitlist_nucldivsigma_2exp = pickle.load(file_in)
         if sigma_exist:
             with open(
                 "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_1exp.pkl",
@@ -985,10 +1021,22 @@ def main():
 
         # =========================================
         weighted_energy_nucl, fitweights = weighted_avg_1_2_exp(
-            fitlist_nucl_1exp, fitlist_nucl_2exp, print=False, tmax_choice=config["tmax_nucl"],
+            fitlist_nucl_1exp,
+            fitlist_nucl_2exp,
+            print=False,
+            tmax_choice=config["tmax_nucl"],
+        )
+        weighted_energy_nucldivsigma, fitweights = weighted_avg_1_2_exp(
+            fitlist_nucldivsigma_1exp,
+            fitlist_nucldivsigma_2exp,
+            print=False,
+            tmax_choice=config["tmax_nucl"],
         )
         weighted_energy_sigma, fitweights = weighted_avg_1_2_exp(
-            fitlist_sigma_1exp, fitlist_sigma_2exp, print=False, tmax_choice=config["tmax_sigma"],
+            fitlist_sigma_1exp,
+            fitlist_sigma_2exp,
+            print=False,
+            tmax_choice=config["tmax_sigma"],
         )
         # =========================================
 
@@ -1024,7 +1072,7 @@ def main():
 
     # ===============================
     # HARD CODED RANGE!!!
-    ratio_t_range = np.arange(7,18)
+    ratio_t_range = np.arange(7, 18)
     # ===============================
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
@@ -1064,50 +1112,42 @@ def main():
         show=False,
     )
 
-    order0_fit = np.zeros((len(lambdas), pars.nboot))
-    order1_fit = np.zeros((len(lambdas), pars.nboot))
-    order2_fit = np.zeros((len(lambdas), pars.nboot))
-    order3_fit = np.zeros((len(lambdas), pars.nboot))
-    order0_evals = np.zeros((len(lambdas), pars.nboot, 2))
-    order1_evals = np.zeros((len(lambdas), pars.nboot, 2))
-    order2_evals = np.zeros((len(lambdas), pars.nboot, 2))
-    order3_evals = np.zeros((len(lambdas), pars.nboot, 2))
-    order0_evecs = np.zeros((len(lambdas), pars.nboot, 2, 2))
-    order1_evecs = np.zeros((len(lambdas), pars.nboot, 2, 2))
-    order2_evecs = np.zeros((len(lambdas), pars.nboot, 2, 2))
-    order3_evecs = np.zeros((len(lambdas), pars.nboot, 2, 2))
-    red_chisq_list = np.zeros((4, len(lambdas)))
-
-    order0_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
-    order1_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
-    order2_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
-    order3_states_fit = np.zeros((len(lambdas), 2, pars.nboot, 2))
-    order3_states_fit_divsigma = np.zeros((len(lambdas), 2, pars.nboot, 2))
-
-    order0_corrs = np.zeros((len(lambdas), 2, pars.nboot, pars.T))
-    order1_corrs = np.zeros((len(lambdas), 2, pars.nboot, pars.T))
-    order2_corrs = np.zeros((len(lambdas), 2, pars.nboot, pars.T))
-    order3_corrs = np.zeros((len(lambdas), 2, pars.nboot, pars.T))
-
-    corr_matrices = np.zeros((len(lambdas), 4, 2, 2, pars.nboot, pars.T))
-
+    fitlist = []
     for i, lmb_val in enumerate(lambdas):
         print(f"\n====================\nLambda = {lmb_val}\n====================")
         # Construct a correlation matrix for each order in lambda(skipping order 0)
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
         )
-        corr_matrices[i, 0] = matrix_1
-        corr_matrices[i, 1] = matrix_2
-        corr_matrices[i, 2] = matrix_3
-        corr_matrices[i, 3] = matrix_4
 
-        Gt1_1, Gt2_1, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
-            matrix_1, time_choice, delta_t, name="_test", show=False
+        # ==================================================
+        # O(lambda^0) fit
+        (
+            Gt1_0,
+            Gt2_0,
+            [eval_left0, evec_left0, eval_right0, evec_right0],
+        ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
+        # Gt1_0 = np.einsum("ki,ijkl,kj->kl", evec_left0[:, :, 0], matrix_1, evec_right0[:, :, 0])
+        # Gt2_0 = np.einsum("ki,ijkl,kj->kl", evec_left0[:, :, 1], matrix_1, evec_right0[:, :, 1])
+        ratio0 = Gt1_0 / Gt2_0
+        effmass_ratio0 = stats.bs_effmass(ratio0, time_axis=1, spacing=1)
+        bootfit_state0, redchisq_0 = fit_value3(
+            Gt1_0, ratio_t_range, aexp_function, norm=1
         )
-        # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_1, evec_right[:, :, 0])
-        # Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_1, evec_right[:, :, 1])
-        # print(f"evec_1 = {np.average(evec_left,axis=0)}")
+        bootfit_state2, redchisq_2 = fit_value3(
+            Gt2_0, ratio_t_range, aexp_function, norm=1
+        )
+        bootfit0, redchisq0 = fit_value3(ratio0, ratio_t_range, aexp_function, norm=1)
+
+        # ==================================================
+        # O(lambda^1) fit
+        (
+            Gt1_1,
+            Gt2_1,
+            [eval_left1, evec_left1, eval_right1, evec_right1],
+        ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
+        # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 0], matrix_1, evec_right1[:, :, 0])
+        # Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 1], matrix_1, evec_right1[:, :, 1])
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
         bootfit_state1, redchisq_1 = fit_value3(
@@ -1116,106 +1156,50 @@ def main():
         bootfit_state2, redchisq_2 = fit_value3(
             Gt2_1, ratio_t_range, aexp_function, norm=1
         )
-        order0_corrs[i, 0] = Gt1_1
-        order0_corrs[i, 1] = Gt2_1
-        order0_states_fit[i, 0] = bootfit_state1
-        order0_states_fit[i, 1] = bootfit_state2
-
         bootfit1, redchisq1 = fit_value3(ratio1, ratio_t_range, aexp_function, norm=1)
-        order0_fit[i] = bootfit1[:, 1]  # /2
 
-        order0_evals[i] = eval_left
-        order0_evecs[i] = evec_left
-        # print("\n\ne-vals: ",eval_left)
-        # print("\n\ne-vecs l: ",np.average(evec_left,axis=0))
-        # print("\n\ne-vecs r: ",np.average(evec_right, axis=0))
-        red_chisq_list[0, i] = redchisq1
-
-        # print(f"diff = {err_brackets(np.average(bootfit1[:,1]),np.std(bootfit1[:,1]))}")
-        # print(f"redchisq1 = {redchisq1}")
-
-        Gt1_2, Gt2_2, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
-            matrix_2, time_choice, delta_t, name="_test", show=False
-        )
-        # Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_2, evec_right[:, :, 0])
-        # Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_2, evec_right[:, :, 1])
-        # print(f"evec_2 = {np.average(evec_left,axis=0)}")
-        # print(f"evec_2 = {evec_left}")
+        # ==================================================
+        # O(lambda^2) fit
+        (
+            Gt1_2,
+            Gt2_2,
+            [eval_left2, evec_left2, eval_right2, evec_right2],
+        ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
+        # Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 0], matrix_1, evec_right2[:, :, 0])
+        # Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 1], matrix_1, evec_right2[:, :, 1])
         ratio2 = Gt1_2 / Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
-        bootfit2, redchisq2 = fit_value3(ratio2, ratio_t_range, aexp_function, norm=1)
-        bootfit_state1, redchisq_1 = fit_value3(
+        bootfit_state2, redchisq_2 = fit_value3(
             Gt1_2, ratio_t_range, aexp_function, norm=1
         )
         bootfit_state2, redchisq_2 = fit_value3(
             Gt2_2, ratio_t_range, aexp_function, norm=1
         )
-        order1_corrs[i, 0] = Gt1_2
-        order1_corrs[i, 1] = Gt2_2
-        order1_states_fit[i, 0] = bootfit_state1
-        order1_states_fit[i, 1] = bootfit_state2
-        order1_fit[i] = bootfit2[:, 1]  # /2
-        order1_evals[i] = eval_left
-        order1_evecs[i] = evec_left
-        red_chisq_list[1, i] = redchisq2
-        # print(f"redchisq2 = {redchisq2}")
+        bootfit2, redchisq2 = fit_value3(ratio2, ratio_t_range, aexp_function, norm=1)
 
-        Gt1_3, Gt2_3, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
-            matrix_3, time_choice, delta_t, name="_test", show=False
-        )
-        # Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_3, evec_right[:, :, 0])
-        # Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_3, evec_right[:, :, 1])
-
-        # print(f"evec_3 = {np.average(evec_left,axis=0)}")
+        # ==================================================
+        # O(lambda^3) fit
+        (
+            Gt1_3,
+            Gt2_3,
+            [eval_left3, evec_left3, eval_right3, evec_right3],
+        ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
+        # Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 0], matrix_1, evec_right3[:, :, 0])
+        # Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 1], matrix_1, evec_right3[:, :, 1])
         ratio3 = Gt1_3 / Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
-        bootfit3, redchisq3 = fit_value3(ratio3, ratio_t_range, aexp_function, norm=1)
-        bootfit_state1, redchisq_1 = fit_value3(
+        bootfit_state3, redchisq_3 = fit_value3(
             Gt1_3, ratio_t_range, aexp_function, norm=1
         )
-        bootfit_state2, redchisq_2 = fit_value3(
+        bootfit_state3, redchisq_3 = fit_value3(
             Gt2_3, ratio_t_range, aexp_function, norm=1
         )
-        order2_corrs[i, 0] = Gt1_3
-        order2_corrs[i, 1] = Gt2_3
-        order2_states_fit[i, 0] = bootfit_state1
-        order2_states_fit[i, 1] = bootfit_state2
-        order2_fit[i] = bootfit3[:, 1]  # /2
-        order2_evals[i] = eval_left
-        order2_evecs[i] = evec_left
-        red_chisq_list[2, i] = redchisq3
-        # print(f"redchisq3 = {redchisq3}")
+        bootfit3, redchisq3 = fit_value3(ratio3, ratio_t_range, aexp_function, norm=1)
 
-        Gt1_4, Gt2_4, [eval_left, evec_left, eval_right, evec_right] = gevp_bootstrap(
-            matrix_4, time_choice, delta_t, name="_test", show=False
-        )
-        # Gt1_4 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 0], matrix_4, evec_right[:, :, 0])
-        # Gt2_4 = np.einsum("ki,ijkl,kj->kl", evec_left[:, :, 1], matrix_4, evec_right[:, :, 1])
-
-        # print(f"evec_4 = {np.average(evec_left,axis=0)}")
-        ratio4 = Gt1_4 / Gt2_4
-        effmass_ratio4 = stats.bs_effmass(ratio4, time_axis=1, spacing=1)
-        bootfit4, redchisq4 = fit_value3(ratio4, ratio_t_range, aexp_function, norm=1)
-        print(f"redchisq4 = {redchisq4}")
-        bootfit_state1, redchisq_1 = fit_value3(
-            Gt1_4, ratio_t_range, aexp_function, norm=1e20
-        )
-        bootfit_state2, redchisq_2 = fit_value3(
-            Gt2_4, ratio_t_range, aexp_function, norm=1e20
-        )
-        order3_corrs[i, 0] = Gt1_4
-        order3_corrs[i, 1] = Gt2_4
-        order3_states_fit[i, 0] = bootfit_state1
-        order3_states_fit[i, 1] = bootfit_state2
-        order3_fit[i] = bootfit4[:, 1]  # /2
-        order3_evals[i] = eval_left
-        order3_evecs[i] = evec_left
-        red_chisq_list[3, i] = redchisq4
-
-        if i == 0:
-            order3_states_fit_divsigma[i, 0] = np.zeros((pars.nboot, 2))
-            order3_states_fit_divsigma[i, 1] = np.zeros((pars.nboot, 2))
-
+        # ==================================================
+        # Divide the nucleon correlator by the Sigma correlator and fit this ratio to get the energy shift.
+        if lmb_val == 0:
+            order3_states_fit_divsigma = np.zeros((2, pars.nboot, 2))
         else:
             sigma_ = G2_sigm[0][:, :, 0]
             print(np.shape(sigma_))
@@ -1232,9 +1216,57 @@ def main():
                 Gt2_4_divsigma, ratio_t_range, aexp_function, norm=1
             )
 
-            order3_states_fit_divsigma[i, 0] = bootfit_state1_divsigma
-            order3_states_fit_divsigma[i, 1] = bootfit_state2_divsigma
+            order3_states_fit_divsigma = np.array(
+                [bootfit_state1_divsigma, bootfit_state1_divsigma]
+            )
 
+        # ==================================================
+        # Save the data
+        fitparams = {
+            "lambdas": lambdas,
+            "time_choice": time_choice,
+            "delta_t": delta_t,
+            "corr_matrices": np.array([matrix_1, matrix_2, matrix_3, matrix_4]),
+            "order0_corrs": np.array([Gt1_0, Gt2_0]),
+            "order0_states_fit": np.array([bootfit_state0, bootfit_state2]),
+            "order0_fit": bootfit0,
+            "order0_eval_left": eval_left0,
+            "order0_eval_right": eval_right0,
+            "order0_evec_left": evec_left0,
+            "order0_evec_right": evec_right0,
+            "red_chisq0": redchisq0,
+            "order1_corrs": np.array([Gt1_1, Gt2_1]),
+            "order1_states_fit": np.array([bootfit_state1, bootfit_state2]),
+            "order1_fit": bootfit1,
+            "order1_eval_left": eval_left1,
+            "order1_eval_right": eval_right1,
+            "order1_evec_left": evec_left1,
+            "order1_evec_right": evec_right1,
+            "red_chisq1": redchisq1,
+            "order2_corrs": np.array([Gt1_2, Gt2_2]),
+            "order2_states_fit": np.array([bootfit_state2, bootfit_state2]),
+            "order2_fit": bootfit2,
+            "order2_eval_left": eval_left2,
+            "order2_eval_right": eval_right2,
+            "order2_evec_left": evec_left2,
+            "order2_evec_right": evec_right2,
+            "red_chisq2": redchisq2,
+            "order3_corrs": np.array([Gt1_3, Gt2_3]),
+            "order3_states_fit": np.array([bootfit_state3, bootfit_state2]),
+            "order3_fit": bootfit3,
+            "order3_eval_left": eval_left3,
+            "order3_eval_right": eval_right3,
+            "order3_evec_left": evec_left3,
+            "order3_evec_right": evec_right3,
+            "red_chisq3": redchisq3,
+            "order3_states_fit_divsigma": order3_states_fit_divsigma,
+            "weighted_energy_nucl": weighted_energy_nucl,
+            "weighted_energy_nucldivsigma": weighted_energy_nucldivsigma,
+            "weighted_energy_sigma": weighted_energy_sigma,
+        }
+        fitlist.append(fitparams)
+
+        # ==================================================
         if plotting:
             plotting_script_all(
                 matrix_1 / 1e39,
@@ -1271,52 +1303,11 @@ def main():
 
     # ----------------------------------------------------------------------
     # Save the fit data to a pickle file
-    all_data = {
-        "lambdas": lambdas,
-        "bootfit_unpert_nucl": bootfit_unpert_nucl,
-        "bootfit_unpert_sigma": bootfit_unpert_sigma,
-        "weighted_energy_nucl": weighted_energy_nucl,
-        "weighted_energy_sigma": weighted_energy_sigma,
-        "bootfit_ratio": bootfit_ratio,
-        "bootfit_effratio": bootfit_effratio,
-        # "corr_matrices": corr_matrices,
-        # "order0_corrs": order0_corrs,
-        # "order1_corrs": order1_corrs,
-        # "order2_corrs": order2_corrs,
-        # "order3_corrs": order3_corrs,
-        "order0_fit": order0_fit,
-        "order1_fit": order1_fit,
-        "order2_fit": order2_fit,
-        "order3_fit": order3_fit,
-        "order0_evals": order0_evals,
-        "order1_evals": order1_evals,
-        "order2_evals": order2_evals,
-        "order3_evals": order3_evals,
-        "order0_evecs": order0_evecs,
-        "order1_evecs": order1_evecs,
-        "order2_evecs": order2_evecs,
-        "order3_evecs": order3_evecs,
-        "order0_states_fit": order0_states_fit,
-        "order1_states_fit": order1_states_fit,
-        "order2_states_fit": order2_states_fit,
-        "order3_states_fit": order3_states_fit,
-        "order3_states_fit_divsigma": order3_states_fit_divsigma,
-        "redchisq": red_chisq_list,
-        "time_choice": time_choice,
-        "delta_t": delta_t,
-    }
-    # with open(
-    #     datadir
-    #     / (
-    #         f"lambda_dep_t{time_choice}_dt{delta_t}_fit{ratio_t_range[0]}-{ratio_t_range[-1]}.pkl"
-    #     ),
-    #     "wb",
-    # ) as file_out:
     with open(
         datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"),
         "wb",
     ) as file_out:
-        pickle.dump(all_data, file_out)
+        pickle.dump(fitlist, file_out)
 
 
 if __name__ == "__main__":
