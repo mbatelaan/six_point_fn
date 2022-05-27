@@ -1131,10 +1131,10 @@ def main():
         # Gt2_0 = np.einsum("ki,ijkl,kj->kl", evec_left0[:, :, 1], matrix_1, evec_right0[:, :, 1])
         ratio0 = Gt1_0 / Gt2_0
         effmass_ratio0 = stats.bs_effmass(ratio0, time_axis=1, spacing=1)
-        bootfit_state0, redchisq_0 = fit_value3(
+        bootfit_state1_0, redchisq1_0 = fit_value3(
             Gt1_0, ratio_t_range, aexp_function, norm=1
         )
-        bootfit_state2, redchisq_2 = fit_value3(
+        bootfit_state2_0, redchisq2_0 = fit_value3(
             Gt2_0, ratio_t_range, aexp_function, norm=1
         )
         bootfit0, redchisq0 = fit_value3(ratio0, ratio_t_range, aexp_function, norm=1)
@@ -1151,10 +1151,10 @@ def main():
         # Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 1], matrix_2, evec_right1[:, :, 1])
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
-        bootfit_state1, redchisq_1 = fit_value3(
+        bootfit_state1_1, redchisq1_1 = fit_value3(
             Gt1_1, ratio_t_range, aexp_function, norm=1
         )
-        bootfit_state2, redchisq_2 = fit_value3(
+        bootfit_state2_1, redchisq2_1 = fit_value3(
             Gt2_1, ratio_t_range, aexp_function, norm=1
         )
         bootfit1, redchisq1 = fit_value3(ratio1, ratio_t_range, aexp_function, norm=1)
@@ -1171,10 +1171,10 @@ def main():
         # Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 1], matrix_3, evec_right2[:, :, 1])
         ratio2 = Gt1_2 / Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
-        bootfit_state2, redchisq_2 = fit_value3(
+        bootfit_state1_2, redchisq1_2 = fit_value3(
             Gt1_2, ratio_t_range, aexp_function, norm=1
         )
-        bootfit_state2, redchisq_2 = fit_value3(
+        bootfit_state2_2, redchisq2_2 = fit_value3(
             Gt2_2, ratio_t_range, aexp_function, norm=1
         )
         bootfit2, redchisq2 = fit_value3(ratio2, ratio_t_range, aexp_function, norm=1)
@@ -1191,10 +1191,10 @@ def main():
         # Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 1], matrix_4, evec_right3[:, :, 1])
         ratio3 = Gt1_3 / Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
-        bootfit_state3, redchisq_3 = fit_value3(
+        bootfit_state1_3, redchisq1_3 = fit_value3(
             Gt1_3, ratio_t_range, aexp_function, norm=1
         )
-        bootfit_state3, redchisq_3 = fit_value3(
+        bootfit_state2_3, redchisq1_3 = fit_value3(
             Gt2_3, ratio_t_range, aexp_function, norm=1
         )
         bootfit3, redchisq3 = fit_value3(ratio3, ratio_t_range, aexp_function, norm=1)
@@ -1237,7 +1237,7 @@ def main():
             "delta_t": delta_t,
             # "corr_matrices": np.array([matrix_1, matrix_2, matrix_3, matrix_4]),
             # "order0_corrs": np.array([Gt1_0, Gt2_0]),
-            "order0_states_fit": np.array([bootfit_state0, bootfit_state2]),
+            "order0_states_fit": np.array([bootfit_state1_0, bootfit_state2_0]),
             "order0_fit": bootfit0,
             "order0_eval_left": eval_left0,
             "order0_eval_right": eval_right0,
@@ -1245,7 +1245,7 @@ def main():
             "order0_evec_right": evec_right0,
             "red_chisq0": redchisq0,
             # "order1_corrs": np.array([Gt1_1, Gt2_1]),
-            "order1_states_fit": np.array([bootfit_state1, bootfit_state2]),
+            "order1_states_fit": np.array([bootfit_state1_1, bootfit_state2_1]),
             "order1_fit": bootfit1,
             "order1_eval_left": eval_left1,
             "order1_eval_right": eval_right1,
@@ -1253,7 +1253,7 @@ def main():
             "order1_evec_right": evec_right1,
             "red_chisq1": redchisq1,
             # "order2_corrs": np.array([Gt1_2, Gt2_2]),
-            "order2_states_fit": np.array([bootfit_state2, bootfit_state2]),
+            "order2_states_fit": np.array([bootfit_state1_2, bootfit_state2_2]),
             "order2_fit": bootfit2,
             "order2_eval_left": eval_left2,
             "order2_eval_right": eval_right2,
@@ -1261,7 +1261,7 @@ def main():
             "order2_evec_right": evec_right2,
             "red_chisq2": redchisq2,
             # "order3_corrs": np.array([Gt1_3, Gt2_3]),
-            "order3_states_fit": np.array([bootfit_state3, bootfit_state2]),
+            "order3_states_fit": np.array([bootfit_state1_3, bootfit_state2_3]),
             "order3_fit": bootfit3,
             "order3_eval_left": eval_left3,
             "order3_eval_right": eval_right3,
