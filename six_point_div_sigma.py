@@ -1221,7 +1221,7 @@ def main():
             )
 
             order3_states_fit_divsigma = np.array(
-                [bootfit_state1_divsigma, bootfit_state1_divsigma]
+                [bootfit_state1_divsigma, bootfit_state2_divsigma]
             )
 
         print(redchisq0)
