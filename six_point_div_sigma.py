@@ -921,7 +921,7 @@ def main():
     # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
 
     if time_loop:
-        which_corr = [True, True, True]
+        which_corr = [True, False, True]
         time_limits = np.array(
             [
                 [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 5]],
@@ -1019,57 +1019,57 @@ def main():
             ) as file_in:
                 fitlist_large = pickle.load(file_in)
 
-        # =========================================
-        weighted_energy_nucl, fitweights = weighted_avg_1_2_exp(
-            fitlist_nucl_1exp,
-            fitlist_nucl_2exp,
-            print=False,
-            tmax_choice=config["tmax_nucl"],
-        )
-        weighted_energy_nucldivsigma, fitweights = weighted_avg_1_2_exp(
-            fitlist_nucldivsigma_1exp,
-            fitlist_nucldivsigma_2exp,
-            print=False,
-            tmax_choice=config["tmax_nucl"],
-        )
-        weighted_energy_sigma, fitweights = weighted_avg_1_2_exp(
-            fitlist_sigma_1exp,
-            fitlist_sigma_2exp,
-            print=False,
-            tmax_choice=config["tmax_sigma"],
-        )
-        # =========================================
-
-        weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
-        high_weight_nucl = np.argmax(weights_nucl)
-        # print(fitlist_nucl_1exp[high_weight_nucl]["redchisq"])
-        nucl_t_range = np.arange(
-            fitlist_nucl_1exp[high_weight_nucl]["x"][0],
-            fitlist_nucl_1exp[high_weight_nucl]["x"][-1] + 1,
-        )
-        print(f"nucl_t_range = {nucl_t_range}")
-
-        weights_sigma = np.array([i["weight"] for i in fitlist_sigma_1exp])
-        high_weight_sigma = np.argmax(weights_sigma)
-        sigma_t_range = np.arange(
-            fitlist_sigma_1exp[high_weight_sigma]["x"][0],
-            fitlist_sigma_1exp[high_weight_sigma]["x"][-1] + 1,
-        )
-        print(f"sigma_t_range = {sigma_t_range}")
-
-        weights_small = np.array([i["weight"] for i in fitlist_small])
-        high_weight_small = np.argmax(weights_small)
-        weights_large = np.array([i["weight"] for i in fitlist_large])
-        high_weight_large = np.argmax(weights_large)
-        ratio_t_range = np.arange(
-            min(
-                fitlist_small[high_weight_small]["x"][0],
-                fitlist_large[high_weight_large]["x"][0],
-            ),
-            fitlist_large[high_weight_large]["x"][-1] + 1,
-        )
-        print(f"ratio_t_range = {ratio_t_range}")
-
+    # =========================================
+    weighted_energy_nucl, fitweights = weighted_avg_1_2_exp(
+        fitlist_nucl_1exp,
+        fitlist_nucl_2exp,
+        print=False,
+        tmax_choice=config["tmax_nucl"],
+    )
+    weighted_energy_nucldivsigma, fitweights = weighted_avg_1_2_exp(
+        fitlist_nucldivsigma_1exp,
+        fitlist_nucldivsigma_2exp,
+        print=False,
+        tmax_choice=config["tmax_nucl"],
+    )
+    weighted_energy_sigma, fitweights = weighted_avg_1_2_exp(
+        fitlist_sigma_1exp,
+        fitlist_sigma_2exp,
+        print=False,
+        tmax_choice=config["tmax_sigma"],
+    )
+    # =========================================
+    
+    weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
+    high_weight_nucl = np.argmax(weights_nucl)
+    # print(fitlist_nucl_1exp[high_weight_nucl]["redchisq"])
+    nucl_t_range = np.arange(
+        fitlist_nucl_1exp[high_weight_nucl]["x"][0],
+        fitlist_nucl_1exp[high_weight_nucl]["x"][-1] + 1,
+    )
+    print(f"nucl_t_range = {nucl_t_range}")
+    
+    weights_sigma = np.array([i["weight"] for i in fitlist_sigma_1exp])
+    high_weight_sigma = np.argmax(weights_sigma)
+    sigma_t_range = np.arange(
+        fitlist_sigma_1exp[high_weight_sigma]["x"][0],
+        fitlist_sigma_1exp[high_weight_sigma]["x"][-1] + 1,
+    )
+    print(f"sigma_t_range = {sigma_t_range}")
+    
+    weights_small = np.array([i["weight"] for i in fitlist_small])
+    high_weight_small = np.argmax(weights_small)
+    weights_large = np.array([i["weight"] for i in fitlist_large])
+    high_weight_large = np.argmax(weights_large)
+    ratio_t_range = np.arange(
+        min(
+            fitlist_small[high_weight_small]["x"][0],
+            fitlist_large[high_weight_large]["x"][0],
+        ),
+        fitlist_large[high_weight_large]["x"][-1] + 1,
+    )
+    print(f"ratio_t_range = {ratio_t_range}")
+    
     # ===============================
     # HARD CODED RANGE!!!
     ratio_t_range = np.arange(7, 18)
@@ -1138,6 +1138,7 @@ def main():
             Gt2_0, ratio_t_range, aexp_function, norm=1
         )
         bootfit0, redchisq0 = fit_value3(ratio0, ratio_t_range, aexp_function, norm=1)
+        print(redchisq0)
 
         # ==================================================
         # O(lambda^1) fit
@@ -1145,9 +1146,9 @@ def main():
             Gt1_1,
             Gt2_1,
             [eval_left1, evec_left1, eval_right1, evec_right1],
-        ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
-        # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 0], matrix_1, evec_right1[:, :, 0])
-        # Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 1], matrix_1, evec_right1[:, :, 1])
+        ) = gevp_bootstrap(matrix_2, time_choice, delta_t, name="_test", show=False)
+        # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 0], matrix_2, evec_right1[:, :, 0])
+        # Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 1], matrix_2, evec_right1[:, :, 1])
         ratio1 = Gt1_1 / Gt2_1
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
         bootfit_state1, redchisq_1 = fit_value3(
@@ -1157,6 +1158,7 @@ def main():
             Gt2_1, ratio_t_range, aexp_function, norm=1
         )
         bootfit1, redchisq1 = fit_value3(ratio1, ratio_t_range, aexp_function, norm=1)
+        print(redchisq1)
 
         # ==================================================
         # O(lambda^2) fit
@@ -1164,9 +1166,9 @@ def main():
             Gt1_2,
             Gt2_2,
             [eval_left2, evec_left2, eval_right2, evec_right2],
-        ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
-        # Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 0], matrix_1, evec_right2[:, :, 0])
-        # Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 1], matrix_1, evec_right2[:, :, 1])
+        ) = gevp_bootstrap(matrix_3, time_choice, delta_t, name="_test", show=False)
+        # Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 0], matrix_3, evec_right2[:, :, 0])
+        # Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 1], matrix_3, evec_right2[:, :, 1])
         ratio2 = Gt1_2 / Gt2_2
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
         bootfit_state2, redchisq_2 = fit_value3(
@@ -1176,6 +1178,7 @@ def main():
             Gt2_2, ratio_t_range, aexp_function, norm=1
         )
         bootfit2, redchisq2 = fit_value3(ratio2, ratio_t_range, aexp_function, norm=1)
+        print(redchisq2)
 
         # ==================================================
         # O(lambda^3) fit
@@ -1183,9 +1186,9 @@ def main():
             Gt1_3,
             Gt2_3,
             [eval_left3, evec_left3, eval_right3, evec_right3],
-        ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
-        # Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 0], matrix_1, evec_right3[:, :, 0])
-        # Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 1], matrix_1, evec_right3[:, :, 1])
+        ) = gevp_bootstrap(matrix_4, time_choice, delta_t, name="_test", show=False)
+        # Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 0], matrix_4, evec_right3[:, :, 0])
+        # Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 1], matrix_4, evec_right3[:, :, 1])
         ratio3 = Gt1_3 / Gt2_3
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
         bootfit_state3, redchisq_3 = fit_value3(
@@ -1195,6 +1198,7 @@ def main():
             Gt2_3, ratio_t_range, aexp_function, norm=1
         )
         bootfit3, redchisq3 = fit_value3(ratio3, ratio_t_range, aexp_function, norm=1)
+        print(redchisq3)
 
         # ==================================================
         # Divide the nucleon correlator by the Sigma correlator and fit this ratio to get the energy shift.
@@ -1203,31 +1207,36 @@ def main():
         else:
             sigma_ = G2_sigm[0][:, :, 0]
             print(np.shape(sigma_))
-            print(np.shape(Gt1_4))
-            Gt1_4_divsigma = Gt1_4 / sigma_
-            Gt2_4_divsigma = Gt2_4 / sigma_
-            print(np.shape(Gt1_4_divsigma))
+            print(np.shape(Gt1_3))
+            Gt1_3_divsigma = Gt1_3 / sigma_
+            Gt2_3_divsigma = Gt2_3 / sigma_
+            print(np.shape(Gt1_3_divsigma))
 
-            # aexp_function.initparfnc(Gt1_4_divsigma, timeslice=7)
+            # aexp_function.initparfnc(Gt1_3_divsigma, timeslice=7)
             bootfit_state1_divsigma, redchisq_1_divsigma = fit_value3(
-                Gt1_4_divsigma, ratio_t_range, aexp_function, norm=1
+                Gt1_3_divsigma, ratio_t_range, aexp_function, norm=1
             )
             bootfit_state2_divsigma, redchisq_2_divsigma = fit_value3(
-                Gt2_4_divsigma, ratio_t_range, aexp_function, norm=1
+                Gt2_3_divsigma, ratio_t_range, aexp_function, norm=1
             )
 
             order3_states_fit_divsigma = np.array(
                 [bootfit_state1_divsigma, bootfit_state1_divsigma]
             )
 
+        print(redchisq0)
+        print(redchisq1)
+        print(redchisq2)
+        print(redchisq3)
+
         # ==================================================
         # Save the data
         fitparams = {
-            "lambdas": lambdas,
+            "lambdas": lmb_val,
             "time_choice": time_choice,
             "delta_t": delta_t,
-            "corr_matrices": np.array([matrix_1, matrix_2, matrix_3, matrix_4]),
-            "order0_corrs": np.array([Gt1_0, Gt2_0]),
+            # "corr_matrices": np.array([matrix_1, matrix_2, matrix_3, matrix_4]),
+            # "order0_corrs": np.array([Gt1_0, Gt2_0]),
             "order0_states_fit": np.array([bootfit_state0, bootfit_state2]),
             "order0_fit": bootfit0,
             "order0_eval_left": eval_left0,
@@ -1235,7 +1244,7 @@ def main():
             "order0_evec_left": evec_left0,
             "order0_evec_right": evec_right0,
             "red_chisq0": redchisq0,
-            "order1_corrs": np.array([Gt1_1, Gt2_1]),
+            # "order1_corrs": np.array([Gt1_1, Gt2_1]),
             "order1_states_fit": np.array([bootfit_state1, bootfit_state2]),
             "order1_fit": bootfit1,
             "order1_eval_left": eval_left1,
@@ -1243,7 +1252,7 @@ def main():
             "order1_evec_left": evec_left1,
             "order1_evec_right": evec_right1,
             "red_chisq1": redchisq1,
-            "order2_corrs": np.array([Gt1_2, Gt2_2]),
+            # "order2_corrs": np.array([Gt1_2, Gt2_2]),
             "order2_states_fit": np.array([bootfit_state2, bootfit_state2]),
             "order2_fit": bootfit2,
             "order2_eval_left": eval_left2,
@@ -1251,7 +1260,7 @@ def main():
             "order2_evec_left": evec_left2,
             "order2_evec_right": evec_right2,
             "red_chisq2": redchisq2,
-            "order3_corrs": np.array([Gt1_3, Gt2_3]),
+            # "order3_corrs": np.array([Gt1_3, Gt2_3]),
             "order3_states_fit": np.array([bootfit_state3, bootfit_state2]),
             "order3_fit": bootfit3,
             "order3_eval_left": eval_left3,
@@ -1289,11 +1298,11 @@ def main():
                 show=False,
             )
             plotting_script_diff_2(
+                effmass_ratio0,
                 effmass_ratio1,
                 effmass_ratio2,
                 effmass_ratio3,
-                effmass_ratio4,
-                [bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1], bootfit4[:, 1]],
+                [bootfit0[:, 1], bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1]],
                 ratio_t_range,
                 lmb_val,
                 plotdir,

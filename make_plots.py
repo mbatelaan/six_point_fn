@@ -257,11 +257,16 @@ def fit_lmb_4(ydata, function, lambdas, plotdir, p0=None):
 
 def plot_lmb_dep(all_data, plotdir, fit_data=None):
     """Make a plot of the lambda dependence of the energy shift"""
+    print(
+        all_data["lambdas0"],
+        np.average(all_data["order0_fit"], axis=1),
+        np.std(all_data["order0_fit"],axis=1),
+    )
     plt.figure(figsize=(9, 6))
     plt.errorbar(
         all_data["lambdas0"],
-        np.average(all_data["order0_fit"], axis=1),
-        np.std(all_data["order0_fit"], axis=1),
+        np.average(all_data["order0_fit"],axis=1),
+        np.std(all_data["order0_fit"],axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^1)$",
         color=_colors[0],
@@ -1369,17 +1374,29 @@ def main():
     # plot_energy_diffs(data, config, plotdir)
 
     lambdas = np.array([d["lambdas"] for d in data])
-    order0_fit = np.array([d["order0_fit"] for d in data])
-    order1_fit = np.array([d["order1_fit"] for d in data])
-    order2_fit = np.array([d["order2_fit"] for d in data])
-    order3_fit = np.array([d["order3_fit"] for d in data])
+    print("\n\n", np.shape(lambdas))
+    print("\n\n", lambdas)
+    order0_fit = np.array([d["order0_fit"][:,1] for d in data])
+    order1_fit = np.array([d["order1_fit"][:,1] for d in data])
+    order2_fit = np.array([d["order2_fit"][:,1] for d in data])
+    order3_fit = np.array([d["order3_fit"][:,1] for d in data])
     # order1_fit = data["order1_fit"]
     # order2_fit = data["order2_fit"]
     # order3_fit = data["order3_fit"]
     # redchisq = data["redchisq"]
-    redchisq = np.array([d["redchisq"] for d in data])
+    redchisq0 = np.array([d["red_chisq0"] for d in data])
+    redchisq1 = np.array([d["red_chisq1"] for d in data])
+    redchisq2 = np.array([d["red_chisq2"] for d in data])
+    redchisq3 = np.array([d["red_chisq3"] for d in data])
     time_choice = data[0]["time_choice"]
     delta_t = data[0]["delta_t"]
+
+    print(data[7]["red_chisq0"])
+    print(data[7]["red_chisq1"])
+    print(data[7]["red_chisq2"])
+    print(data[7]["red_chisq3"])
+
+    print("\n\n", np.shape(order0_fit))
 
     all_data0 = {
         "lambdas0": lambdas,
@@ -1390,7 +1407,10 @@ def main():
         "order1_fit": order1_fit,
         "order2_fit": order2_fit,
         "order3_fit": order3_fit,
-        "redchisq": redchisq,
+        "redchisq0": redchisq0,
+        "redchisq1": redchisq1,
+        "redchisq2": redchisq2,
+        "redchisq3": redchisq3,
         "time_choice": time_choice,
         "delta_t": delta_t,
     }
@@ -1398,14 +1418,25 @@ def main():
 
     # Filter out data points with a high reduced chi-squared value
     chisq_tol = 1.5  # 1.7
-    order0_fit = order0_fit[np.where(redchisq[0] <= chisq_tol)]
-    lambdas0 = lambdas[np.where(redchisq[0] <= chisq_tol)]
-    order1_fit = order1_fit[np.where(redchisq[1] <= chisq_tol)]
-    lambdas1 = lambdas[np.where(redchisq[1] <= chisq_tol)]
-    order2_fit = order2_fit[np.where(redchisq[2] <= chisq_tol)]
-    lambdas2 = lambdas[np.where(redchisq[2] <= chisq_tol)]
-    order3_fit = order3_fit[np.where(redchisq[3] <= chisq_tol)]
-    lambdas3 = lambdas[np.where(redchisq[3] <= chisq_tol)]
+    print(np.where(redchisq0 <= chisq_tol))
+    print(np.where(redchisq1 <= chisq_tol))
+    print(np.where(redchisq2 <= chisq_tol))
+    print(np.where(redchisq3 <= chisq_tol))
+
+    print(redchisq0)
+    print(redchisq1)
+    print(redchisq2)
+    print(redchisq3)
+
+    order0_fit = order0_fit[np.where(redchisq0 <= chisq_tol)]
+    lambdas0 = lambdas[np.where(redchisq0 <= chisq_tol)]
+    order1_fit = order1_fit[np.where(redchisq1 <= chisq_tol)]
+    lambdas1 = lambdas[np.where(redchisq1 <= chisq_tol)]
+    order2_fit = order2_fit[np.where(redchisq2 <= chisq_tol)]
+    lambdas2 = lambdas[np.where(redchisq2 <= chisq_tol)]
+    order3_fit = order3_fit[np.where(redchisq3 <= chisq_tol)]
+    lambdas3 = lambdas[np.where(redchisq3 <= chisq_tol)]
+
 
     all_data = {
         "lambdas0": lambdas0,
@@ -1416,7 +1447,10 @@ def main():
         "order1_fit": order1_fit,
         "order2_fit": order2_fit,
         "order3_fit": order3_fit,
-        "redchisq": redchisq,
+        "redchisq0": redchisq0,
+        "redchisq1": redchisq1,
+        "redchisq2": redchisq2,
+        "redchisq3": redchisq3,
         "time_choice": time_choice,
         "delta_t": delta_t,
     }
@@ -1561,7 +1595,8 @@ def main():
     # with open(datadir / ("fit_data_time_choice"+str(time_choice_range[0])+"-"+str(time_choice_range[-1])+".pkl"), "rb") as file_in:
     with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "rb") as file_in:
         data = pickle.load(file_in)
-    lambdas = data["lambdas"]
+    lambdas = np.array([d["lambdas"] for d in data])
+    # lambdas = data["lambdas0"]
     order0_fit = data["order0_fit"]
     order1_fit = data["order1_fit"]
     order2_fit = data["order2_fit"]
