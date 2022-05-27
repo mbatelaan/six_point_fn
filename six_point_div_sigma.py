@@ -1039,7 +1039,7 @@ def main():
         tmax_choice=config["tmax_sigma"],
     )
     # =========================================
-    
+
     weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
     high_weight_nucl = np.argmax(weights_nucl)
     # print(fitlist_nucl_1exp[high_weight_nucl]["redchisq"])
@@ -1048,7 +1048,7 @@ def main():
         fitlist_nucl_1exp[high_weight_nucl]["x"][-1] + 1,
     )
     print(f"nucl_t_range = {nucl_t_range}")
-    
+
     weights_sigma = np.array([i["weight"] for i in fitlist_sigma_1exp])
     high_weight_sigma = np.argmax(weights_sigma)
     sigma_t_range = np.arange(
@@ -1056,7 +1056,7 @@ def main():
         fitlist_sigma_1exp[high_weight_sigma]["x"][-1] + 1,
     )
     print(f"sigma_t_range = {sigma_t_range}")
-    
+
     weights_small = np.array([i["weight"] for i in fitlist_small])
     high_weight_small = np.argmax(weights_small)
     weights_large = np.array([i["weight"] for i in fitlist_large])
@@ -1069,7 +1069,7 @@ def main():
         fitlist_large[high_weight_large]["x"][-1] + 1,
     )
     print(f"ratio_t_range = {ratio_t_range}")
-    
+
     # ===============================
     # HARD CODED RANGE!!!
     ratio_t_range = np.arange(7, 18)

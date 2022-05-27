@@ -260,13 +260,13 @@ def plot_lmb_dep(all_data, plotdir, fit_data=None):
     print(
         all_data["lambdas0"],
         np.average(all_data["order0_fit"], axis=1),
-        np.std(all_data["order0_fit"],axis=1),
+        np.std(all_data["order0_fit"], axis=1),
     )
     plt.figure(figsize=(9, 6))
     plt.errorbar(
         all_data["lambdas0"],
-        np.average(all_data["order0_fit"],axis=1),
-        np.std(all_data["order0_fit"],axis=1),
+        np.average(all_data["order0_fit"], axis=1),
+        np.std(all_data["order0_fit"], axis=1),
         fmt="s",
         label=r"$\mathcal{O}(\lambda^1)$",
         color=_colors[0],
@@ -1372,14 +1372,13 @@ def main():
         data = pickle.load(file_in)
 
     # plot_energy_diffs(data, config, plotdir)
-
     lambdas = np.array([d["lambdas"] for d in data])
     print("\n\n", np.shape(lambdas))
     print("\n\n", lambdas)
-    order0_fit = np.array([d["order0_fit"][:,1] for d in data])
-    order1_fit = np.array([d["order1_fit"][:,1] for d in data])
-    order2_fit = np.array([d["order2_fit"][:,1] for d in data])
-    order3_fit = np.array([d["order3_fit"][:,1] for d in data])
+    order0_fit = np.array([d["order0_fit"][:, 1] for d in data])
+    order1_fit = np.array([d["order1_fit"][:, 1] for d in data])
+    order2_fit = np.array([d["order2_fit"][:, 1] for d in data])
+    order3_fit = np.array([d["order3_fit"][:, 1] for d in data])
     # order1_fit = data["order1_fit"]
     # order2_fit = data["order2_fit"]
     # order3_fit = data["order3_fit"]
@@ -1436,7 +1435,6 @@ def main():
     lambdas2 = lambdas[np.where(redchisq2 <= chisq_tol)]
     order3_fit = order3_fit[np.where(redchisq3 <= chisq_tol)]
     lambdas3 = lambdas[np.where(redchisq3 <= chisq_tol)]
-
 
     all_data = {
         "lambdas0": lambdas0,
