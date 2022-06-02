@@ -40,6 +40,11 @@ def fitfunction5(lmb, Delta_E, matrix_element):
     return deltaE
 
 
+def fitfunction6(lmb, matrix_element, delta_E_fix):
+    deltaE = np.sqrt(delta_E_fix**2 + 4 * lmb**2 * matrix_element**2)
+    return deltaE
+
+
 def fit_lmb(ydata, function, lambdas, p0=None):
     """Fit the lambda dependence
 
@@ -109,6 +114,47 @@ def fit_lambda_dep(fitlist, order, lmb_range):
     print(f"chisq order {order}:", chisq_fit)
     print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
     return lmb_range, bootfit, redchisq_fit, chisq_fit
+
+
+def fit_lambda_dep_2(fitlist, order, lmb_range):
+    """Fit the lambda dependence of the energy shift
+    Now fitting with only one parameter, we set the y-intercept by using the energy ratio gotten from fits.
+    """
+    p0 = 0.7
+    fit_data = np.array([fit[f"order{order}_fit"][:, 1] for fit in fitlist])
+    lambdas = np.array([fit[f"lambdas"] for fit in fitlist])
+
+    # Check if we haven't excluded some of the chosen fit range
+    if lmb_range[-1] >= len(lambdas):
+        lmb_range = np.arange(min(len(lambdas) - 5, lmb_range[0]), len(lambdas))
+    else:
+        lmb_range = lmb_range
+
+    ydata_avg = np.average(fit_data[lmb_range], axis=1)
+    invcovmat = linalg.inv(np.cov(fit_data[lmb_range].T))
+
+    popt_avg, pcov_avg = curve_fit(
+        fitfunction6,
+        lambdas[lmb_range],
+        ydata_avg,
+        sigma=invcovmat,
+        p0=p0,
+        args=delta_E_fix
+        # maxfev=4000,
+        # bounds=bounds,
+    )
+
+    #     bootfit, redchisq_fit, chisq_fit = fit_lmb(
+    #     fit_data[lmb_range],
+    #     fitfunction5,
+    #     lambdas[lmb_range],
+    #     p0=p0,
+    # )
+    # print(f"redchisq order {order}:", redchisq_fit)
+    # print(f"chisq order {order}:", chisq_fit)
+    # print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
+    print(popt_avg)
+    return popt_avg, pcov_avg
 
 
 def plot_lmb_depR(all_data, plotdir, fit_data=None):
@@ -386,6 +432,9 @@ def main():
         )
 
     plot_lmb_depR(all_data, plotdir, fit_data)
+
+    delta_E_fix = np.average(data[0]["weighted_energy_nucldivsigma"])
+    result = fit_lambda_dep_2(fitlist, delta_E_fix, order, lmb_range)
 
 
 if __name__ == "__main__":
