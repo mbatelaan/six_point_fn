@@ -120,32 +120,44 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
         indices = indices[np.where(16 > tmin_1exp[indices])]
         fitlist_1exp = [fitlist_1exp[index] for index in indices]
 
-        tmax_2exp = np.array([i["x"][-1] for i in fitlist_2exp])
-        tmin_2exp = np.array([i["x"][0] for i in fitlist_2exp])
-        indices_2exp = np.where(tmax_2exp == tmax_choice)
-        indices_2exp = indices_2exp[0][np.where(tmin_2exp[indices_2exp] < 4)]
-        fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
+        if len(fitlist_2exp)>0:
+            tmax_2exp = np.array([i["x"][-1] for i in fitlist_2exp])
+            tmin_2exp = np.array([i["x"][0] for i in fitlist_2exp])
+            indices_2exp = np.where(tmax_2exp == tmax_choice)
+            indices_2exp = indices_2exp[0][np.where(tmin_2exp[indices_2exp] < 4)]
+            fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
 
     dE_1exp = np.std([i["param"][:, 1] for i in fitlist_1exp], axis=1)
     dof_1exp = np.array([i["dof"] for i in fitlist_1exp])
     chisq_1exp = np.array([i["chisq"] for i in fitlist_1exp])
 
-    dE_2exp = np.std([i["param"][:, 1] for i in fitlist_2exp], axis=1)
-    dof_2exp = np.array([i["dof"] for i in fitlist_2exp])
-    chisq_2exp = np.array([i["chisq"] for i in fitlist_2exp])
+    if len(fitlist_2exp)>0:
+        dE_2exp = np.std([i["param"][:, 1] for i in fitlist_2exp], axis=1)
+        dof_2exp = np.array([i["dof"] for i in fitlist_2exp])
+        chisq_2exp = np.array([i["chisq"] for i in fitlist_2exp])
+        dof_list = np.append(dof_1exp, dof_2exp)
+        chisq_list = np.append(chisq_1exp, chisq_2exp)
+        dE_list = np.append(dE_1exp, dE_2exp)
+        energies_comb = np.append(
+            np.array([i["param"][:, 1] for i in fitlist_1exp]),
+            np.array([i["param"][:, 1] for i in fitlist_2exp]),
+            axis=0,
+        )
 
+    else:
+        dof_list = dof_1exp
+        chisq_list = chisq_1exp
+        dE_list = dE_1exp
+        energies_comb = np.array([i["param"][:, 1] for i in fitlist_1exp])
+        
     fitweights = np.array(
         stats.fitweights(
-            np.append(dof_1exp, dof_2exp),
-            np.append(chisq_1exp, chisq_2exp),
-            np.append(dE_1exp, dE_2exp),
+            dof_list,
+            chisq_list,
+            dE_list,
         )
     )
-    energies_comb = np.append(
-        np.array([i["param"][:, 1] for i in fitlist_1exp]),
-        np.array([i["param"][:, 1] for i in fitlist_2exp]),
-        axis=0,
-    )
+
     weighted_energy = np.dot(fitweights, energies_comb)
 
     # Rescale the bootstrap error to include the systematic error
@@ -168,59 +180,15 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
     return weighted_energy, fitweights
 
 
-# def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp):
-#     dE_1exp = np.std([i["param"][:, 1] for i in fitlist_1exp], axis=1)
-#     dof_1exp = np.array([i["dof"] for i in fitlist_1exp])
-#     chisq_1exp = np.array([i["chisq"] for i in fitlist_1exp])
 
-#     dE_2exp = np.std([i["param"][:, 1] for i in fitlist_2exp], axis=1)
-#     dof_2exp = np.array([i["dof"] for i in fitlist_2exp])
-#     chisq_2exp = np.array([i["chisq"] for i in fitlist_2exp])
-
-#     fitweights = np.array(
-#         stats.fitweights(
-#             np.append(dof_1exp, dof_2exp),
-#             np.append(chisq_1exp, chisq_2exp),
-#             np.append(dE_1exp, dE_2exp),
-#         )
-#     )
-#     print(np.shape(fitweights))
-#     energies_comb = np.append(
-#         np.array([i["param"][:, 1] for i in fitlist_1exp]),
-#         np.array([i["param"][:, 1] for i in fitlist_2exp]),
-#         axis=0,
-#     )
-#     print(np.shape(np.array([i["param"][:, 1] for i in fitlist_1exp])))
-#     print(np.shape(energies_comb))
-
-#     weighted_energy = np.dot(fitweights, energies_comb)
-#     # Rescale the bootstrap error to include the systematic error
-#     E_avg = np.average(weighted_energy)
-#     E_staterr = np.std(weighted_energy)
-#     E_systerr = np.sqrt(
-#         np.dot(
-#             fitweights,
-#             np.array([(E_avg - np.average(energy)) ** 2 for energy in energies_comb]),
-#         )
-#     )
-#     E_comberr = np.sqrt(E_staterr**2 + E_systerr**2)
-#     for ival, value in enumerate(weighted_energy):
-#         weighted_energy[ival] = E_avg + (value - E_avg) * E_comberr / E_staterr
-
-#     print(
-#         f"\n+++++\nweighted energy = {err_brackets(np.average(weighted_energy), np.std(weighted_energy))}\n+++++"
-#     )
-#     return weighted_energy, fitweights
-
-
-def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17):
+def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17, tminmin_1exp=3, tminmax_1exp=16, tminmin_2exp=0, tminmax_2exp=4):
     print("\n")
 
     tmax_1exp = np.array([i["x"][-1] for i in fitlist_1exp])
     tmin_1exp = np.array([i["x"][0] for i in fitlist_1exp])
     indices = np.where(tmax_1exp == tmax_choice)
-    indices = indices[0][np.where(3 < tmin_1exp[indices])]
-    indices = indices[np.where(16 > tmin_1exp[indices])]
+    indices = indices[0][np.where(tminmin_1exp < tmin_1exp[indices])]
+    indices = indices[np.where(tminmax_1exp > tmin_1exp[indices])]
     tmax_ = tmax_1exp[indices]
     tmin_ = tmin_1exp[indices]
     reduced_fitlist_1exp = [fitlist_1exp[index] for index in indices]
@@ -228,7 +196,8 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17):
     tmax_2exp = np.array([i["x"][-1] for i in fitlist_2exp])
     tmin_2exp = np.array([i["x"][0] for i in fitlist_2exp])
     indices_2exp = np.where(tmax_2exp == tmax_choice)
-    indices_2exp = indices_2exp[0][np.where(tmin_2exp[indices_2exp] < 4)]
+    indices_2exp = indices_2exp[0][np.where(tminmin_2exp < tmin_2exp[indices_2exp])]
+    indices_2exp = indices_2exp[np.where(tminmax_2exp > tmin_2exp[indices_2exp])]
     tmin_2 = tmin_2exp[indices_2exp]
     reduced_fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
 
@@ -242,11 +211,12 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17):
     energies_std = np.std(energies_1exp, axis=1)
     weights_ = weights
 
-    energies_2exp = np.array([i["param"][:, 1] for i in reduced_fitlist_2exp])
-    energies_avg_2 = np.average(energies_2exp, axis=1)
-    energies_std_2 = np.std(energies_2exp, axis=1)
-    weights_2 = weights_2
-
+    if len(reduced_fitlist_2exp)>0:
+        energies_2exp = np.array([i["param"][:, 1] for i in reduced_fitlist_2exp])
+        energies_avg_2 = np.average(energies_2exp, axis=1)
+        energies_std_2 = np.std(energies_2exp, axis=1)
+        weights_2 = weights_2
+        
     # fig, ax1 = plt.subplots(figsize=(5, 4))
     fig, ax1 = plt.subplots(figsize=(7, 5))
     ax1.errorbar(
@@ -260,17 +230,18 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17):
         elinewidth=1,
         markerfacecolor="none",
     )
-    ax1.errorbar(
-        tmin_2,
-        energies_avg_2,
-        energies_std_2,
-        fmt="s",
-        label=r"2-exp",
-        color=_colors[1],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
+    if len(reduced_fitlist_2exp)>0:
+        ax1.errorbar(
+            tmin_2,
+            energies_avg_2,
+            energies_std_2,
+            fmt="s",
+            label=r"2-exp",
+            color=_colors[1],
+            capsize=4,
+            elinewidth=1,
+            markerfacecolor="none",
+        )
     ax1.fill_between(
         np.arange(-1, 20),
         np.ones(21) * (np.average(weighted_energy) - np.std(weighted_energy)),
@@ -332,18 +303,29 @@ def main():
 
     with open(datadir / (f"time_window_loop_nucl_1exp.pkl"), "rb") as file_in:
         fitlist_nucl_1exp = pickle.load(file_in)
+    with open(datadir / (f"time_window_loop_nucl_2exp.pkl"), "rb") as file_in:
+        fitlist_nucl_2exp = pickle.load(file_in)
+
     with open(
         "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_1exp.pkl",
         "rb",
     ) as file_in:
         fitlist_sigma_1exp = pickle.load(file_in)
-    with open(datadir / (f"time_window_loop_nucl_2exp.pkl"), "rb") as file_in:
-        fitlist_nucl_2exp = pickle.load(file_in)
     with open(
         "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_2exp.pkl",
         "rb",
     ) as file_in:
         fitlist_sigma_2exp = pickle.load(file_in)
+
+    with open(
+            datadir / (f"time_window_loop_nucldivsigma_1exp.pkl"), "rb"
+    ) as file_in:
+        fitlist_nucldivsigma_1exp = pickle.load(file_in)
+    with open(
+            datadir / (f"time_window_loop_nucldivsigma_2exp.pkl"), "rb"
+    ) as file_in:
+        fitlist_nucldivsigma_2exp = pickle.load(file_in)
+
     with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:
         fitlist_small = pickle.load(file_in)
     with open(datadir / (f"time_window_loop_lambda_large.pkl"), "rb") as file_in:
@@ -429,6 +411,20 @@ def main():
 
     weighted_avg(fitlist_nucl_1exp, fitlist_nucl_2exp, plotdir, "nucl", tmax_choice=config["tmax_nucl"])
     weighted_avg(fitlist_sigma_1exp, fitlist_sigma_2exp, plotdir, "sigma", tmax_choice=config["tmax_sigma"])
+
+    # ===== Nucleon divided by sigma data =====
+    weights_nucldivsigma = np.array([i["weight"] for i in fitlist_nucldivsigma_1exp])
+    weights_nucldivsigma_2 = np.array([i["weight"] for i in fitlist_nucldivsigma_2exp])
+    high_weight_nucldivsigma = np.argmax(weights_nucldivsigma)
+    nucldivsigma_t_range = np.arange(
+        fitlist_nucldivsigma_1exp[high_weight_nucldivsigma]["x"][0],
+        fitlist_nucldivsigma_1exp[high_weight_nucldivsigma]["x"][-1] + 1,
+    )
+    print(f"\nnucldivsigma_t_range = {nucldivsigma_t_range}")
+    print("max: redchisq = ", fitlist_nucldivsigma_1exp[high_weight_nucldivsigma]["redchisq"])
+    print("max: range = ", fitlist_nucldivsigma_1exp[high_weight_nucldivsigma]["x"])
+
+    weighted_avg(fitlist_nucldivsigma_1exp, fitlist_nucldivsigma_2exp, plotdir, "nucldivsigma", tmax_choice=config["tmax_nucl"], tminmin_2exp = 2, tminmax_2exp = 2, tminmin_1exp=1, tminmax_1exp=15)
 
 if __name__ == "__main__":
     main()
