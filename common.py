@@ -935,7 +935,7 @@ def read_correlators6(pars, pickledir, pickledir2, mom_strings):
     return G2_nucl, G2_sigm
 
 
-def make_matrices(G2_nucl, G2_sigm, lmb_val):
+def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
     matrix_1 = np.array(
         [
             [G2_nucl[0][:, :, 0], lmb_val * G2_nucl[1][:, :, 0]],
@@ -979,6 +979,58 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
                 G2_sigm[0][:, :, 0]
                 + (lmb_val ** 2) * G2_sigm[2][:, :, 0]
                 + (lmb_val ** 4) * G2_sigm[4][:, :, 0],
+            ],
+        ]
+    )
+
+    return matrix_1, matrix_2, matrix_3, matrix_4
+
+def make_matrices(G2_nucl, G2_sigm, lmb_val):
+    """ Construct the matrices for the GEVP"""
+    
+    matrix_1 = np.array(
+        [
+            [G2_nucl[0][:, :], lmb_val * G2_nucl[1][:, :]],
+            [lmb_val * G2_sigm[1][:, :], G2_sigm[0][:, :]],
+        ]
+    )
+    matrix_2 = np.array(
+        [
+            [
+                G2_nucl[0][:, :] + lmb_val ** 2 * G2_nucl[2][:, :],
+                lmb_val * G2_nucl[1][:, :],
+            ],
+            [
+                lmb_val * G2_sigm[1][:, :],
+                G2_sigm[0][:, :] + lmb_val ** 2 * G2_sigm[2][:, :],
+            ],
+        ]
+    )
+    matrix_3 = np.array(
+        [
+            [
+                G2_nucl[0][:, :] + lmb_val ** 2 * G2_nucl[2][:, :],
+                lmb_val * G2_nucl[1][:, :] + lmb_val ** 3 * G2_nucl[3][:, :],
+            ],
+            [
+                lmb_val * G2_sigm[1][:, :] + lmb_val ** 3 * G2_sigm[3][:, :],
+                G2_sigm[0][:, :] + lmb_val ** 2 * G2_sigm[2][:, :],
+            ],
+        ]
+    )
+    matrix_4 = np.array(
+        [
+            [
+                G2_nucl[0][:, :]
+                + (lmb_val ** 2) * G2_nucl[2][:, :]
+                + (lmb_val ** 4) * G2_nucl[4][:, :],
+                lmb_val * G2_nucl[1][:, :] + (lmb_val ** 3) * G2_nucl[3][:, :],
+            ],
+            [
+                lmb_val * G2_sigm[1][:, :] + (lmb_val ** 3) * G2_sigm[3][:, :],
+                G2_sigm[0][:, :]
+                + (lmb_val ** 2) * G2_sigm[2][:, :]
+                + (lmb_val ** 4) * G2_sigm[4][:, :],
             ],
         ]
     )

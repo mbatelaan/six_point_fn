@@ -669,7 +669,7 @@ def fit_loop(
     if which_corr[0]:
         print("\n\nNucleon fitting")
         fitlist_nucl = stats.fit_loop(
-            G2_nucl[0][:, :, 0],
+            G2_nucl[0][:, :],
             aexp_function,
             time_limits[0],
             plot=False,
@@ -680,7 +680,7 @@ def fit_loop(
         with open(datadir / (f"time_window_loop_nucl_1exp.pkl"), "wb") as file_out:
             pickle.dump(fitlist_nucl, file_out)
         fitlist_nucl_2exp = stats.fit_loop(
-            G2_nucl[0][:, :, 0],
+            G2_nucl[0][:, :],
             twoexp_function,
             time_limits[0],
             plot=False,
@@ -691,7 +691,7 @@ def fit_loop(
         with open(datadir / (f"time_window_loop_nucl_2exp.pkl"), "wb") as file_out:
             pickle.dump(fitlist_nucl_2exp, file_out)
 
-        ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:, :, 0]
+        ratio_unpert = G2_nucl[0][:, :] / G2_sigm[0][:, :]
         fitlist_nucldivsigma = stats.fit_loop(
             ratio_unpert,
             aexp_function,
@@ -723,7 +723,7 @@ def fit_loop(
         print("\n\nSigma fitting")
         # Sigma fit loop
         fitlist_sigma = stats.fit_loop(
-            G2_sigm[0][:, :, 0],
+            G2_sigm[0][:, :],
             aexp_function,
             time_limits[1],
             plot=False,
@@ -734,7 +734,7 @@ def fit_loop(
         with open(datadir / (f"time_window_loop_sigma_1exp.pkl"), "wb") as file_out:
             pickle.dump(fitlist_sigma, file_out)
         fitlist_sigma_2exp = stats.fit_loop(
-            G2_sigm[0][:, :, 0],
+            G2_sigm[0][:, :],
             twoexp_function,
             time_limits[1],
             plot=False,
@@ -1029,6 +1029,13 @@ def main():
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
 
+    for icorr, corr in enumerate(G2_nucl):
+        G2_nucl[icorr] = np.abs(corr[:, :, 0] + 1j * corr[:, :, 1])
+        # G2_nucl[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
+    for icorr, corr in enumerate(G2_sigm):
+        G2_sigm[icorr] = np.abs(corr[:, :, 0] + 1j * corr[:, :, 1])
+        # G2_sigm[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
+
     # Set the analysis parameters that will be used (from the yaml file)
     lambdas = np.linspace(config["lmb_i"], config["lmb_f"], 15)
     time_choice = config["time_choice"]
@@ -1205,13 +1212,13 @@ def main():
     # Then fit to the ratio of those correlators to get the energy gap
 
     bootfit_unpert_nucl, redchisq1 = fit_value3(
-        G2_nucl[0][:, :, 0], nucl_t_range, aexp_function, norm=1
+        G2_nucl[0][:, :], nucl_t_range, aexp_function, norm=1
     )
     bootfit_unpert_sigma, redchisq2 = fit_value3(
-        G2_sigm[0][:, :, 0], sigma_t_range, aexp_function, norm=1
+        G2_sigm[0][:, :], sigma_t_range, aexp_function, norm=1
     )
 
-    ratio_unpert = G2_nucl[0][:, :, 0] / G2_sigm[0][:, :, 0]
+    ratio_unpert = G2_nucl[0][:, :] / G2_sigm[0][:, :]
     bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, ratio_t_range)
     bootfit_effratio, redchisq_effratio = fit_value3(
         ratio_unpert, ratio_t_range, aexp_function, norm=1
@@ -1221,8 +1228,8 @@ def main():
     # )
 
     plotting_script_unpert(
-        G2_nucl[0][:, :, 0],
-        G2_sigm[0][:, :, 0],
+        G2_nucl[0][:, :],
+        G2_sigm[0][:, :],
         ratio_unpert,
         # bootfit_unpert_nucl[:, 1],
         # bootfit_unpert_sigma[:, 1],
@@ -1243,6 +1250,7 @@ def main():
     fitlist = []
     for i, lmb_val in enumerate(lambdas):
         print(f"\n====================\nLambda = {lmb_val}\n====================")
+
         # Construct a correlation matrix for each order in lambda(skipping order 0)
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
@@ -1334,7 +1342,7 @@ def main():
         if lmb_val == 0:
             order3_states_fit_divsigma = np.zeros((2, pars.nboot, 2))
         else:
-            sigma_ = G2_sigm[0][:, :, 0]
+            sigma_ = G2_sigm[0][:, :]
             print(np.shape(sigma_))
             print(np.shape(Gt1_3))
             Gt1_3_divsigma = Gt1_3 / sigma_

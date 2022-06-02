@@ -576,18 +576,37 @@ if __name__ == "__main__":
     else:
         G2_nucl, G2_sigm = read_correlators(pars, pickledir, pickledir2, mom_strings)
 
-    corr_11_avg_real = np.average(G2_nucl[0][:,:,0], axis=0)
+    # corr_11_avg_real = np.average(G2_nucl[0][:,:,0], axis=0)
+    # print('\n')
+    # print(corr_11_avg_real)
+
+    # corr_11_avg_imag = np.average(G2_nucl[0][:,:,1], axis=0)
+    # print('\n')
+    # print(corr_11_avg_imag)
+
+    # print('\n')
+    # print(corr_11_avg_real - corr_11_avg_imag)
+
+    # corr_11_avg = np.average(G2_nucl[0][:,:,0], axis=0) + 1j * np.average(G2_nucl[0][:,:,1], axis=0)
+    # print('\n')
+    # print(corr_11_avg)
+
+    for icorr, corr in enumerate(G2_nucl):
+        G2_nucl[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
+    for icorr, corr in enumerate(G2_sigm):
+        G2_sigm[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
+
+    corr_11_avg_real = np.average(G2_nucl[0][:,:], axis=0)
     print('\n')
     print(corr_11_avg_real)
 
-    corr_11_avg_imag = np.average(G2_nucl[0][:,:,1], axis=0)
+    corr_12_avg_real = np.average(G2_nucl[1][:,:], axis=0)
     print('\n')
-    print(corr_11_avg_imag)
+    print(corr_12_avg_real)
 
-    print('\n')
-    print(corr_11_avg_real - corr_11_avg_imag)
 
-    corr_11_avg = np.average(G2_nucl[0][:,:,0], axis=0) + 1j * np.average(G2_nucl[0][:,:,1], axis=0)
-    print('\n')
-    print(corr_11_avg)
+    matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
+        G2_nucl, G2_sigm, lmb_val
+    )
 
+ 
