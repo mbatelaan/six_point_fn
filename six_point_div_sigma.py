@@ -798,8 +798,8 @@ def fit_loop(
         fitlist_large,
         fitlist_nucldivsigma,
         fitlist_nucldivsigma_2exp,
-
     )
+
 
 def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=None):
     """Take two lists of dictionaries, one for a fit using the one-exponential function and one using a two-exponential function, Return the weighted average of the energies across these fits"""
@@ -812,7 +812,7 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
         indices = indices[np.where(16 > tmin_1exp[indices])]
         fitlist_1exp = [fitlist_1exp[index] for index in indices]
 
-        if len(fitlist_2exp)>0:
+        if len(fitlist_2exp) > 0:
             tmax_2exp = np.array([i["x"][-1] for i in fitlist_2exp])
             tmin_2exp = np.array([i["x"][0] for i in fitlist_2exp])
             indices_2exp = np.where(tmax_2exp == tmax_choice)
@@ -823,7 +823,7 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
     dof_1exp = np.array([i["dof"] for i in fitlist_1exp])
     chisq_1exp = np.array([i["chisq"] for i in fitlist_1exp])
 
-    if len(fitlist_2exp)>0:
+    if len(fitlist_2exp) > 0:
         dE_2exp = np.std([i["param"][:, 1] for i in fitlist_2exp], axis=1)
         dof_2exp = np.array([i["dof"] for i in fitlist_2exp])
         chisq_2exp = np.array([i["chisq"] for i in fitlist_2exp])
@@ -841,7 +841,7 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
         chisq_list = chisq_1exp
         dE_list = dE_1exp
         energies_comb = np.array([i["param"][:, 1] for i in fitlist_1exp])
-        
+
     fitweights = np.array(
         stats.fitweights(
             dof_list,
@@ -872,8 +872,17 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
     return weighted_energy, fitweights
 
 
-
-def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17, tminmin_1exp=3, tminmax_1exp=16, tminmin_2exp=0, tminmax_2exp=4):
+def weighted_avg(
+    fitlist_1exp,
+    fitlist_2exp,
+    plotdir,
+    name,
+    tmax_choice=17,
+    tminmin_1exp=3,
+    tminmax_1exp=16,
+    tminmin_2exp=0,
+    tminmax_2exp=4,
+):
     print("\n")
 
     tmax_1exp = np.array([i["x"][-1] for i in fitlist_1exp])
@@ -893,7 +902,9 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17, tmin
     tmin_2 = tmin_2exp[indices_2exp]
     reduced_fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
 
-    weighted_energy, fitweights = weighted_avg_1_2_exp(reduced_fitlist_1exp, reduced_fitlist_2exp, print=False)
+    weighted_energy, fitweights = weighted_avg_1_2_exp(
+        reduced_fitlist_1exp, reduced_fitlist_2exp, print=False
+    )
 
     weights = fitweights[: len(reduced_fitlist_1exp)]
     weights_2 = fitweights[len(reduced_fitlist_1exp) :]
@@ -903,12 +914,12 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17, tmin
     energies_std = np.std(energies_1exp, axis=1)
     weights_ = weights
 
-    if len(reduced_fitlist_2exp)>0:
+    if len(reduced_fitlist_2exp) > 0:
         energies_2exp = np.array([i["param"][:, 1] for i in reduced_fitlist_2exp])
         energies_avg_2 = np.average(energies_2exp, axis=1)
         energies_std_2 = np.std(energies_2exp, axis=1)
         weights_2 = weights_2
-        
+
     return weighted_energy, fitweights
 
 
@@ -1099,7 +1110,17 @@ def main():
         print=False,
         tmax_choice=config["tmax_nucl"],
     )
-    weighted_energy_nucldivsigma, fitweights = weighted_avg(fitlist_nucldivsigma_1exp, fitlist_nucldivsigma_2exp, plotdir, "nucldivsigma", tmax_choice=config["tmax_nucl"], tminmin_2exp = 2, tminmax_2exp = 2, tminmin_1exp=1, tminmax_1exp=15)
+    weighted_energy_nucldivsigma, fitweights = weighted_avg(
+        fitlist_nucldivsigma_1exp,
+        fitlist_nucldivsigma_2exp,
+        plotdir,
+        "nucldivsigma",
+        tmax_choice=config["tmax_nucl"],
+        tminmin_2exp=2,
+        tminmax_2exp=2,
+        tminmin_1exp=1,
+        tminmax_1exp=15,
+    )
     weighted_energy_sigma, fitweights = weighted_avg_1_2_exp(
         fitlist_sigma_1exp,
         fitlist_sigma_2exp,
@@ -1207,8 +1228,8 @@ def main():
         # Gt1_0 = np.einsum("ki,ijkl,kj->kl", evec_left0[:, :, 0], matrix_1, evec_right0[:, :, 0])
         # Gt2_0 = np.einsum("ki,ijkl,kj->kl", evec_left0[:, :, 1], matrix_1, evec_right0[:, :, 1])
         print("\n evec shape = ", np.shape(evec_left0))
-        print("\n evec left avg = \n",np.average(evec_left0, axis=0))
-        print("\n evec right avg = \n",np.average(evec_right0, axis=0))
+        print("\n evec left avg = \n", np.average(evec_left0, axis=0))
+        print("\n evec right avg = \n", np.average(evec_right0, axis=0))
         ratio0 = Gt1_0 / Gt2_0
         effmass_ratio0 = stats.bs_effmass(ratio0, time_axis=1, spacing=1)
         bootfit_state1_0, redchisq1_0 = fit_value3(
@@ -1355,7 +1376,7 @@ def main():
         print("Saved the data")
 
         # ==================================================
-        print('plotting')
+        print("plotting")
         if plotting:
             plotting_script_all(
                 matrix_1 / 1e39,
@@ -1389,7 +1410,7 @@ def main():
                 name="_l" + str(lmb_val) + "_all",
                 show=False,
             )
-        print('plotted')
+        print("plotted")
 
     # ----------------------------------------------------------------------
     # Save the fit data to a pickle file
