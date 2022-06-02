@@ -1236,16 +1236,12 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     mat_0_avg = np.average(corr_matrix[:, :, :, time_choice], axis=2)
     mat_1_avg = np.average(corr_matrix[:, :, :, time_choice + delta_t], axis=2)
 
-    eval_left, evec_left = np.linalg.eig(
+    eval_left_avg, evec_left_avg = np.linalg.eig(
         np.matmul(mat_1_avg, np.linalg.inv(mat_0_avg)).T
     )
-    eval_right, evec_right = np.linalg.eig(
+    eval_right_avg, evec_right_avg = np.linalg.eig(
         np.matmul(np.linalg.inv(mat_0_avg), mat_1_avg)
     )
-
-    # print('average = ', np.matmul(mat_1_avg, np.linalg.inv(mat_0_avg)).T)
-    # print(f"\nevec_left = {evec_left}")
-    # print(f"eval_left = {eval_left}")
 
     evec_left_list = []
     evec_right_list = []
@@ -1292,10 +1288,10 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
         eval_left_list.append(eval_left)
         eval_right_list.append(eval_right)
 
-    evec_left = np.average(evec_left_list, axis=0)
-    evec_right = np.average(evec_right_list, axis=0)
-    evec_left = np.average(evec_left_list, axis=0)
-    evec_right = np.average(evec_right_list, axis=0)
+    # evec_left = np.average(evec_left_list, axis=0)
+    # evec_right = np.average(evec_right_list, axis=0)
+    # evec_left = np.average(evec_left_list, axis=0)
+    # evec_right = np.average(evec_right_list, axis=0)
 
     # # Ordering of the eigenvalues
     # if eval_left[0] > eval_left[1]:
@@ -1306,10 +1302,10 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     #     evec_right_list = [evec[:,::-1] for evec in evec_right_list]
 
     Gt1 = np.abs(
-        np.einsum("i,ijkl,j->kl", evec_left[:, 0], corr_matrix, evec_right[:, 0])
+        np.einsum("i,ijkl,j->kl", evec_left_avg[:, 0], corr_matrix, evec_right_avg[:, 0])
     )
     Gt2 = np.abs(
-        np.einsum("i,ijkl,j->kl", evec_left[:, 1], corr_matrix, evec_right[:, 1])
+        np.einsum("i,ijkl,j->kl", evec_left_avg[:, 1], corr_matrix, evec_right_avg[:, 1])
     )
 
     if show:
