@@ -347,7 +347,7 @@ def plotting_script_diff_2(
     axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
     plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.25))
-    plt.ylabel(r"$\Delta E_{\textrm{eff}}/\lambda$")
+    plt.ylabel(r"$\Delta E_{\textrm{eff}}$")
     plt.xlabel("$t/a$")
     plt.legend(fontsize="x-small")
     plt.title("$\lambda=" + str(lmb_val) + "$")
