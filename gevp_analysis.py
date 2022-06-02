@@ -18,8 +18,9 @@ from common import fit_value3
 from common import read_correlators
 from common import read_correlators2
 from common import read_correlators4
-from common import read_correlators5
+from common import read_correlators5_complex
 from common import make_matrices
+from common import normalize_matrices
 from common import gevp
 from common import gevp_bootstrap
 
@@ -146,18 +147,18 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     evec_num = 0
     x = t_0[indices]
 
-    product = np.sum(np.array([ fit["order3_evec_left"][:,0] for fit in fitlist ])[indices] * np.array([ fit["order3_evec_left"][:,1] for fit in fitlist ])[indices], axis=1)
-    a = np.array([ fit["order3_evec_left"][:,0] for fit in fitlist ])[indices]
-    b = np.array([ fit["order3_evec_left"][:,1] for fit in fitlist ])[indices]
-    print('a*b = ',a*b)
-    print('sum a*b = ',np.sum(a*b,axis=1))
-    # product2 = np.sum(np.array([ fit["order3_evec_right"][:,0] for fit in fitlist ])[indices] * np.array([ fit["order3_evec_right"][:,1] for fit in fitlist ])[indices], axis=1)
-    product2 = np.sum(np.array([ fit["order3_evec_right"][:,0] for fit in fitlist ])[indices] ** 2, axis=1)
-    print(np.shape(np.array([ fit["order3_evec_left"][:,0] for fit in fitlist ])[indices]))
-    # print(np.array([ fit["order3_evec_left"][:,0] for fit in fitlist ])[indices][0], np.array([ fit["order3_evec_left"][:,1] for fit in fitlist ])[indices][0])
-    print('\n\nproduct = ', product)
-    print('\n\nproduct2 = ', product2)
-    # print('\n\nproduct = ', np.shape(product))
+    # product = np.sum(np.array([ fit["order3_evec_left"][:,0] for fit in fitlist ])[indices] * np.array([ fit["order3_evec_left"][:,1] for fit in fitlist ])[indices], axis=1)
+    # a = np.array([ fit["order3_evec_left"][:,0] for fit in fitlist ])[indices]
+    # b = np.array([ fit["order3_evec_left"][:,1] for fit in fitlist ])[indices]
+    # print('a*b = ',a*b)
+    # print('sum a*b = ',np.sum(a*b,axis=1))
+    # # product2 = np.sum(np.array([ fit["order3_evec_right"][:,0] for fit in fitlist ])[indices] * np.array([ fit["order3_evec_right"][:,1] for fit in fitlist ])[indices], axis=1)
+    # product2 = np.sum(np.array([ fit["order3_evec_right"][:,0] for fit in fitlist ])[indices] ** 2, axis=1)
+    # print(np.shape(np.array([ fit["order3_evec_left"][:,0] for fit in fitlist ])[indices]))
+    # # print(np.array([ fit["order3_evec_left"][:,0] for fit in fitlist ])[indices][0], np.array([ fit["order3_evec_left"][:,1] for fit in fitlist ])[indices][0])
+    # print('\n\nproduct = ', product)
+    # print('\n\nproduct2 = ', product2)
+    # # print('\n\nproduct = ', np.shape(product))
 
     # print(np.array([ fit["order3_evec_left_bs"][:,:,0] for fit in fitlist ])[indices][0])
     # evecs = np.array([ fit["order3_evec_left_bs"][:,:,0] for fit in fitlist ])[indices][0]
@@ -170,7 +171,16 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     # # print('\n\nproduct2 = ', product2)
 
 
-    # energy_shifts = np.array([ fit["order3_fit"][:,1] for fit in fitlist ])[indices]
+    energy_shifts0_bs = np.array([ fit["order0_fit_bs"][:,1] for fit in fitlist ])[indices]
+    energy_shifts1_bs = np.array([ fit["order1_fit_bs"][:,1] for fit in fitlist ])[indices]
+    energy_shifts2_bs = np.array([ fit["order2_fit_bs"][:,1] for fit in fitlist ])[indices]
+    energy_shifts3_bs = np.array([ fit["order3_fit_bs"][:,1] for fit in fitlist ])[indices]
+
+    energy_shifts0 = np.array([ fit["order0_fit"][:,1] for fit in fitlist ])[indices]
+    energy_shifts1 = np.array([ fit["order1_fit"][:,1] for fit in fitlist ])[indices]
+    energy_shifts2 = np.array([ fit["order2_fit"][:,1] for fit in fitlist ])[indices]
+    energy_shifts3 = np.array([ fit["order3_fit"][:,1] for fit in fitlist ])[indices]
+
     eval_energy1 = np.array([ -np.log(fit["order3_eval_left"][0])/delta_t_fix for fit in fitlist ])[indices]
     eval_energy2 = np.array([ -np.log(fit["order3_eval_left"][1])/delta_t_fix for fit in fitlist ])[indices]
     eval_energy1_bs = np.array([ -np.log(fit["order3_eval_left_bs"][:, 0])/delta_t_fix for fit in fitlist ])[indices]
@@ -196,22 +206,111 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     evec_val2_2_right = np.array([ fit["order3_evec_right"][1,1]**2 for fit in fitlist ])[indices]
     print(len(x))
 
-    # plt.figure(figsize=(5, 4))
-    # plt.errorbar(
-    #     x,
-    #     np.average(energy_shifts, axis=1),
-    #     np.std(energy_shifts, axis=1),
-    #     fmt="s",
-    #     # label=r"$\mathcal{O}(\lambda^1)$",
-    #     color=_colors[0],
-    #     capsize=4,
-    #     elinewidth=1,
-    #     markerfacecolor="none",
-    # )
-    # plt.xlabel(r"$t_{0}$")
-    # plt.ylabel(r"$\textrm{Energy}$")
-    # plt.savefig(plotdir / (f"delta_t{delta_t_fix}_energyshift_" + name + ".pdf"))
-    # plt.close()
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        x,
+        np.average(energy_shifts0_bs, axis=1),
+        np.std(energy_shifts0_bs, axis=1),
+        fmt=_markers[0],
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.05,
+        np.average(energy_shifts1_bs, axis=1),
+        np.std(energy_shifts1_bs, axis=1),
+        fmt=_markers[1],
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.1,
+        np.average(energy_shifts2_bs, axis=1),
+        np.std(energy_shifts2_bs, axis=1),
+        fmt=_markers[2],
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.15,
+        np.average(energy_shifts3_bs, axis=1),
+        np.std(energy_shifts3_bs, axis=1),
+        fmt=_markers[3],
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.xlim(0.7, 6.2)
+    plt.ylim(0.02, 0.05)
+    plt.xlabel(r"$t_{0}$")
+    plt.ylabel(r"$\textrm{Energy}$")
+    plt.legend(fontsize='xx-small', framealpha=0.3)
+    plt.savefig(plotdir / (f"delta_t{delta_t_fix}_energyshift_bs_" + name + ".pdf"))
+    plt.close()
+
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        x,
+        np.average(energy_shifts0, axis=1),
+        np.std(energy_shifts0, axis=1),
+        fmt=_markers[0],
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.05,
+        np.average(energy_shifts1, axis=1),
+        np.std(energy_shifts1, axis=1),
+        fmt=_markers[1],
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.1,
+        np.average(energy_shifts2, axis=1),
+        np.std(energy_shifts2, axis=1),
+        fmt=_markers[2],
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.15,
+        np.average(energy_shifts3, axis=1),
+        np.std(energy_shifts3, axis=1),
+        fmt=_markers[3],
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.xlim(0.7, 6.2)
+    plt.ylim(0.02, 0.05)
+    plt.xlabel(r"$t_{0}$")
+    plt.ylabel(r"$\textrm{Energy}$")
+    plt.legend(fontsize='xx-small', framealpha=0.3)
+    plt.savefig(plotdir / (f"delta_t{delta_t_fix}_energyshift_" + name + ".pdf"))
+    plt.close()
 
     fig = plt.figure(figsize=(9, 6))
     plt.plot(x, evec_val1, color=_colors[0],label='left evec 1 first element')
@@ -279,6 +378,132 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.legend(fontsize='xx-small', framealpha=0.3)
     plt.ylim(0,1)
     plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_bs" + name + ".pdf"))
+    plt.close()
+
+    return
+
+def t_0_slice(fitlist, t_0_fix, plotdir, name):
+    t_0 = np.array([i["t_0"] for i in fitlist])
+    delta_t = np.array([i["delta_t"] for i in fitlist])
+    indices = np.where(t_0 == t_0_fix)
+    evec_num = 0
+    x = delta_t[indices]
+
+    energy_shifts0_bs = np.array([ fit["order0_fit_bs"][:,1] for fit in fitlist ])[indices]
+    energy_shifts1_bs = np.array([ fit["order1_fit_bs"][:,1] for fit in fitlist ])[indices]
+    energy_shifts2_bs = np.array([ fit["order2_fit_bs"][:,1] for fit in fitlist ])[indices]
+    energy_shifts3_bs = np.array([ fit["order3_fit_bs"][:,1] for fit in fitlist ])[indices]
+
+    energy_shifts0 = np.array([ fit["order0_fit"][:,1] for fit in fitlist ])[indices]
+    energy_shifts1 = np.array([ fit["order1_fit"][:,1] for fit in fitlist ])[indices]
+    energy_shifts2 = np.array([ fit["order2_fit"][:,1] for fit in fitlist ])[indices]
+    energy_shifts3 = np.array([ fit["order3_fit"][:,1] for fit in fitlist ])[indices]
+
+
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        x,
+        np.average(energy_shifts0_bs, axis=1),
+        np.std(energy_shifts0_bs, axis=1),
+        fmt=_markers[0],
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.05,
+        np.average(energy_shifts1_bs, axis=1),
+        np.std(energy_shifts1_bs, axis=1),
+        fmt=_markers[1],
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.1,
+        np.average(energy_shifts2_bs, axis=1),
+        np.std(energy_shifts2_bs, axis=1),
+        fmt=_markers[2],
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.15,
+        np.average(energy_shifts3_bs, axis=1),
+        np.std(energy_shifts3_bs, axis=1),
+        fmt=_markers[3],
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.xlim(0.7, 6.2)
+    plt.ylim(0.02, 0.05)
+    plt.xlabel(r"$\Delta t$")
+    plt.ylabel(r"$\textrm{Energy}$")
+    plt.legend(fontsize='xx-small', framealpha=0.3)
+    plt.savefig(plotdir / (f"t_0{t_0_fix}_energyshift_bs_" + name + ".pdf"))
+    plt.close()
+
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        x,
+        np.average(energy_shifts0, axis=1),
+        np.std(energy_shifts0, axis=1),
+        fmt=_markers[0],
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.05,
+        np.average(energy_shifts1, axis=1),
+        np.std(energy_shifts1, axis=1),
+        fmt=_markers[1],
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.1,
+        np.average(energy_shifts2, axis=1),
+        np.std(energy_shifts2, axis=1),
+        fmt=_markers[2],
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        x+0.15,
+        np.average(energy_shifts3, axis=1),
+        np.std(energy_shifts3, axis=1),
+        fmt=_markers[3],
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.xlim(0.7, 6.2)
+    plt.ylim(0.02, 0.05)
+    plt.xlabel(r"$\Delta t$")
+    plt.ylabel(r"$\textrm{Energy}$")
+    plt.legend(fontsize='xx-small', framealpha=0.3)
+    plt.savefig(plotdir / (f"t_0{t_0_fix}_energyshift_" + name + ".pdf"))
     plt.close()
 
     return
@@ -452,25 +677,17 @@ def plot_eigenstates(
     plt.close()
     return
 
-def normalize_matrices(matrices): #_1, matrix_2, matrix_3, matrix_4):
-    matrix_list = []
-    time_choice = 6
-    for matrix in matrices:
-        matrix_copy = matrix.copy()
-        # matrix = matrix/1e38
-        for i, elemi in enumerate(matrix):
-            for j, elemj in enumerate(elemi):
-                # print(np.shape(matrix[i,i,:,1]))
-                # print(np.shape(matrix[i,j]))
-                # print(np.shape(np.sqrt(np.abs(matrix[i,i,:,1]*matrix[j,j,:,1]))[0]**(-1)))
-                # print('\n',np.average(matrix[i,j],axis=0)[time_choice])
-                # print(np.average(matrix[i,i,:,time_choice]))
-                # print(np.average(matrix[j,j,:,time_choice]))
-                # print(np.average(np.sqrt(np.abs(matrix[i,i,:,time_choice]*matrix[j,j,:,time_choice]))))
-                # print(np.average(np.sqrt(np.abs(matrix[i,i,:,time_choice]*matrix[j,j,:,time_choice]))**(-1)))
-                matrix[i,j] = np.einsum('kl,k->kl', matrix_copy[i,j], np.sqrt(np.abs(matrix_copy[i,i,:,time_choice]*matrix_copy[j,j,:,time_choice]))**(-1))
-        matrix_list.append(matrix)
-    return matrix_list
+# def normalize_matrices(matrices): #_1, matrix_2, matrix_3, matrix_4):
+#     matrix_list = []
+#     time_choice = 6
+#     for matrix in matrices:
+#         matrix_copy = matrix.copy()
+#         # matrix = matrix.copy()/1e36
+#         for i, elemi in enumerate(matrix):
+#             for j, elemj in enumerate(elemi):
+#                 matrix[i,j] = np.einsum('kl,k->kl', matrix_copy[i,j], np.sqrt(np.abs(matrix_copy[i,i,:,time_choice]*matrix_copy[j,j,:,time_choice]))**(-1))
+#         matrix_list.append(matrix)
+#     return matrix_list
 
 
 def gevp_loop(G2_nucl, G2_sigm, lmb_val, datadir):
@@ -496,37 +713,83 @@ def gevp_loop(G2_nucl, G2_sigm, lmb_val, datadir):
     for i, time_choice in enumerate(time_choice_range):
         for j, delta_t in enumerate(delta_t_range):
             print(f"t_0 =  {time_choice}\tDelta t = {delta_t}\n")
-            # order 4
-            Gt1_4, Gt2_4, gevp_data = gevp(
-                matrix_4, time_choice, delta_t, name="_test", show=False
+            # GEVP on ensemble average
+            Gt1_1, Gt2_1, gevp_data_1 = gevp(
+                matrix_1, time_choice, delta_t, name="_test", show=False
             )
-            Gt1_4_bs, Gt2_4_bs, gevp_data_bs = gevp_bootstrap(
+            Gt1_2, Gt2_2, gevp_data_2 = gevp(
+                matrix_2, time_choice, delta_t, name="_test", show=False
+            )
+            Gt1_3, Gt2_3, gevp_data_3 = gevp(
+                matrix_3, time_choice, delta_t, name="_test", show=False
+            )
+            Gt1_4, Gt2_4, gevp_data_4 = gevp(
                 matrix_4, time_choice, delta_t, name="_test", show=False
             )
 
-            ratio3 = Gt1_4 / Gt2_4
+            # GEVP full bootstrap
+            Gt1_1_bs, Gt2_1_bs, gevp_data_bs_1 = gevp_bootstrap(
+                matrix_1, time_choice, delta_t, name="_test", show=False
+            )
+            Gt1_2_bs, Gt2_2_bs, gevp_data_bs_2 = gevp_bootstrap(
+                matrix_2, time_choice, delta_t, name="_test", show=False
+            )
+            Gt1_3_bs, Gt2_3_bs, gevp_data_bs_3 = gevp_bootstrap(
+                matrix_3, time_choice, delta_t, name="_test", show=False
+            )
+            Gt1_4_bs, Gt2_4_bs, gevp_data_bs_4 = gevp_bootstrap(
+                matrix_4, time_choice, delta_t, name="_test", show=False
+            )
+
+            ratio1 = np.abs(Gt1_1 / Gt2_1)
+            ratio2 = np.abs(Gt1_2 / Gt2_2)
+            ratio3 = np.abs(Gt1_3 / Gt2_3)
+            ratio4 = np.abs(Gt1_4 / Gt2_4)
+            ratio1_bs = np.abs(Gt1_1_bs / Gt2_1_bs)
+            ratio2_bs = np.abs(Gt1_2_bs / Gt2_2_bs)
+            ratio3_bs = np.abs(Gt1_3_bs / Gt2_3_bs)
+            ratio4_bs = np.abs(Gt1_4_bs / Gt2_4_bs)
             try:
-                bootfit3, redchisq3 = fit_value3(ratio3, t_range, aexp_function)
+                bootfit0, redchisq0 = fit_value3(ratio1, t_range, aexp_function)
+                bootfit1, redchisq1 = fit_value3(ratio2, t_range, aexp_function)
+                bootfit2, redchisq2 = fit_value3(ratio3, t_range, aexp_function)
+                bootfit3, redchisq3 = fit_value3(ratio4, t_range, aexp_function)
             except:
+                bootfit0, redchisq0 = np.nan, np.nan
+                bootfit1, redchisq1 = np.nan, np.nan
+                bootfit2, redchisq2 = np.nan, np.nan
                 bootfit3, redchisq3 = np.nan, np.nan
-            ratio3_bs = Gt1_4_bs / Gt2_4_bs
+
+            # Fit bootstrap GEVP
             try:
-                bootfit3_bs, redchisq3_bs = fit_value3(ratio3_bs, t_range, aexp_function)
+                bootfit0_bs, redchisq0_bs = fit_value3(ratio1_bs, t_range, aexp_function)
+                bootfit1_bs, redchisq1_bs = fit_value3(ratio2_bs, t_range, aexp_function)
+                bootfit2_bs, redchisq2_bs = fit_value3(ratio3_bs, t_range, aexp_function)
+                bootfit3_bs, redchisq3_bs = fit_value3(ratio4_bs, t_range, aexp_function)
             except:
+                bootfit0_bs, redchisq0_bs = np.nan, np.nan
+                bootfit1_bs, redchisq1_bs = np.nan, np.nan
+                bootfit2_bs, redchisq2_bs = np.nan, np.nan
                 bootfit3_bs, redchisq3_bs = np.nan, np.nan
 
             fitparams = {
                 "t_0": time_choice,
                 "delta_t": delta_t,
-                "order3_eval_left": gevp_data[0],
-                "order3_evec_left": gevp_data[1],
-                "order3_eval_right": gevp_data[2],
-                "order3_evec_right": gevp_data[3],
-                "order3_eval_left_bs": gevp_data_bs[0],
-                "order3_evec_left_bs": gevp_data_bs[1],
-                "order3_eval_right_bs": gevp_data_bs[2],
-                "order3_evec_right_bs": gevp_data_bs[3],
+                "order3_eval_left": gevp_data_4[0],
+                "order3_evec_left": gevp_data_4[1],
+                "order3_eval_right": gevp_data_4[2],
+                "order3_evec_right": gevp_data_4[3],
+                "order3_eval_left_bs": gevp_data_bs_4[0],
+                "order3_evec_left_bs": gevp_data_bs_4[1],
+                "order3_eval_right_bs": gevp_data_bs_4[2],
+                "order3_evec_right_bs": gevp_data_bs_4[3],
+                "order0_fit": bootfit0,
+                "order1_fit": bootfit1,
+                "order2_fit": bootfit2,
                 "order3_fit": bootfit3,
+                "order0_fit_bs": bootfit0_bs,
+                "order1_fit_bs": bootfit1_bs,
+                "order2_fit_bs": bootfit2_bs,
                 "order3_fit_bs": bootfit3_bs,
                 "red_chisq": redchisq3,
                 "red_chisq_bs": redchisq3_bs,
@@ -566,7 +829,7 @@ if __name__ == "__main__":
     if "onlytwist" in config and config["onlytwist"]:
         G2_nucl, G2_sigm = read_correlators2(pars, pickledir, pickledir2, mom_strings)
     elif "onlytwist2" in config and config["onlytwist2"]:
-        G2_nucl, G2_sigm = read_correlators5(
+        G2_nucl, G2_sigm = read_correlators5_complex(
             pars, pickledir, pickledir2, mom_strings
         )
     elif "qmax" in config and config["qmax"]:
@@ -596,6 +859,10 @@ if __name__ == "__main__":
     delta_t_slice(fitlist, 4, plotdir, name)
     delta_t_slice(fitlist, 5, plotdir, name)
     delta_t_slice(fitlist, 6, plotdir, name)
+    t_0_slice(fitlist, 3, plotdir, name)
+    t_0_slice(fitlist, 4, plotdir, name)
+    t_0_slice(fitlist, 5, plotdir, name)
+    t_0_slice(fitlist, 6, plotdir, name)
     # plot_matrix(fitlist, plotdir, name, bs="_bs")
     
     exit()

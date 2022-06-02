@@ -1517,25 +1517,32 @@ def main():
     # delta_t_range = np.arange(1, 4)
     # t_range = np.arange(4, 9)
 
+    exit()
+
     # with open(datadir / ("fit_data_time_choice"+str(time_choice_range[0])+"-"+str(time_choice_range[-1])+".pkl"), "rb") as file_in:
     with open(datadir / (f"gevp_time_dep_l{lmb_val}.pkl"), "rb") as file_in:
         data = pickle.load(file_in)
     # lambdas = np.array([d["lambdas"] for d in data])
     # lambdas = data["lambdas0"]
-    order0_fit = np.array([d["order0_fit"][:, 1] for d in data])
-    order1_fit = np.array([d["order1_fit"][:, 1] for d in data])
-    order2_fit = np.array([d["order2_fit"][:, 1] for d in data])
-    order3_fit = np.array([d["order3_fit"][:, 1] for d in data])
+    order0_fit = np.array([d["order0_fit_bs"][:, 1] for d in data])
+    order1_fit = np.array([d["order1_fit_bs"][:, 1] for d in data])
+    order2_fit = np.array([d["order2_fit_bs"][:, 1] for d in data])
+    order3_fit = np.array([d["order3_fit_bs"][:, 1] for d in data])
     # order0_fit = data["order0_fit"]
     # order1_fit = data["order1_fit"]
     # order2_fit = data["order2_fit"]
     # order3_fit = data["order3_fit"]
-    time_choice_range = np.array([d["time_choice"][:, 1] for d in data])
+    time_choice_range = np.array([d["t_0"] for d in data])
     # time_choice_range = data["time_choice"]
-    delta_t_range = data["delta_t"]
+    # delta_t_range = data["delta_t"]
+    delta_t_range= np.array([d["delta_t"] for d in data])
     delta_t_choice = np.where(delta_t_range == config["delta_t"])[0][0]
-    order3_evals = data["order3_evals"]
-    order3_evecs = data["order3_evecs"]
+    # order3_evals = data["order3_evals"]
+    # order3_evecs = data["order3_evecs"]
+    # order3_evals = data["order3_evals"]
+    # order3_evecs = data["order3_evecs"]
+
+    energy_shifts = np.array([ fit["order3_fit"][:,1] for fit in fitlist ])[indices]
 
     plt.figure(figsize=(9, 6))
     plt.errorbar(
@@ -1733,148 +1740,6 @@ def main():
     plt.tight_layout()
     plt.savefig(plotdir / (f"delta_t_dep_l{lmb_val}_eigenvector.pdf"))
     plt.close()
-
-
-def main_loop():
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
-
-    pars = params(0)
-    nboot = 200
-    nbin = 1
-
-    # Read in the directory data from the yaml file
-    if len(sys.argv) == 2:
-        config_file = sys.argv[1]
-    else:
-        config_file = "data_dir_theta2.yaml"  # default file
-    with open(config_file) as f:
-        config = yaml.safe_load(f)
-    pickledir = Path(config["pickle_dir1"])
-    pickledir2 = Path(config["pickle_dir2"])
-    plotdir = Path(config["analysis_dir"]) / Path("plots")
-    datadir = Path(config["analysis_dir"]) / Path("data")
-    plotdir.mkdir(parents=True, exist_ok=True)
-    datadir.mkdir(parents=True, exist_ok=True)
-    print("datadir: ", datadir / ("lambda_dep.pkl"))
-
-    t_range = np.arange(config["t_range0"], config["t_range1"])
-    time_choice = config["time_choice"]
-    delta_t = config["delta_t"]
-    lmb_val = config["lmb_val"]
-
-    # Read data from the pickle file
-    with open(
-        datadir
-        / (f"lambda_dep_t{time_choice}_dt{delta_t}_fit{t_range[0]}-{t_range[-1]}.pkl"),
-        "rb",
-    ) as file_in:
-        data = pickle.load(file_in)
-    lambdas = data["lambdas"]
-    order0_fit = data["order0_fit"]
-    order1_fit = data["order1_fit"]
-    order2_fit = data["order2_fit"]
-    order3_fit = data["order3_fit"]
-    redchisq = data["redchisq"]
-    time_choice = data["time_choice"]
-    delta_t = data["delta_t"]
-
-    # Filter out data points with a high reduced chi-squared value
-    chisq_tol = 1.5  # 1.7
-    order0_fit = order0_fit[np.where(redchisq[0] <= chisq_tol)]
-    lambdas0 = lambdas[np.where(redchisq[0] <= chisq_tol)]
-    order1_fit = order1_fit[np.where(redchisq[1] <= chisq_tol)]
-    lambdas1 = lambdas[np.where(redchisq[1] <= chisq_tol)]
-    order2_fit = order2_fit[np.where(redchisq[2] <= chisq_tol)]
-    lambdas2 = lambdas[np.where(redchisq[2] <= chisq_tol)]
-    order3_fit = order3_fit[np.where(redchisq[3] <= chisq_tol)]
-    lambdas3 = lambdas[np.where(redchisq[3] <= chisq_tol)]
-
-    all_data = {
-        "lambdas0": lambdas0,
-        "lambdas1": lambdas1,
-        "lambdas2": lambdas2,
-        "lambdas3": lambdas3,
-        "order0_fit": order0_fit,
-        "order1_fit": order1_fit,
-        "order2_fit": order2_fit,
-        "order3_fit": order3_fit,
-        "redchisq": redchisq,
-        "time_choice": time_choice,
-        "delta_t": delta_t,
-    }
-
-    # scaled_z0 = (redchisq[0] - redchisq[0].min()) / redchisq[0].ptp()
-    # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
-
-    plot_lmb_depR(all_data, plotdir)
-    # plot_lmb_dep2(all_data, plotdir)
-
-    p0 = (1e-3, 0.7)
-    fitlim = 30
-    # plot_lmb_dep2(all_data, plotdir, lmb_range)
-
-    # Fit to the lambda dependence at each order in lambda
-    print("\n")
-
-    fit_data_list = []
-    min_len = np.min([len(lambdas0), len(lambdas1), len(lambdas2), len(lambdas3)])
-    for lmb_initial in np.arange(0, min_len):
-        for lmb_final in np.arange(lmb_initial + 5, min_len):
-            lmb_range = np.arange(lmb_initial, lmb_final)
-            print(f"lmb_range = {lmb_range}")
-            try:
-                # bootfit0, redchisq0, chisq0 = fit_lmb(
-                #     order0_fit[lmb_range], fitfunction5, lambdas0[lmb_range], plotdir, p0=p0, order=1
-                # )
-                # p0 = np.average(bootfit0, axis=0)
-
-                # bootfit1, redchisq1, chisq1 = fit_lmb(
-                #     order1_fit[lmb_range], fitfunction5, lambdas1[lmb_range], plotdir, p0=p0, order=2
-                # )
-
-                # bootfit2, redchisq2, chisq2 = fit_lmb(
-                #     order2_fit[lmb_range], fitfunction5, lambdas2[lmb_range], plotdir, p0=p0, order=3
-                # )
-
-                bootfit3, redchisq3, chisq3 = fit_lmb(
-                    order3_fit[lmb_range],
-                    fitfunction5,
-                    lambdas3[lmb_range],
-                    plotdir,
-                    p0=p0,
-                    order=4,
-                )
-                print("redchisq order 4:", redchisq3)
-
-                fit_data = {
-                    "lmb_range": lmb_range,
-                    "fitlim": fitlim,
-                    # "bootfit0": bootfit0,
-                    # "bootfit1": bootfit1,
-                    # "bootfit2": bootfit2,
-                    "bootfit3": bootfit3,
-                    "lambdas3": lambdas3[lmb_range],
-                    # "redchisq0": redchisq0,
-                    # "redchisq1": redchisq1,
-                    # "redchisq2": redchisq2,
-                    "redchisq3": redchisq3,
-                }
-            except RuntimeError as e:
-                print(
-                    "====================\nFitting Failed\n",
-                    e,
-                    "\n====================",
-                )
-                fit_data = None
-            fit_data_list.append(fit_data)
-
-    with open(datadir / (f"matrix_elements_loop.pkl"), "wb") as file_out:
-        pickle.dump(fit_data_list, file_out)
-
-    # plot_lmb_dep(all_data, plotdir, fit_data)
-    # plot_lmb_depR(all_data, plotdir, fit_data)
 
 
 if __name__ == "__main__":

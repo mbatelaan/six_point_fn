@@ -24,6 +24,7 @@ from common import read_correlators4
 from common import read_correlators5_complex
 from common import read_correlators6
 from common import make_matrices
+from common import normalize_matrices
 from common import gevp
 from common import gevp_bootstrap
 
@@ -923,6 +924,19 @@ def weighted_avg(
     return weighted_energy, fitweights
 
 
+# def normalize_matrices(matrices): #_1, matrix_2, matrix_3, matrix_4):
+#     matrix_list = []
+#     time_choice = 6
+#     for matrix in matrices:
+#         matrix_copy = matrix.copy()
+#         # matrix = matrix.copy()/1e36
+#         for i, elemi in enumerate(matrix):
+#             for j, elemj in enumerate(elemi):
+#                 matrix[i,j] = np.einsum('kl,k->kl', matrix_copy[i,j], np.sqrt(np.abs(matrix_copy[i,i,:,time_choice]*matrix_copy[j,j,:,time_choice]))**(-1))
+#         matrix_list.append(matrix)
+#     return matrix_list
+
+
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     # Plotting setup
@@ -1211,6 +1225,10 @@ def main():
         # Construct a correlation matrix for each order in lambda(skipping order 0)
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
+        )
+
+        [matrix_1, matrix_2, matrix_3, matrix_4] = normalize_matrices(
+            [matrix_1, matrix_2, matrix_3, matrix_4]
         )
 
         # print("\n\nmatrix shape = \n", np.shape(matrix_4))

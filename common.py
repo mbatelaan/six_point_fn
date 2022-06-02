@@ -1062,6 +1062,16 @@ def read_correlators6(pars, pickledir, pickledir2, mom_strings):
 
     return G2_nucl, G2_sigm
 
+def normalize_matrices(matrices, time_choice=1):
+    matrix_list = []
+    for matrix in matrices:
+        matrix_copy = matrix.copy()
+        # matrix = matrix.copy()/1e36
+        for i, elemi in enumerate(matrix):
+            for j, elemj in enumerate(elemi):
+                matrix[i,j] = np.einsum('kl,k->kl', matrix_copy[i,j], np.sqrt(np.abs(matrix_copy[i,i,:,time_choice]*matrix_copy[j,j,:,time_choice]))**(-1))
+        matrix_list.append(matrix)
+    return matrix_list
 
 def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
     matrix_1 = np.array(
