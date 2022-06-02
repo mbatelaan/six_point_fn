@@ -64,6 +64,7 @@ def fitfunction5(lmb, Delta_E, matrix_element):
 
 
 def fitfunction_4(lmb, Delta_E, A, B):
+    """The fit function Ross proposed to capture the compton amplitude"""
     deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * A**2, lmb**4 * B**2)
     return deltaE
 
@@ -1467,7 +1468,7 @@ def main():
         print("fit order 4:", np.average(bootfit3, axis=0))
         print("fit std order 4:", np.std(bootfit3, axis=0), "\n")
 
-        # Fit with the expanded fit function
+        # Fit with the expanded fit function with a lambda^4 term to capture the Compton amplitude
         p0 = (1e-3, 0.7, 0, 7)
         bootfit3_4, redchisq3_4, chisq3_4 = fit_lmb_4(
             order3_fit[lmb_range3],
@@ -1535,14 +1536,14 @@ def main():
     time_choice_range = np.array([d["t_0"] for d in data])
     # time_choice_range = data["time_choice"]
     # delta_t_range = data["delta_t"]
-    delta_t_range= np.array([d["delta_t"] for d in data])
+    delta_t_range = np.array([d["delta_t"] for d in data])
     delta_t_choice = np.where(delta_t_range == config["delta_t"])[0][0]
     # order3_evals = data["order3_evals"]
     # order3_evecs = data["order3_evecs"]
     # order3_evals = data["order3_evals"]
     # order3_evecs = data["order3_evecs"]
 
-    energy_shifts = np.array([ fit["order3_fit"][:,1] for fit in fitlist ])[indices]
+    energy_shifts = np.array([fit["order3_fit"][:, 1] for fit in fitlist])[indices]
 
     plt.figure(figsize=(9, 6))
     plt.errorbar(
