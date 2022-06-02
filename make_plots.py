@@ -1278,6 +1278,7 @@ def main():
         config_file = "data_dir_theta2.yaml"  # default file
     with open(config_file) as f:
         config = yaml.safe_load(f)
+
     pickledir = Path(config["pickle_dir1"])
     pickledir2 = Path(config["pickle_dir2"])
     plotdir = Path(config["analysis_dir"]) / Path("plots")
@@ -1292,38 +1293,23 @@ def main():
     lmb_val = config["lmb_val"]
 
     # Read data from the pickle file
-    # Need to read in the correct file!!!
     with open(
         datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"),
         "rb",
     ) as file_in:
         data = pickle.load(file_in)
 
-    # plot_energy_diffs(data, config, plotdir)
     lambdas = np.array([d["lambdas"] for d in data])
-    print("\n\n", np.shape(lambdas))
-    print("\n\n", lambdas)
     order0_fit = np.array([d["order0_fit"][:, 1] for d in data])
     order1_fit = np.array([d["order1_fit"][:, 1] for d in data])
     order2_fit = np.array([d["order2_fit"][:, 1] for d in data])
     order3_fit = np.array([d["order3_fit"][:, 1] for d in data])
-    # order1_fit = data["order1_fit"]
-    # order2_fit = data["order2_fit"]
-    # order3_fit = data["order3_fit"]
-    # redchisq = data["redchisq"]
     redchisq0 = np.array([d["red_chisq0"] for d in data])
     redchisq1 = np.array([d["red_chisq1"] for d in data])
     redchisq2 = np.array([d["red_chisq2"] for d in data])
     redchisq3 = np.array([d["red_chisq3"] for d in data])
     time_choice = data[0]["time_choice"]
     delta_t = data[0]["delta_t"]
-
-    print(data[7]["red_chisq0"])
-    print(data[7]["red_chisq1"])
-    print(data[7]["red_chisq2"])
-    print(data[7]["red_chisq3"])
-
-    print("\n\n", np.shape(order0_fit))
 
     all_data0 = {
         "lambdas0": lambdas,
@@ -1345,16 +1331,6 @@ def main():
 
     # Filter out data points with a high reduced chi-squared value
     chisq_tol = 1.5  # 1.7
-    print(np.where(redchisq0 <= chisq_tol))
-    print(np.where(redchisq1 <= chisq_tol))
-    print(np.where(redchisq2 <= chisq_tol))
-    print(np.where(redchisq3 <= chisq_tol))
-
-    print(redchisq0)
-    print(redchisq1)
-    print(redchisq2)
-    print(redchisq3)
-
     order0_fit = order0_fit[np.where(redchisq0 <= chisq_tol)]
     lambdas0 = lambdas[np.where(redchisq0 <= chisq_tol)]
     order1_fit = order1_fit[np.where(redchisq1 <= chisq_tol)]
@@ -1363,7 +1339,6 @@ def main():
     lambdas2 = lambdas[np.where(redchisq2 <= chisq_tol)]
     order3_fit = order3_fit[np.where(redchisq3 <= chisq_tol)]
     lambdas3 = lambdas[np.where(redchisq3 <= chisq_tol)]
-
     all_data = {
         "lambdas0": lambdas0,
         "lambdas1": lambdas1,
@@ -1381,12 +1356,6 @@ def main():
         "delta_t": delta_t,
     }
 
-    # scaled_z0 = (redchisq[0] - redchisq[0].min()) / redchisq[0].ptp()
-    # colors_0 = [[0., 0., 0., i] for i in scaled_z0]
-
-    # plot_lmb_depR(all_data, plotdir)
-    # plot_lmb_dep(all_data, plotdir)
-
     p0 = (1e-3, 0.7)
     fitlim = 30
     lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
@@ -1394,6 +1363,7 @@ def main():
     # Fit to the lambda dependence at each order in lambda
     print("\n")
     try:
+        # Check if we haven't excluded some of the chosen fit range
         if lmb_range[-1] >= len(lambdas0):
             lmb_range0 = np.arange(min(len(lambdas0) - 5, lmb_range[0]), len(lambdas0))
         else:
