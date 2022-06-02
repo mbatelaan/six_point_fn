@@ -1233,15 +1233,23 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     time_choice is the timeslice on which the GEVP will be set
     delta_t is the size of the time evolution which will be used to solve the GEVP
     """
+
+    # Apply the GEVP to the ensemble average to project the states we will use for extracting the energy shift.
     mat_0_avg = np.average(corr_matrix[:, :, :, time_choice], axis=2)
     mat_1_avg = np.average(corr_matrix[:, :, :, time_choice + delta_t], axis=2)
-
     eval_left_avg, evec_left_avg = np.linalg.eig(
         np.matmul(mat_1_avg, np.linalg.inv(mat_0_avg)).T
     )
     eval_right_avg, evec_right_avg = np.linalg.eig(
         np.matmul(np.linalg.inv(mat_0_avg), mat_1_avg)
     )
+    # Ordering of the eigenvalues
+    if eval_left_avg[0] > eval_left_avg[1]:
+        eval_left_avg = eval_left_avg[::-1]
+        evec_left_avg = evec_left_avg[:, ::-1]
+    if eval_right_avg[0] > eval_right_avg[1]:
+        eval_right_avg = eval_right_avg[::-1]
+        evec_right_avg = evec_right_avg[:, ::-1]
 
     evec_left_list = []
     evec_right_list = []
