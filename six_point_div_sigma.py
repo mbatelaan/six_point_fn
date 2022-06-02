@@ -912,65 +912,6 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17, tmin
     return weighted_energy, fitweights
 
 
-# def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=None):
-#     """Take two lists of dictionaries, one for a fit using the one-exponential function and one using a two-exponential function, Return the weighted average of the energies across these fits"""
-
-#     if tmax_choice:
-#         tmax_1exp = np.array([i["x"][-1] for i in fitlist_1exp])
-#         tmin_1exp = np.array([i["x"][0] for i in fitlist_1exp])
-#         indices = np.where(tmax_1exp == tmax_choice)
-#         indices = indices[0][np.where(3 < tmin_1exp[indices])]
-#         indices = indices[np.where(tmin_1exp[indices] < 16)]
-#         fitlist_1exp = [fitlist_1exp[index] for index in indices]
-
-#         tmax_2exp = np.array([i["x"][-1] for i in fitlist_2exp])
-#         tmin_2exp = np.array([i["x"][0] for i in fitlist_2exp])
-#         indices_2exp = np.where(tmax_2exp == tmax_choice)
-#         indices_2exp = indices_2exp[0][np.where(tmin_2exp[indices_2exp] < 4)]
-#         fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
-
-#     dE_1exp = np.std([i["param"][:, 1] for i in fitlist_1exp], axis=1)
-#     dof_1exp = np.array([i["dof"] for i in fitlist_1exp])
-#     chisq_1exp = np.array([i["chisq"] for i in fitlist_1exp])
-
-#     dE_2exp = np.std([i["param"][:, 1] for i in fitlist_2exp], axis=1)
-#     dof_2exp = np.array([i["dof"] for i in fitlist_2exp])
-#     chisq_2exp = np.array([i["chisq"] for i in fitlist_2exp])
-
-#     fitweights = np.array(
-#         stats.fitweights(
-#             np.append(dof_1exp, dof_2exp),
-#             np.append(chisq_1exp, chisq_2exp),
-#             np.append(dE_1exp, dE_2exp),
-#         )
-#     )
-#     energies_comb = np.append(
-#         np.array([i["param"][:, 1] for i in fitlist_1exp]),
-#         np.array([i["param"][:, 1] for i in fitlist_2exp]),
-#         axis=0,
-#     )
-#     weighted_energy = np.dot(fitweights, energies_comb)
-
-#     # Rescale the bootstrap error to include the systematic error
-#     E_avg = np.average(weighted_energy)
-#     E_staterr = np.std(weighted_energy)
-#     E_systerr = np.sqrt(
-#         np.dot(
-#             fitweights,
-#             np.array([(E_avg - np.average(energy)) ** 2 for energy in energies_comb]),
-#         )
-#     )
-#     E_comberr = np.sqrt(E_staterr**2 + E_systerr**2)
-#     for ival, value in enumerate(weighted_energy):
-#         weighted_energy[ival] = E_avg + (value - E_avg) * E_comberr / E_staterr
-
-#     if print:
-#         print(
-#             f"\n+++++\nweighted energy = {err_brackets(np.average(weighted_energy), np.std(weighted_energy))}\n+++++"
-#         )
-#     return weighted_energy, fitweights
-
-
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     # Plotting setup
@@ -1048,7 +989,6 @@ def main():
     print(aexp_function.label)
 
     # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
-
     if time_loop:
         which_corr = [True, False, True]
         time_limits = np.array(
@@ -1160,12 +1100,6 @@ def main():
         tmax_choice=config["tmax_nucl"],
     )
     weighted_energy_nucldivsigma, fitweights = weighted_avg(fitlist_nucldivsigma_1exp, fitlist_nucldivsigma_2exp, plotdir, "nucldivsigma", tmax_choice=config["tmax_nucl"], tminmin_2exp = 2, tminmax_2exp = 2, tminmin_1exp=1, tminmax_1exp=15)
-    # weighted_energy_nucldivsigma, fitweights = weighted_avg_1_2_exp(
-    #     fitlist_nucldivsigma_1exp,
-    #     fitlist_nucldivsigma_2exp,
-    #     print=False,
-    #     tmax_choice=config["tmax_nucl"],
-    # )
     weighted_energy_sigma, fitweights = weighted_avg_1_2_exp(
         fitlist_sigma_1exp,
         fitlist_sigma_2exp,
@@ -1256,6 +1190,13 @@ def main():
             G2_nucl, G2_sigm, lmb_val
         )
 
+        # print("\n\nmatrix shape = \n", np.shape(matrix_4))
+        # print("\n\nmatrix elem = \n", matrix_4[1, 1, 3, 16])
+        # print("\n\nmatrix1 elem = \n", np.average(matrix_1[0, 1, :, 1:13], axis=0))
+        # print("\n\nmatrix2 elem = \n", np.average(matrix_2[0, 1, :, 1:13], axis=0))
+        # print("\n\nmatrix3 elem = \n", np.average(matrix_3[0, 1, :, 1:13], axis=0))
+        # print("\n\nmatrix4 elem = \n", np.average(matrix_4[0, 1, :, 1:13], axis=0))
+
         # ==================================================
         # O(lambda^0) fit
         (
@@ -1265,7 +1206,9 @@ def main():
         ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
         # Gt1_0 = np.einsum("ki,ijkl,kj->kl", evec_left0[:, :, 0], matrix_1, evec_right0[:, :, 0])
         # Gt2_0 = np.einsum("ki,ijkl,kj->kl", evec_left0[:, :, 1], matrix_1, evec_right0[:, :, 1])
-        print("\n\n\n evec = ",evec_left0)
+        print("\n evec shape = ", np.shape(evec_left0))
+        print("\n evec left avg = \n",np.average(evec_left0, axis=0))
+        print("\n evec right avg = \n",np.average(evec_right0, axis=0))
         ratio0 = Gt1_0 / Gt2_0
         effmass_ratio0 = stats.bs_effmass(ratio0, time_axis=1, spacing=1)
         bootfit_state1_0, redchisq1_0 = fit_value3(
@@ -1342,12 +1285,9 @@ def main():
         if lmb_val == 0:
             order3_states_fit_divsigma = np.zeros((2, pars.nboot, 2))
         else:
-            sigma_ = np.abs(G2_sigm[0])
-            print(np.shape(sigma_))
-            print(np.shape(Gt1_3))
-            Gt1_3_divsigma = Gt1_3 / sigma_
-            Gt2_3_divsigma = Gt2_3 / sigma_
-            print(np.shape(Gt1_3_divsigma))
+            sigma_ = G2_sigm[0]
+            Gt1_3_divsigma = np.abs(Gt1_3 / sigma_)
+            Gt2_3_divsigma = np.abs(Gt2_3 / sigma_)
 
             # aexp_function.initparfnc(Gt1_3_divsigma, timeslice=7)
             bootfit_state1_divsigma, redchisq_1_divsigma = fit_value3(
@@ -1415,6 +1355,7 @@ def main():
         print("Saved the data")
 
         # ==================================================
+        print('plotting')
         if plotting:
             plotting_script_all(
                 matrix_1 / 1e39,
@@ -1448,6 +1389,7 @@ def main():
                 name="_l" + str(lmb_val) + "_all",
                 show=False,
             )
+        print('plotted')
 
     # ----------------------------------------------------------------------
     # Save the fit data to a pickle file
