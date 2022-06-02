@@ -996,26 +996,31 @@ def main():
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
 
-    # # Make the correlators complex valued
-    # for icorr, corr in enumerate(G2_nucl):
-    #     # G2_nucl[icorr] = np.abs(corr[:, :, 0] + 1j * corr[:, :, 1])
-    #     G2_nucl[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
-    # for icorr, corr in enumerate(G2_sigm):
-    #     # G2_sigm[icorr] = np.abs(corr[:, :, 0] + 1j * corr[:, :, 1])
-    #     G2_sigm[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
-
     # Set the analysis parameters that will be used (from the yaml file)
     lambdas = np.linspace(config["lmb_i"], config["lmb_f"], 15)
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
     plotting = config["plotting"]
     time_loop = config["time_loop"]
-
     aexp_function = ff.initffncs("Aexp")
     twoexp_function = ff.initffncs("Twoexp")
-    print(aexp_function.label)
 
-    # A loop over time windows, it fits the correlators and calculates a weight for each fit window.
+    # # Loop over time windows, it fits the correlators and calculates a weight for each fit window.
+    # nucl_exist = exists(datadir / (f"time_window_loop_nucl_1exp.pkl")) and exists(
+    #     datadir / (f"time_window_loop_nucl_2exp.pkl")
+    # )
+    # sigma_exists = exists(
+    #     "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_1exp.pkl"
+    # )
+    # small_exist = exists(datadir / (f"time_window_loop_lambda_small.pkl"))
+    # large_exist = exists(datadir / (f"time_window_loop_lambda_large.pkl"))
+    # file_missing = [
+    #     not nucl_exist,
+    #     not sigma_exist,
+    #     not small_exist,
+    #     not large_exist,
+    # ]
+    # time_loop = any(file_missing)
     if time_loop:
         which_corr = [True, False, True]
         time_limits = np.array(
@@ -1049,7 +1054,6 @@ def main():
         nucl_exist = exists(datadir / (f"time_window_loop_nucl_1exp.pkl")) and exists(
             datadir / (f"time_window_loop_nucl_2exp.pkl")
         )
-        # sigma_exist = exists(datadir / (f"time_window_loop_sigma.pkl"))
         sigma_exist = True  # Because we'll use the fit from qmax for all other datasets
         small_exist = exists(datadir / (f"time_window_loop_lambda_small.pkl"))
         large_exist = exists(datadir / (f"time_window_loop_lambda_large.pkl"))
