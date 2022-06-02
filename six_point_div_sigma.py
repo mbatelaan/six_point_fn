@@ -21,7 +21,7 @@ from common import read_correlators
 from common import read_correlators2
 from common import read_correlators3
 from common import read_correlators4
-from common import read_correlators5
+from common import read_correlators5_complex
 from common import read_correlators6
 from common import make_matrices
 from common import gevp
@@ -948,6 +948,7 @@ def main():
     for key, value in defaults.items():
         config.setdefault(key, value)
 
+    # Set the directories for reading data, saving data and saving plots
     pickledir_k1 = Path(config["pickle_dir1"])
     pickledir_k2 = Path(config["pickle_dir2"])
     plotdir = Path(config["analysis_dir"]) / Path("plots")
@@ -966,7 +967,7 @@ def main():
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
     elif "onlytwist2" in config and config["onlytwist2"]:
-        G2_nucl, G2_sigm = read_correlators5(
+        G2_nucl, G2_sigm = read_correlators5_complex(
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
     elif "one_fourier" in config and config["one_fourier"]:
@@ -981,12 +982,13 @@ def main():
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
 
-    for icorr, corr in enumerate(G2_nucl):
-        # G2_nucl[icorr] = np.abs(corr[:, :, 0] + 1j * corr[:, :, 1])
-        G2_nucl[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
-    for icorr, corr in enumerate(G2_sigm):
-        # G2_sigm[icorr] = np.abs(corr[:, :, 0] + 1j * corr[:, :, 1])
-        G2_sigm[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
+    # # Make the correlators complex valued
+    # for icorr, corr in enumerate(G2_nucl):
+    #     # G2_nucl[icorr] = np.abs(corr[:, :, 0] + 1j * corr[:, :, 1])
+    #     G2_nucl[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
+    # for icorr, corr in enumerate(G2_sigm):
+    #     # G2_sigm[icorr] = np.abs(corr[:, :, 0] + 1j * corr[:, :, 1])
+    #     G2_sigm[icorr] = corr[:, :, 0] + 1j * corr[:, :, 1]
 
     # Set the analysis parameters that will be used (from the yaml file)
     lambdas = np.linspace(config["lmb_i"], config["lmb_f"], 15)

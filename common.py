@@ -805,6 +805,134 @@ def read_correlators5(pars, pickledir, pickledir2, mom_strings):
 
     return G2_nucl, G2_sigm
 
+
+def read_correlators5_complex(pars, pickledir, pickledir2, mom_strings):
+    """Read the pickle files which contain the correlator data
+
+    The script will check the folders for available files and pick out the files with the highest number of configurations.
+    """
+    ### ----------------------------------------------------------------------
+    ### find the highest number of configurations available
+    ### Unperturbed correlators
+    fileup = (
+        pickledir
+        / Path(
+            "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+            + mom_strings[1]
+        )
+    ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
+    conf_num_list = np.array(
+        [int("".join(filter(str.isdigit, l.name))) for l in list(fileup)]
+    )
+    conf_num = conf_num_list[np.argmax(conf_num_list)]
+    print("conf_numU:", conf_num)
+    barspec_nameU = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
+
+    filestrange = (
+        pickledir2
+        / Path(
+            "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+            + mom_strings[1]
+        )
+    ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
+    conf_num_list = np.array(
+        [int("".join(filter(str.isdigit, l.name))) for l in list(filestrange)]
+    )
+    conf_num = conf_num_list[np.argmax(conf_num_list)]
+    print("conf_numS:", conf_num)
+    barspec_nameS = "/barspec_nucleon_rel_" + str(conf_num) + "cfgs.pickle"
+
+    ### ----------------------------------------------------------------------
+    G2_nucl = []
+    G2_sigm = []
+    ### ----------------------------------------------------------------------
+    ### Unperturbed correlators
+    unpertfile_nucleon_pos = pickledir / Path(
+        "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    unpertfile_sigma = pickledir2 / Path(
+        "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    G2_unpert_qp100_nucl = read_pickle(
+        unpertfile_nucleon_pos, nboot=pars.nboot, nbin=pars.nbin
+    )
+    G2_unpert_q000_sigma = read_pickle(
+        unpertfile_sigma, nboot=pars.nboot, nbin=pars.nbin
+    )
+    G2_nucl.append(G2_unpert_qp100_nucl[:, :, 0] + 1j * G2_unpert_qp100_nucl[:, :, 1])
+    G2_sigm.append(G2_unpert_q000_sigma[:, :, 0] + 1j * G2_unpert_q000_sigma[:, :, 1])
+
+    ### ----------------------------------------------------------------------
+    ### SU & SS
+    filelist_SU1 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    filelist_SU3 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    filelist_SS2 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    filelist_SS4 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+
+    G2_q100_SU_lmb = read_pickle(filelist_SU1, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q000_SS_lmb2 = read_pickle(filelist_SS2, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q100_SU_lmb3 = read_pickle(filelist_SU3, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q000_SS_lmb4 = read_pickle(filelist_SS4, nboot=pars.nboot, nbin=pars.nbin)
+    G2_sigm.append(G2_q100_SU_lmb[:, :, 0] + 1j * G2_q100_SU_lmb[:, :, 1])
+    G2_sigm.append(G2_q000_SS_lmb2[:, :, 0] + 1j * G2_q000_SS_lmb2[:, :, 1])
+    G2_sigm.append(G2_q100_SU_lmb3[:, :, 0] + 1j * G2_q100_SU_lmb3[:, :, 1])
+    G2_sigm.append(G2_q000_SS_lmb4[:, :, 0] + 1j * G2_q000_SS_lmb4[:, :, 1])
+
+    ### ----------------------------------------------------------------------
+    ### US & UU
+    filelist_US1 = pickledir / Path(
+        "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    filelist_UU2 = pickledir / Path(
+        "baryon-3pt_UU_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    filelist_US3 = pickledir / Path(
+        "baryon-3pt_US_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    filelist_UU4 = pickledir / Path(
+        "baryon-3pt_UU_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+
+    G2_q000_US_lmb = read_pickle(filelist_US1, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q100_UU_lmb2 = read_pickle(filelist_UU2, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q000_US_lmb3 = read_pickle(filelist_US3, nboot=pars.nboot, nbin=pars.nbin)
+    G2_q100_UU_lmb4 = read_pickle(filelist_UU4, nboot=pars.nboot, nbin=pars.nbin)
+    G2_nucl.append(G2_q000_US_lmb[:, :, 0] + 1j * G2_q000_US_lmb[:, :, 1])
+    G2_nucl.append(G2_q100_UU_lmb2[:, :, 0] + 1j * G2_q100_UU_lmb2[:, :, 1])
+    G2_nucl.append(G2_q000_US_lmb3[:, :, 0] + 1j * G2_q000_US_lmb3[:, :, 1])
+    G2_nucl.append(G2_q100_UU_lmb4[:, :, 0] + 1j * G2_q100_UU_lmb4[:, :, 1])
+
+    return G2_nucl, G2_sigm
+
+
 def read_correlators6(pars, pickledir, pickledir2, mom_strings):
     """Read the pickle files which contain the correlator data
 
@@ -865,8 +993,8 @@ def read_correlators6(pars, pickledir, pickledir2, mom_strings):
     G2_unpert_q000_sigma = read_pickle(
         unpertfile_sigma, nboot=pars.nboot, nbin=pars.nbin
     )
-    G2_nucl.append(G2_unpert_qp100_nucl)
-    G2_sigm.append(G2_unpert_q000_sigma)
+    G2_nucl.append(G2_unpert_qp100_nucl[:, :, 0] + 1j * G2_unpert_qp100_nucl[:, :, 1])
+    G2_sigm.append(G2_unpert_q000_sigma[:, :, 0] + 1j * G2_unpert_q000_sigma[:, :, 1])
 
     ### ----------------------------------------------------------------------
     ### SU & SS
@@ -895,10 +1023,10 @@ def read_correlators6(pars, pickledir, pickledir2, mom_strings):
     G2_q000_SS_lmb2 = read_pickle(filelist_SS2, nboot=pars.nboot, nbin=pars.nbin)
     G2_q100_SU_lmb3 = read_pickle(filelist_SU3, nboot=pars.nboot, nbin=pars.nbin)
     G2_q000_SS_lmb4 = read_pickle(filelist_SS4, nboot=pars.nboot, nbin=pars.nbin)
-    G2_sigm.append(G2_q100_SU_lmb)
-    G2_sigm.append(G2_q000_SS_lmb2)
-    G2_sigm.append(G2_q100_SU_lmb3)
-    G2_sigm.append(G2_q000_SS_lmb4)
+    G2_sigm.append(G2_q100_SU_lmb[:, :, 0] + 1j * G2_q100_SU_lmb[:, :, 1])
+    G2_sigm.append(G2_q000_SS_lmb2[:, :, 0] + 1j * G2_q000_SS_lmb2[:, :, 1])
+    G2_sigm.append(G2_q100_SU_lmb3[:, :, 0] + 1j * G2_q100_SU_lmb3[:, :, 1])
+    G2_sigm.append(G2_q000_SS_lmb4[:, :, 0] + 1j * G2_q000_SS_lmb4[:, :, 1])
 
     ### ----------------------------------------------------------------------
     ### US & UU
@@ -927,10 +1055,10 @@ def read_correlators6(pars, pickledir, pickledir2, mom_strings):
     G2_q100_UU_lmb2 = read_pickle(filelist_UU2, nboot=pars.nboot, nbin=pars.nbin)
     G2_q000_US_lmb3 = read_pickle(filelist_US3, nboot=pars.nboot, nbin=pars.nbin)
     G2_q100_UU_lmb4 = read_pickle(filelist_UU4, nboot=pars.nboot, nbin=pars.nbin)
-    G2_nucl.append(G2_q000_US_lmb)
-    G2_nucl.append(G2_q100_UU_lmb2)
-    G2_nucl.append(G2_q000_US_lmb3)
-    G2_nucl.append(G2_q100_UU_lmb4)
+    G2_nucl.append(G2_q000_US_lmb[:, :, 0] + 1j * G2_q000_US_lmb[:, :, 1])
+    G2_nucl.append(G2_q100_UU_lmb2[:, :, 0] + 1j * G2_q100_UU_lmb2[:, :, 1])
+    G2_nucl.append(G2_q000_US_lmb3[:, :, 0] + 1j * G2_q000_US_lmb3[:, :, 1])
+    G2_nucl.append(G2_q100_UU_lmb4[:, :, 0] + 1j * G2_q100_UU_lmb4[:, :, 1])
 
     return G2_nucl, G2_sigm
 
@@ -945,24 +1073,24 @@ def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
     matrix_2 = np.array(
         [
             [
-                G2_nucl[0][:, :, 0] + lmb_val ** 2 * G2_nucl[2][:, :, 0],
+                G2_nucl[0][:, :, 0] + lmb_val**2 * G2_nucl[2][:, :, 0],
                 lmb_val * G2_nucl[1][:, :, 0],
             ],
             [
                 lmb_val * G2_sigm[1][:, :, 0],
-                G2_sigm[0][:, :, 0] + lmb_val ** 2 * G2_sigm[2][:, :, 0],
+                G2_sigm[0][:, :, 0] + lmb_val**2 * G2_sigm[2][:, :, 0],
             ],
         ]
     )
     matrix_3 = np.array(
         [
             [
-                G2_nucl[0][:, :, 0] + lmb_val ** 2 * G2_nucl[2][:, :, 0],
-                lmb_val * G2_nucl[1][:, :, 0] + lmb_val ** 3 * G2_nucl[3][:, :, 0],
+                G2_nucl[0][:, :, 0] + lmb_val**2 * G2_nucl[2][:, :, 0],
+                lmb_val * G2_nucl[1][:, :, 0] + lmb_val**3 * G2_nucl[3][:, :, 0],
             ],
             [
-                lmb_val * G2_sigm[1][:, :, 0] + lmb_val ** 3 * G2_sigm[3][:, :, 0],
-                G2_sigm[0][:, :, 0] + lmb_val ** 2 * G2_sigm[2][:, :, 0],
+                lmb_val * G2_sigm[1][:, :, 0] + lmb_val**3 * G2_sigm[3][:, :, 0],
+                G2_sigm[0][:, :, 0] + lmb_val**2 * G2_sigm[2][:, :, 0],
             ],
         ]
     )
@@ -970,24 +1098,25 @@ def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
         [
             [
                 G2_nucl[0][:, :, 0]
-                + (lmb_val ** 2) * G2_nucl[2][:, :, 0]
-                + (lmb_val ** 4) * G2_nucl[4][:, :, 0],
-                lmb_val * G2_nucl[1][:, :, 0] + (lmb_val ** 3) * G2_nucl[3][:, :, 0],
+                + (lmb_val**2) * G2_nucl[2][:, :, 0]
+                + (lmb_val**4) * G2_nucl[4][:, :, 0],
+                lmb_val * G2_nucl[1][:, :, 0] + (lmb_val**3) * G2_nucl[3][:, :, 0],
             ],
             [
-                lmb_val * G2_sigm[1][:, :, 0] + (lmb_val ** 3) * G2_sigm[3][:, :, 0],
+                lmb_val * G2_sigm[1][:, :, 0] + (lmb_val**3) * G2_sigm[3][:, :, 0],
                 G2_sigm[0][:, :, 0]
-                + (lmb_val ** 2) * G2_sigm[2][:, :, 0]
-                + (lmb_val ** 4) * G2_sigm[4][:, :, 0],
+                + (lmb_val**2) * G2_sigm[2][:, :, 0]
+                + (lmb_val**4) * G2_sigm[4][:, :, 0],
             ],
         ]
     )
 
     return matrix_1, matrix_2, matrix_3, matrix_4
 
+
 def make_matrices(G2_nucl, G2_sigm, lmb_val):
-    """ Construct the matrices for the GEVP"""
-    
+    """Construct the matrices for the GEVP"""
+
     matrix_1 = np.array(
         [
             [G2_nucl[0][:, :], lmb_val * G2_nucl[1][:, :]],
@@ -997,24 +1126,24 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
     matrix_2 = np.array(
         [
             [
-                G2_nucl[0][:, :] + lmb_val ** 2 * G2_nucl[2][:, :],
+                G2_nucl[0][:, :] + lmb_val**2 * G2_nucl[2][:, :],
                 lmb_val * G2_nucl[1][:, :],
             ],
             [
                 lmb_val * G2_sigm[1][:, :],
-                G2_sigm[0][:, :] + lmb_val ** 2 * G2_sigm[2][:, :],
+                G2_sigm[0][:, :] + lmb_val**2 * G2_sigm[2][:, :],
             ],
         ]
     )
     matrix_3 = np.array(
         [
             [
-                G2_nucl[0][:, :] + lmb_val ** 2 * G2_nucl[2][:, :],
-                lmb_val * G2_nucl[1][:, :] + lmb_val ** 3 * G2_nucl[3][:, :],
+                G2_nucl[0][:, :] + lmb_val**2 * G2_nucl[2][:, :],
+                lmb_val * G2_nucl[1][:, :] + lmb_val**3 * G2_nucl[3][:, :],
             ],
             [
-                lmb_val * G2_sigm[1][:, :] + lmb_val ** 3 * G2_sigm[3][:, :],
-                G2_sigm[0][:, :] + lmb_val ** 2 * G2_sigm[2][:, :],
+                lmb_val * G2_sigm[1][:, :] + lmb_val**3 * G2_sigm[3][:, :],
+                G2_sigm[0][:, :] + lmb_val**2 * G2_sigm[2][:, :],
             ],
         ]
     )
@@ -1022,15 +1151,15 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
         [
             [
                 G2_nucl[0][:, :]
-                + (lmb_val ** 2) * G2_nucl[2][:, :]
-                + (lmb_val ** 4) * G2_nucl[4][:, :],
-                lmb_val * G2_nucl[1][:, :] + (lmb_val ** 3) * G2_nucl[3][:, :],
+                + (lmb_val**2) * G2_nucl[2][:, :]
+                + (lmb_val**4) * G2_nucl[4][:, :],
+                lmb_val * G2_nucl[1][:, :] + (lmb_val**3) * G2_nucl[3][:, :],
             ],
             [
-                lmb_val * G2_sigm[1][:, :] + (lmb_val ** 3) * G2_sigm[3][:, :],
+                lmb_val * G2_sigm[1][:, :] + (lmb_val**3) * G2_sigm[3][:, :],
                 G2_sigm[0][:, :]
-                + (lmb_val ** 2) * G2_sigm[2][:, :]
-                + (lmb_val ** 4) * G2_sigm[4][:, :],
+                + (lmb_val**2) * G2_sigm[2][:, :]
+                + (lmb_val**4) * G2_sigm[4][:, :],
             ],
         ]
     )
@@ -1064,12 +1193,12 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     # Ordering of the eigenvalues
     if eval_left[0] > eval_left[1]:
         eval_left = eval_left[::-1]
-        evec_left = evec_left[:,::-1]
+        evec_left = evec_left[:, ::-1]
         # eval_left = eval_left.T[::-1].T
         # evec_left = evec_left.T[::-1].T
     if eval_right[0] > eval_right[1]:
         eval_right = eval_right[::-1]
-        evec_right = evec_right[:,::-1]
+        evec_right = evec_right[:, ::-1]
         # eval_right = eval_right.T[::-1].T
         # evec_right = evec_right.T[::-1].T
     # print("left:", eval_left, evec_left)
@@ -1086,6 +1215,7 @@ def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
 
     return Gt1, Gt2, gevp_data
 
+
 def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     """Solve the GEVP for a given correlation matrix
 
@@ -1096,8 +1226,12 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     mat_0_avg = np.average(corr_matrix[:, :, :, time_choice], axis=2)
     mat_1_avg = np.average(corr_matrix[:, :, :, time_choice + delta_t], axis=2)
 
-    eval_left, evec_left = np.linalg.eig(np.matmul(mat_1_avg, np.linalg.inv(mat_0_avg)).T)
-    eval_right, evec_right = np.linalg.eig(np.matmul(np.linalg.inv(mat_0_avg), mat_1_avg))
+    eval_left, evec_left = np.linalg.eig(
+        np.matmul(mat_1_avg, np.linalg.inv(mat_0_avg)).T
+    )
+    eval_right, evec_right = np.linalg.eig(
+        np.matmul(np.linalg.inv(mat_0_avg), mat_1_avg)
+    )
 
     # print('average = ', np.matmul(mat_1_avg, np.linalg.inv(mat_0_avg)).T)
     # print(f"\nevec_left = {evec_left}")
@@ -1108,18 +1242,18 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     eval_left_list = []
     eval_right_list = []
     nboot = np.shape(corr_matrix)[2]
-    
+
     for boot in range(nboot):
         mat_0 = corr_matrix[:, :, boot, time_choice]
         mat_1 = corr_matrix[:, :, boot, time_choice + delta_t]
-        
+
         eval_left, evec_left = np.linalg.eig(np.matmul(mat_1, np.linalg.inv(mat_0)).T)
         eval_right, evec_right = np.linalg.eig(np.matmul(np.linalg.inv(mat_0), mat_1))
         # if boot == 1:
         # if evec_left[1,0]**2 > 0.4:
-            # print('\nboot 1  = ', np.matmul(mat_1, np.linalg.inv(mat_0)).T)
-            # print('evec sq = ', evec_left[:,0]**2)
-            # print('evec sq = ', evec_left, evec_right,'\n')
+        # print('\nboot 1  = ', np.matmul(mat_1, np.linalg.inv(mat_0)).T)
+        # print('evec sq = ', evec_left[:,0]**2)
+        # print('evec sq = ', evec_left, evec_right,'\n')
 
         # # Ordering by the square of the first value of the eigenvectors
         # if evec_left[0,0]**2 < evec_left[0,1]**2:
@@ -1135,11 +1269,11 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
         if eval_left[0] > eval_left[1]:
             # print("sorting left")
             eval_left = eval_left[::-1]
-            evec_left = evec_left[:,::-1]
+            evec_left = evec_left[:, ::-1]
         if eval_right[0] > eval_right[1]:
             # print("sorting right")
             eval_right = eval_right[::-1]
-            evec_right = evec_right[:,::-1]
+            evec_right = evec_right[:, ::-1]
             # eval_right = eval_right.T[::-1].T
             # evec_right = evec_right.T[::-1].T
 
@@ -1161,12 +1295,21 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     #     eval_right_list = [evalu[::-1] for evalu in eval_right_list]
     #     evec_right_list = [evec[:,::-1] for evec in evec_right_list]
 
-    Gt1 = np.abs(np.einsum("i,ijkl,j->kl", evec_left[:, 0], corr_matrix, evec_right[:, 0]))
-    Gt2 = np.abs(np.einsum("i,ijkl,j->kl", evec_left[:, 1], corr_matrix, evec_right[:, 1]))
+    Gt1 = np.abs(
+        np.einsum("i,ijkl,j->kl", evec_left[:, 0], corr_matrix, evec_right[:, 0])
+    )
+    Gt2 = np.abs(
+        np.einsum("i,ijkl,j->kl", evec_left[:, 1], corr_matrix, evec_right[:, 1])
+    )
 
     if show:
         stats.ploteffmass(Gt1, "eig_1" + name, plotdir, show=True)
         stats.ploteffmass(Gt2, "eig_2" + name, plotdir, show=True)
 
-    gevp_data = [np.array(eval_left_list), np.array(evec_left_list), np.array(eval_right_list), np.array(evec_right_list)]
+    gevp_data = [
+        np.array(eval_left_list),
+        np.array(evec_left_list),
+        np.array(eval_right_list),
+        np.array(evec_right_list),
+    ]
     return Gt1, Gt2, gevp_data
