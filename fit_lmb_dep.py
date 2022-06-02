@@ -34,6 +34,7 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
+
 def fitfunction5(lmb, Delta_E, matrix_element):
     deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * matrix_element**2)
     return deltaE
@@ -42,7 +43,7 @@ def fitfunction5(lmb, Delta_E, matrix_element):
 def fit_lmb(ydata, function, lambdas, p0=None):
     """Fit the lambda dependence
 
-    ydata is an array with the lambda values on the first index and bootstraps on the second index 
+    ydata is an array with the lambda values on the first index and bootstraps on the second index
     lambdas is an array of values to fit over
     the function will return an array of fit parameters for each bootstrap
     """
@@ -109,13 +110,17 @@ def fit_lambda_dep(fitlist, order, lmb_range):
     print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
     return lmb_range, bootfit, redchisq_fit, chisq_fit
 
+
 def plot_lmb_depR(all_data, plotdir, fit_data=None):
     """Make a plot of the lambda dependence of the energy shift
-
-    Where the plot uses colored bands to show the dependence"""
+    Where the plot uses colored bands to show the dependence
+    """
 
     print(all_data["lambdas0"])
-    print(np.average(all_data["order0_fit"], axis=1) - np.std(all_data["order0_fit"], axis=1))
+    print(
+        np.average(all_data["order0_fit"], axis=1)
+        - np.std(all_data["order0_fit"], axis=1)
+    )
     plt.figure(figsize=(9, 6))
     plt.fill_between(
         all_data["lambdas0"],
@@ -369,14 +374,19 @@ def main():
         "lambdas1": np.array([fit[f"lambdas"] for fit in fitlist1]),
         "lambdas2": np.array([fit[f"lambdas"] for fit in fitlist2]),
         "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3]),
-        "time_choice" : data[0]["time_choice"],
-        "delta_t" : data[0]["delta_t"]
+        "time_choice": data[0]["time_choice"],
+        "delta_t": data[0]["delta_t"],
     }
     for order in np.arange(4):
-        all_data[f"order{order}_fit"] = np.array([fit[f"order{order}_fit"][:, 1] for fit in fitlists[order]])
-        all_data[f"redchisq{order}"] = np.array([fit[f"red_chisq{order}"] for fit in fitlists[order]])
+        all_data[f"order{order}_fit"] = np.array(
+            [fit[f"order{order}_fit"][:, 1] for fit in fitlists[order]]
+        )
+        all_data[f"redchisq{order}"] = np.array(
+            [fit[f"red_chisq{order}"] for fit in fitlists[order]]
+        )
 
     plot_lmb_depR(all_data, plotdir, fit_data)
+
 
 if __name__ == "__main__":
     main()

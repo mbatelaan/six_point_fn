@@ -592,8 +592,10 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     G2_unpert_q000_sigma = read_pickle(
         unpertfile_sigma, nboot=pars.nboot, nbin=pars.nbin
     )
-    G2_nucl.append(G2_unpert_qp100_nucl)
-    G2_sigm.append(G2_unpert_q000_sigma)
+    G2_nucl.append(G2_unpert_qp100_nucl[:, :, 0] + 1j * G2_unpert_qp100_nucl[:, :, 1])
+    G2_sigm.append(G2_unpert_q000_sigma[:, :, 0] + 1j * G2_unpert_q000_sigma[:, :, 1])
+    # G2_nucl.append(G2_unpert_qp100_nucl)
+    # G2_sigm.append(G2_unpert_q000_sigma)
 
     ### ----------------------------------------------------------------------
     ### SU & SS
@@ -622,10 +624,14 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     G2_q000_SS_lmb2 = read_pickle(filelist_SS2, nboot=pars.nboot, nbin=pars.nbin)
     G2_q100_SU_lmb3 = read_pickle(filelist_SU3, nboot=pars.nboot, nbin=pars.nbin)
     G2_q000_SS_lmb4 = read_pickle(filelist_SS4, nboot=pars.nboot, nbin=pars.nbin)
-    G2_sigm.append(G2_q100_SU_lmb)
-    G2_sigm.append(G2_q000_SS_lmb2)
-    G2_sigm.append(G2_q100_SU_lmb3)
-    G2_sigm.append(G2_q000_SS_lmb4)
+    G2_sigm.append(G2_q100_SU_lmb[:, :, 0] + 1j * G2_q100_SU_lmb[:, :, 1])
+    G2_sigm.append(G2_q000_SS_lmb2[:, :, 0] + 1j * G2_q000_SS_lmb2[:, :, 1])
+    G2_sigm.append(G2_q100_SU_lmb3[:, :, 0] + 1j * G2_q100_SU_lmb3[:, :, 1])
+    G2_sigm.append(G2_q000_SS_lmb4[:, :, 0] + 1j * G2_q000_SS_lmb4[:, :, 1])
+    # G2_sigm.append(G2_q100_SU_lmb)
+    # G2_sigm.append(G2_q000_SS_lmb2)
+    # G2_sigm.append(G2_q100_SU_lmb3)
+    # G2_sigm.append(G2_q000_SS_lmb4)
 
     ### ----------------------------------------------------------------------
     ### US & UU
@@ -654,10 +660,14 @@ def read_correlators4(pars, pickledir, pickledir2, mom_strings):
     G2_q100_UU_lmb2 = read_pickle(filelist_UU2, nboot=pars.nboot, nbin=pars.nbin)
     G2_q000_US_lmb3 = read_pickle(filelist_US3, nboot=pars.nboot, nbin=pars.nbin)
     G2_q100_UU_lmb4 = read_pickle(filelist_UU4, nboot=pars.nboot, nbin=pars.nbin)
-    G2_nucl.append(G2_q000_US_lmb)
-    G2_nucl.append(G2_q100_UU_lmb2)
-    G2_nucl.append(G2_q000_US_lmb3)
-    G2_nucl.append(G2_q100_UU_lmb4)
+    G2_nucl.append(G2_q000_US_lmb[:, :, 0] + 1j * G2_q000_US_lmb[:, :, 1])
+    G2_nucl.append(G2_q100_UU_lmb2[:, :, 0] + 1j * G2_q100_UU_lmb2[:, :, 1])
+    G2_nucl.append(G2_q000_US_lmb3[:, :, 0] + 1j * G2_q000_US_lmb3[:, :, 1])
+    G2_nucl.append(G2_q100_UU_lmb4[:, :, 0] + 1j * G2_q100_UU_lmb4[:, :, 1])
+    # G2_nucl.append(G2_q000_US_lmb)
+    # G2_nucl.append(G2_q100_UU_lmb2)
+    # G2_nucl.append(G2_q000_US_lmb3)
+    # G2_nucl.append(G2_q100_UU_lmb4)
 
     return G2_nucl, G2_sigm
 
@@ -1062,6 +1072,7 @@ def read_correlators6(pars, pickledir, pickledir2, mom_strings):
 
     return G2_nucl, G2_sigm
 
+
 def normalize_matrices(matrices, time_choice=1):
     matrix_list = []
     for matrix in matrices:
@@ -1069,9 +1080,20 @@ def normalize_matrices(matrices, time_choice=1):
         # matrix = matrix.copy()/1e36
         for i, elemi in enumerate(matrix):
             for j, elemj in enumerate(elemi):
-                matrix[i,j] = np.einsum('kl,k->kl', matrix_copy[i,j], np.sqrt(np.abs(matrix_copy[i,i,:,time_choice]*matrix_copy[j,j,:,time_choice]))**(-1))
+                matrix[i, j] = np.einsum(
+                    "kl,k->kl",
+                    matrix_copy[i, j],
+                    np.sqrt(
+                        np.abs(
+                            matrix_copy[i, i, :, time_choice]
+                            * matrix_copy[j, j, :, time_choice]
+                        )
+                    )
+                    ** (-1),
+                )
         matrix_list.append(matrix)
     return matrix_list
+
 
 def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
     matrix_1 = np.array(
@@ -1310,10 +1332,14 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     #     evec_right_list = [evec[:,::-1] for evec in evec_right_list]
 
     Gt1 = np.abs(
-        np.einsum("i,ijkl,j->kl", evec_left_avg[:, 0], corr_matrix, evec_right_avg[:, 0])
+        np.einsum(
+            "i,ijkl,j->kl", evec_left_avg[:, 0], corr_matrix, evec_right_avg[:, 0]
+        )
     )
     Gt2 = np.abs(
-        np.einsum("i,ijkl,j->kl", evec_left_avg[:, 1], corr_matrix, evec_right_avg[:, 1])
+        np.einsum(
+            "i,ijkl,j->kl", evec_left_avg[:, 1], corr_matrix, evec_right_avg[:, 1]
+        )
     )
 
     if show:
