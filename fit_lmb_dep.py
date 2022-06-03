@@ -347,9 +347,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         plt.plot(
             all_data["lambdas0"],
             np.average(fitBS0, axis=0),
-            # label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq0']:2.3}$"
-            # + "\n"
-            # + rf"$\textrm{{M.E.}}={m_e_0}$",
+            label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq0']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_0}$",
             color=_colors[0],
             linestyle="--",
             linewidth=1,
@@ -358,9 +358,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         plt.plot(
             all_data["lambdas1"],
             np.average(fitBS1, axis=0),
-            # label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq1']:2.3}$"
-            # + "\n"
-            # + rf"$\textrm{{M.E.}}={m_e_1}$",
+            label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq1']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_1}$",
             color=_colors[1],
             linestyle="--",
             linewidth=1,
@@ -369,9 +369,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         plt.plot(
             all_data["lambdas2"],
             np.average(fitBS2, axis=0),
-            # label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq2']:2.3}$"
-            # + "\n"
-            # + rf"$\textrm{{M.E.}}={m_e_2}$",
+            label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq2']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_2}$",
             color=_colors[2],
             linewidth=1,
             linestyle="--",
@@ -404,6 +404,87 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
         plt.ylim(0, 0.15)
         plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim.pdf"))
+
+    plt.close()
+    return
+
+def plot_lmb_dep4(all_data, plotdir, fit_data=None):
+    """Make a plot of the lambda dependence of the energy shift
+    Where the plot uses colored bands to show the dependence
+    """
+
+    print(all_data["lambdas0"])
+    print(
+        np.average(all_data["order0_fit"], axis=1)
+        - np.std(all_data["order0_fit"], axis=1)
+    )
+    plt.figure(figsize=(9, 6))
+    plt.fill_between(
+        all_data["lambdas3"],
+        np.average(all_data["order3_fit"], axis=1)
+        - np.std(all_data["order3_fit"], axis=1),
+        np.average(all_data["order3_fit"], axis=1)
+        + np.std(all_data["order3_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.legend(fontsize="x-small", loc="upper left")
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$\Delta E$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(plotdir / ("lambda_dep_bands_4.pdf"))
+
+    if fit_data:
+        lmb_range = fit_data["lmb_range"]
+        lmb_range3 = fit_data["lmb_range3"]
+
+        plt.fill_between(
+            np.array(
+                [
+                    all_data["lambdas3"][lmb_range3[0]],
+                    all_data["lambdas3"][lmb_range3[-1]],
+                ]
+            ),
+            np.array([-10, -10]),
+            np.array([10, 10]),
+            color=_colors[3],
+            alpha=0.1,
+            linewidth=0,
+        )
+        m_e_3 = err_brackets(
+            np.average(fit_data["bootfit3"], axis=0)[1],
+            np.std(fit_data["bootfit3"], axis=0)[1],
+        )
+
+        fitBS3 = np.array(
+            [fitfunction5(all_data["lambdas3"], *bf) for bf in fit_data["bootfit3"]]
+        )
+
+        plt.plot(
+            all_data["lambdas3"],
+            np.average(fitBS3, axis=0),
+            label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_3}$",
+            color=_colors[3],
+            linewidth=1,
+            linestyle="--",
+            alpha=0.9,
+        )
+
+        plt.legend(fontsize="x-small", loc="upper left")
+        plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+        plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+        plt.tight_layout()
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_4.pdf"))
+        plt.ylim(0, 0.15)
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4.pdf"))
 
     plt.close()
     return
@@ -467,9 +548,11 @@ def main():
     # Fit to the lambda dependence for each order
     fit_data = {"lmb_range": lmb_range}
     for order in np.arange(4):
+        lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
         lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
             fitlists[order], order, lmb_range
         )
+        print('lmb_range = ', lmb_range)
         fit_data[f"lmb_range{order}"] = lmb_range
         fit_data[f"bootfit{order}"] = bootfit
         fit_data[f"redchisq{order}"] = redchisq_fit
@@ -495,6 +578,7 @@ def main():
         )
 
     plot_lmb_depR(all_data, plotdir, fit_data)
+    plot_lmb_dep4(all_data, plotdir, fit_data)
 
     delta_E_fix = np.average(data[0]["weighted_energy_nucldivsigma"])
     print('\n\n',delta_E_fix)
