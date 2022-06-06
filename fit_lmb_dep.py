@@ -61,7 +61,7 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     covmat_inverse = linalg.pinv(covmat)
     diag = np.diagonal(covmat)
     diag_sigma = np.diag(np.std(ydata, axis=0) ** 2)
-    dof = len(lambdas)
+    dof = len(lambdas) - len(p0)
 
     popt_avg, pcov_avg = curve_fit(
         function,
@@ -120,7 +120,8 @@ def fit_lambda_dep_2(fitlist, delta_E_fix, order, lmb_range, fitfunction):
     """Fit the lambda dependence of the energy shift
     Now fitting with only one parameter, we set the y-intercept by using the energy ratio gotten from fits.
     """
-    p0 = (0.7,)
+    p0_2 = (1e-4, 0.7,)
+    p0_1 = (0.7,)
     fit_data = np.array([fit[f"order{order}_fit"][:, 1] for fit in fitlist])
     lambdas = np.array([fit[f"lambdas"] for fit in fitlist])
 
@@ -138,87 +139,82 @@ def fit_lambda_dep_2(fitlist, delta_E_fix, order, lmb_range, fitfunction):
     diag_sigma = np.diag(np.std(ydata, axis=0) ** 2)
 
     xdata = lambdas[lmb_range]
-    print('\n\n',xdata)
-    print('\n\n',ydata_avg)
-    print('\n\n',delta_E_fix)
+    # print('\n\n',xdata)
+    # print('\n\n',ydata_avg)
+    # print('\n\n',delta_E_fix)
 
-    resavg = syopt.minimize(
-        ff.chisqfn2,
-        (1e-3, 0.7),
-        args=(fitfunction5, xdata, ydata_avg, invcovmat),
-        method="Nelder-Mead",
-        # bounds=bounds,
-        options={"disp": False},
-    )
-    print(resavg.x)
-    print(resavg.fun)
-    bootfit = []
-    for iboot, values in enumerate(ydata):
-        resavg = syopt.minimize(
-            ff.chisqfn2,
-            (1e-3, 0.7),
-            args=(fitfunction5, xdata, values, diag_sigma),
-            method="Nelder-Mead",
-            # bounds=bounds,
-            options={"disp": False},
-        )
-        bootfit.append(resavg.x)
-    bootfit = np.array(bootfit)
-    print(np.shape(bootfit))
-    print('bootfit avg = ',np.average(bootfit, axis=0), '\n\n')
+    # # ============================================================
+    # # two-parameter function
+    # resavg = syopt.minimize(
+    #     ff.chisqfn2,
+    #     p0_2,
+    #     args=(fitfunction5, xdata, ydata_avg, invcovmat),
+    #     method="Nelder-Mead",
+    #     # bounds=bounds,
+    #     options={"disp": False},
+    # )
+    # print('\nresavg.x = ', resavg.x)
+    # print('resavg.fun = ', resavg.fun)
+    # bootfit = []
+    # chisq_vals = []
+    # for iboot, values in enumerate(ydata):
+    #     resavg = syopt.minimize(
+    #         ff.chisqfn2,
+    #         p0_2,
+    #         # args=(fitfunction5, xdata, values, diag_sigma),
+    #         args=(fitfunction5, xdata, values, diag_sigma),
+    #         method="Nelder-Mead",
+    #         # bounds=bounds,
+    #         options={"disp": False},
+    #     )
+    #     bootfit.append(resavg.x)
+    #     chisq_vals.append(resavg.fun)
+    # chisq_vals = np.array(chisq_vals)
+    # bootfit = np.array(bootfit)
+    # bootfit_avg = np.average(bootfit, axis=0)
+    # chisq = ff.chisqfn2(bootfit_avg, fitfunction5, xdata, ydata_avg, invcovmat)
+    # dof = len(xdata) - len(p0_2)
+    # redchisq = chisq / dof
 
+    # print('\nbootfit avg fn5 = ',bootfit_avg)
+    # print('bootfit chisq fn5 = ',np.average(chisq_vals, axis=0))
+    # print('bootfit chisq fn5 = ',redchisq, '\n\n')
+
+    # ============================================================
+    # one-parameter function
     resavg = syopt.minimize(
         ff.chisqfn4,
-        p0,
+        p0_1,
         args=(fitfunction6, xdata, ydata_avg, (delta_E_fix,), invcovmat),
         method="Nelder-Mead",
-        # bounds=bounds,
         options={"disp": False},
     )
+    print('\nresavg.x = ', resavg.x)
+    print('resavg.fun = ', resavg.fun)
+
     bootfit = []
+    chisq_vals = []
     for iboot, values in enumerate(ydata):
         resavg = syopt.minimize(
             ff.chisqfn4,
-            p0,
+            p0_1,
             args=(fitfunction6, xdata, values, (delta_E_fix,), diag_sigma),
             method="Nelder-Mead",
-            # bounds=bounds,
             options={"disp": False},
         )
         bootfit.append(resavg.x)
+        chisq_vals.append(resavg.fun)
     bootfit = np.array(bootfit)
-    print(np.shape(bootfit))
-    print('bootfit avg = ',np.average(bootfit, axis=0), '\n\n')
-    print(resavg.x)
-    print(resavg.fun)
-    return resavg
+    chisq_vals = np.array(chisq_vals)
+    bootfit_avg = np.average(bootfit, axis=0)
+    chisq = ff.chisqfn4(bootfit_avg, fitfunction6, xdata, ydata_avg, (delta_E_fix,), invcovmat)
+    dof = len(xdata) -  len(p0_1)
+    redchisq = chisq / dof
 
-    # redchisq = resavg.fun / (len(data[0, :]) - len(p0))
-    # p0 = resavg.x
-
-    # popt_avg, pcov_avg = curve_fit(
-    #     fitfunction,
-    #     xdata,
-    #     ydata_avg,
-    #     sigma=diag_sigma,
-    #     p0=p0,
-    #     # args=(delta_E_fix,),
-    #     # maxfev=4000,
-    #     # bounds=bounds,
-    # )
-
-    #     bootfit, redchisq_fit, chisq_fit = fit_lmb(
-    #     fit_data[lmb_range],
-    #     fitfunction5,
-    #     lambdas[lmb_range],
-    #     p0=p0,
-    # )
-    # print(f"redchisq order {order}:", redchisq_fit)
-    # print(f"chisq order {order}:", chisq_fit)
-    # print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
-    # print(popt_avg)
-    # return popt_avg, pcov_avg
-
+    print('\nbootfit avg fn6 = ',np.average(bootfit, axis=0))
+    print('bootfit chisq fn6 = ',np.average(chisq_vals, axis=0))
+    print('bootfit chisq fn6 = ',redchisq, '\n\n')
+    return bootfit, redchisq
 
 def plot_lmb_depR(all_data, plotdir, fit_data=None):
     """Make a plot of the lambda dependence of the energy shift
@@ -389,7 +385,7 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
             alpha=0.9,
         )
 
-        plt.legend(fontsize="x-small", loc="upper left")
+        plt.legend(fontsize="small", loc="upper left")
         # plt.legend(fontsize="x-small")
         # plt.xlim(-0.01, 0.16)
         # plt.ylim(0, 0.15)
@@ -489,6 +485,87 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None):
     plt.close()
     return
 
+def plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix):
+    """Make a plot of the lambda dependence of the energy shift
+    Where the plot uses colored bands to show the dependence
+    """
+
+    print(all_data["lambdas0"])
+    print(
+        np.average(all_data["order0_fit"], axis=1)
+        - np.std(all_data["order0_fit"], axis=1)
+    )
+    plt.figure(figsize=(9, 6))
+    plt.fill_between(
+        all_data["lambdas3"],
+        np.average(all_data["order3_fit"], axis=1)
+        - np.std(all_data["order3_fit"], axis=1),
+        np.average(all_data["order3_fit"], axis=1)
+        + np.std(all_data["order3_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.legend(fontsize="x-small", loc="upper left")
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$\Delta E$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    # plt.savefig(plotdir / ("lambda_dep_bands_4.pdf"))
+
+    if fit_data:
+        lmb_range = fit_data["lmb_range"]
+        # lmb_range3 = fit_data["lmb_range3"]
+
+        plt.fill_between(
+            np.array(
+                [
+                    all_data["lambdas3"][lmb_range[0]],
+                    all_data["lambdas3"][lmb_range[-1]],
+                ]
+            ),
+            np.array([-10, -10]),
+            np.array([10, 10]),
+            color=_colors[3],
+            alpha=0.1,
+            linewidth=0,
+        )
+        m_e_3 = err_brackets(
+            np.average(fit_data["bootfit3"], axis=0),
+            np.std(fit_data["bootfit3"], axis=0),
+        )
+
+        fitBS3 = np.array(
+            [fitfunction6(all_data["lambdas3"], *bf, delta_E_fix) for bf in fit_data["bootfit3"]]
+        )
+
+        plt.plot(
+            all_data["lambdas3"],
+            np.average(fitBS3, axis=0),
+            label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_3}$",
+            color=_colors[3],
+            linewidth=1,
+            linestyle="--",
+            alpha=0.9,
+        )
+
+        plt.legend(fontsize="x-small", loc="upper left")
+        plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+        plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+        plt.tight_layout()
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_4_1par.pdf"))
+        plt.ylim(0, 0.15)
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4_1par.pdf"))
+
+    plt.close()
+    return
+
 
 def main():
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
@@ -582,8 +659,11 @@ def main():
 
     delta_E_fix = np.average(data[0]["weighted_energy_nucldivsigma"])
     print('\n\n',delta_E_fix)
-    result = fit_lambda_dep_2(fitlist3, delta_E_fix, order, lmb_range, fitfunction6)
-
+    fit_data = {"lmb_range": lmb_range}
+    bootfit, redchisq = fit_lambda_dep_2(fitlist3, delta_E_fix, order, lmb_range, fitfunction6)
+    fit_data[f"bootfit3"] = bootfit
+    fit_data[f"redchisq3"] = redchisq
+    plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix)
 
 if __name__ == "__main__":
     main()
