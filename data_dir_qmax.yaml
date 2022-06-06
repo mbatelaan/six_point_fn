@@ -9,8 +9,8 @@ t_range1 : 24
 lmb_val : 0.03
 lmb_i : 0
 lmb_f : 0.05
-lmb_init : 8
-lmb_final : 13
+lmb_init : 0
+lmb_final : 10
 tmax_nucl : 22
 tmax_sigma : 17
 tmax_ratio : 17

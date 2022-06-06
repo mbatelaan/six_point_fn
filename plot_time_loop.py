@@ -251,7 +251,7 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17, tmin
         linewidth=0,
         label=rf"$E={err_brackets(np.average(weighted_energy), np.std(weighted_energy))}$",
     )
-    ax1.set_xlabel(r"$\textrm{tmin}$")
+    ax1.set_xlabel(r"$t_{\textrm{min}}$")
     ax1.set_ylabel(r"$E$")
     ax1.set_xlim(0, tmin_[-1] + 1)
 
