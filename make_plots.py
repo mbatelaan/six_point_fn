@@ -1263,9 +1263,10 @@ def plot_energy_diffs(data, config, plotdir):
 
 
 def main():
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # plt.rc("text", usetex=True)
+    # rcParams.update({"figure.autolayout": True})
+    plt.style.use("./mystyle.txt")
 
     pars = params(0)
     nboot = 200

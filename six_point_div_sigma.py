@@ -940,9 +940,10 @@ def weighted_avg(
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     # Plotting setup
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # plt.rc("text", usetex=True)
+    # rcParams.update({"figure.autolayout": True})
+    plt.style.use("./mystyle.txt")
 
     # Get the parameters for this lattice ensemble (kp121040kp120620)
     pars = params(0)

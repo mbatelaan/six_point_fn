@@ -5,6 +5,7 @@ import yaml
 import sys
 import scipy.optimize as syopt
 from scipy.optimize import curve_fit
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
@@ -251,6 +252,7 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
         elinewidth=1,
         markerfacecolor="none",
     )
+    plt.xticks(x)
     plt.xlim(0.7, 6.2)
     plt.ylim(0.02, 0.05)
     plt.xlabel(r"$t_{0}$")
@@ -304,6 +306,7 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
         elinewidth=1,
         markerfacecolor="none",
     )
+    plt.xticks(x)
     plt.xlim(0.7, 6.2)
     plt.ylim(0.02, 0.05)
     plt.xlabel(r"$t_{0}$")
@@ -325,6 +328,7 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.ylabel(r"$\textrm{Eigenvector elements squared}$")
     fig.legend(fontsize='xx-small', framealpha=0.3)
     plt.ylim(0,1)
+    plt.xticks(x)
     plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_" + name + ".pdf"))
     plt.close()
 
@@ -341,6 +345,7 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.ylabel(r"$\textrm{Eigenvector value squared}$")
     fig.legend(fontsize='xx-small', framealpha=0.3)
     plt.ylim(0,2)
+    plt.xticks(x)
     plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_summed" + name + ".pdf"))
     plt.close()
 
@@ -353,6 +358,7 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.ylabel(r"$\textrm{energy from eigenvalue}$")
     fig.legend(fontsize='xx-small', framealpha=0.3)
     plt.ylim(0.3,1)
+    plt.xticks(x)
     plt.savefig(plotdir / (f"delta_t{delta_t_fix}_eval_energy_" + name + ".pdf"))
     plt.close()
 
@@ -364,6 +370,7 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.xlabel(r"$t_{0}$")
     plt.ylabel(r"$\textrm{energy from eigenvalue}$")
     plt.ylim(0.3,1)
+    plt.xticks(x)
     fig.legend(fontsize='xx-small', framealpha=0.3)
     plt.savefig(plotdir / (f"delta_t{delta_t_fix}_eval_energy_bs" + name + ".pdf"))
     plt.close()
@@ -377,6 +384,7 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.ylabel(r"$\textrm{Eigenvector elements squared}$")
     plt.legend(fontsize='xx-small', framealpha=0.3)
     plt.ylim(0,1)
+    plt.xticks(x)
     plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_bs" + name + ".pdf"))
     plt.close()
 
@@ -445,6 +453,7 @@ def t_0_slice(fitlist, t_0_fix, plotdir, name):
         elinewidth=1,
         markerfacecolor="none",
     )
+    plt.xticks(x)
     plt.xlim(0.7, 6.2)
     plt.ylim(0.02, 0.05)
     plt.xlabel(r"$\Delta t$")
@@ -498,12 +507,73 @@ def t_0_slice(fitlist, t_0_fix, plotdir, name):
         elinewidth=1,
         markerfacecolor="none",
     )
+    plt.xticks(x)
     plt.xlim(0.7, 6.2)
     plt.ylim(0.02, 0.05)
     plt.xlabel(r"$\Delta t$")
     plt.ylabel(r"$\textrm{Energy}$")
     plt.legend(fontsize='xx-small', framealpha=0.3)
     plt.savefig(plotdir / (f"t_0{t_0_fix}_energyshift_" + name + ".pdf"))
+    plt.close()
+
+    return
+
+def gevp_slice(fitlist, t_0_range, delta_t_range, plotdir, name):
+    t_0 = np.array([i["t_0"] for i in fitlist])
+    delta_t = np.array([i["delta_t"] for i in fitlist])
+    
+    fig, ax = plt.subplots(figsize=(7, 5))
+    for delta_t_ in delta_t_range:
+        indices = np.where(delta_t == delta_t_)
+        print(indices)
+        indices = np.where([delta_t[i] == delta_t_ and t_0[i] in t_0_range for i,j in enumerate(delta_t)])
+        print(indices)
+        t_0_values = t_0[indices]
+        # delta_t_values = delta_t_values[indices]
+        # indices_ = np.where(t_0_values 
+
+        delta_t_x = delta_t_ + 0.7*((t_0_values-t_0_values[0])/(t_0_values[-1]-t_0_values[0]))-0.35
+        energy_shifts3_bs = np.array([ fit["order3_fit_bs"][:,1] for fit in fitlist ])[indices]
+        energy_shifts3 = np.array([ fit["order3_fit"][:,1] for fit in fitlist ])[indices]
+        plt.errorbar(
+            delta_t_x,
+            np.average(energy_shifts3, axis=1),
+            np.std(energy_shifts3, axis=1),
+            fmt=_markers[0],
+            # label=r"$\mathcal{O}(\lambda^4)$",
+            color='k',
+            capsize=4,
+            elinewidth=1,
+            markerfacecolor="none",
+        )
+
+    for i in range(len(delta_t_range)):
+        plt.axvline(i+0.5, linestyle='--', linewidth=0.5)
+
+    # p = plt.rcParams
+    # p["xtick.top"] = True
+    # p["xtick.bottom"] = True
+    plt.xticks(delta_t_range)
+    ax.xaxis.set_minor_locator(mpl.ticker.AutoMinorLocator(2))
+    ax.tick_params(axis = "y", which="major",
+                   direction = 'in',
+                   right=True,
+                   length = 3,
+                   width = 1)
+    ax.tick_params(axis = "x", which="major",
+                   direction = 'in',
+                   length = 0,
+                   width = 0)
+    ax.tick_params(axis = "x", which="minor",
+                   direction = 'in',
+                   top = True,
+                   length = 3,
+                   width = 1)
+    plt.xlim(delta_t_range[0]-0.5, delta_t_range[-1]+0.5)
+    plt.xlabel(r"$\Delta t$")
+    plt.ylabel(r"$\Delta E$")
+    # plt.legend(fontsize='xx-small', framealpha=0.3)
+    plt.savefig(plotdir / (f"gevp_slice_energyshift_" + name + ".pdf"))
     plt.close()
 
     return
@@ -691,7 +761,7 @@ def plot_eigenstates(
 
 
 def gevp_loop(G2_nucl, G2_sigm, lmb_val, datadir):
-    time_choice_range = np.arange(1, 18)
+    time_choice_range = np.arange(1, 10)
     delta_t_range = np.arange(1, 7)
     lambdas = np.linspace(0, 0.05, 30)[1:]
     t_range = np.arange(7, 18)
@@ -803,9 +873,20 @@ def gevp_loop(G2_nucl, G2_sigm, lmb_val, datadir):
 
 
 if __name__ == "__main__":
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # plt.rc("font", size=18, **{"family": "Roboto Condensed"})
+    # plt.rc("font", size=18)
+    # plt.rc("text", usetex=True)
+    # rcParams.update({"figure.autolayout": True})
+    # rcParams.update({"xtick.": True})
+
+    # p = plt.rcParams
+    # # p["xtick.top"] = True
+    # p["xtick.bottom"] = True
+    # p["xtick.direction"] = "in"
+    # p["ytick.direction"] = "in"
+    # p["figure.autolayout"] = True
+    plt.style.use("./mystyle.txt")
 
     pars = params(0)
     # Read in the directory data from the yaml file
@@ -813,9 +894,15 @@ if __name__ == "__main__":
         config_file = sys.argv[1]
     else:
         config_file = "data_dir.yaml"
+    print(f"Reading directories from: {config_file}\n")
     with open(config_file) as f:
         config = yaml.safe_load(f)
-    # TODO: Set up a defaults.yaml file for when there is no input file
+    # Set parameters to defaults defined in another YAML file
+    with open("defaults.yaml") as f:
+        defaults = yaml.safe_load(f)
+    for key, value in defaults.items():
+        config.setdefault(key, value)
+
     pickledir = Path(config["pickle_dir1"])
     pickledir2 = Path(config["pickle_dir2"])
     plotdir = Path(config["analysis_dir"]) / Path("plots")
@@ -864,3 +951,4 @@ if __name__ == "__main__":
     t_0_slice(fitlist, 5, plotdir, name)
     t_0_slice(fitlist, 6, plotdir, name)
     # plot_matrix(fitlist, plotdir, name, bs="_bs")
+    gevp_slice(fitlist, np.arange(1,8), np.arange(1,7), plotdir, name)

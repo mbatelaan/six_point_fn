@@ -273,9 +273,7 @@ def main():
     Read the data from a pickle file and plot it as a color plot on a matrix
     """
 
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    plt.style.use("./mystyle.txt")
 
     pars = params(0)  # Get the parameters for this lattice
 

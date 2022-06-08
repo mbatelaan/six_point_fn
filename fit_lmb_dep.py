@@ -568,9 +568,10 @@ def plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix):
 
 
 def main():
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # plt.rc("text", usetex=True)
+    # rcParams.update({"figure.autolayout": True})
+    plt.style.use("./mystyle.txt")
 
     pars = params(0)
     nboot = 200
