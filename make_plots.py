@@ -1280,6 +1280,12 @@ def main():
     with open(config_file) as f:
         config = yaml.safe_load(f)
 
+    # Set parameters to defaults defined in another YAML file
+    with open("defaults.yaml") as f:
+        defaults = yaml.safe_load(f)
+    for key, value in defaults.items():
+        config.setdefault(key, value)
+
     pickledir = Path(config["pickle_dir1"])
     pickledir2 = Path(config["pickle_dir2"])
     plotdir = Path(config["analysis_dir"]) / Path("plots")
