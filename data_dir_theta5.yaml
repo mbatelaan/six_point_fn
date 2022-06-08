@@ -6,7 +6,6 @@ time_choice : 4
 delta_t : 2
 t_range0 : 11
 t_range1 : 24
-lmb_val : 0.04
 lmb_i : 0
 lmb_f : 0.05
 lmb_init : 5

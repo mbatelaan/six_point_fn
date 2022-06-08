@@ -9,3 +9,4 @@ tmax_nucl : 17
 tmax_sigma : 17
 tmax_ratio : 17
 time_loop : False
+lmb_val : 0.025
