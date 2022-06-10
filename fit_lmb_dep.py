@@ -70,7 +70,7 @@ def fit_lmb(ydata, function, lambdas, p0=None):
         sigma=diag_sigma,
         p0=p0,
         # maxfev=4000,
-        # bounds=bounds,
+        bounds=bounds,
     )
 
     chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, covmat_inverse)
@@ -86,7 +86,7 @@ def fit_lmb(ydata, function, lambdas, p0=None):
             values,
             sigma=diag_sigma,
             p0=p0,
-            # bounds=bounds,
+            bounds=bounds,
         )
         bootfit.append(popt)
     bootfit = np.array(bootfit)
@@ -585,6 +585,12 @@ def main():
     with open(config_file) as f:
         config = yaml.safe_load(f)
 
+    # Set parameters to defaults defined in another YAML file
+    with open("defaults.yaml") as f:
+        defaults = yaml.safe_load(f)
+    for key, value in defaults.items():
+        config.setdefault(key, value)
+
     pickledir = Path(config["pickle_dir1"])
     pickledir2 = Path(config["pickle_dir2"])
     plotdir = Path(config["analysis_dir"]) / Path("plots")
@@ -630,6 +636,7 @@ def main():
         lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
             fitlists[order], order, lmb_range
         )
+        print('\n\nOrder: ', order)
         print('lmb_range = ', lmb_range)
         fit_data[f"lmb_range{order}"] = lmb_range
         fit_data[f"bootfit{order}"] = bootfit
