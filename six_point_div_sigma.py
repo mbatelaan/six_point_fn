@@ -1233,7 +1233,7 @@ def main():
         )
 
         [matrix_1, matrix_2, matrix_3, matrix_4] = normalize_matrices(
-            [matrix_1, matrix_2, matrix_3, matrix_4]
+            [matrix_1, matrix_2, matrix_3, matrix_4], time_choice=6
         )
 
         # print("\n\nmatrix shape = \n", np.shape(matrix_4))

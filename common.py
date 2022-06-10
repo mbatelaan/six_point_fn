@@ -1074,6 +1074,11 @@ def read_correlators6(pars, pickledir, pickledir2, mom_strings):
 
 
 def normalize_matrices(matrices, time_choice=1):
+    """Normalize each of the correlator matrices in a list of matrices.
+    
+    Using the square root of the product of the diagonal elements of the correlator matrix.
+    :param time_choice: sets the time at wich to take the values of the correlators used to normalize the matrices.
+    """
     matrix_list = []
     for matrix in matrices:
         matrix_copy = matrix.copy()
