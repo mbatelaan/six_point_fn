@@ -9,6 +9,8 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
+from gevpanalysis.definitions import PROJECT_BASE_DIRECTORY
+
 from analysis import stats
 from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
@@ -195,7 +197,8 @@ def fit_lambda_dep(fitlist, order, lmb_range):
 
 def main_loop():
     """ Fit to the lambda dependence of the energy shift and loop over the fit windows """
-    plt.style.use("./mystyle.txt")
+    mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
+    plt.style.use(mystyle.as_posix())
 
     pars = params(0)
     nboot = 200
@@ -203,14 +206,14 @@ def main_loop():
 
     # Read in the directory data from the yaml file
     if len(sys.argv) == 2:
-        config_file = sys.argv[1]
+        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
     else:
-        config_file = "data_dir_theta2.yaml"  # default file
+        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
     with open(config_file) as f:
         config = yaml.safe_load(f)
 
     # Set parameters to defaults defined in another YAML file
-    with open("defaults.yaml") as f:
+    with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
         defaults = yaml.safe_load(f)
     for key, value in defaults.items():
         config.setdefault(key, value)

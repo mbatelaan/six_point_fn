@@ -591,7 +591,6 @@ def main():
         config = yaml.safe_load(f)
 
     # Set parameters to defaults defined in another YAML file
-    # with open("defaults.yaml") as f:
     with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
         defaults = yaml.safe_load(f)
     for key, value in defaults.items():

@@ -9,6 +9,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
+from gevpanalysis.definitions import PROJECT_BASE_DIRECTORY
+
 from analysis import stats
 from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
@@ -1020,19 +1022,21 @@ if __name__ == "__main__":
     # p["xtick.direction"] = "in"
     # p["ytick.direction"] = "in"
     # p["figure.autolayout"] = True
-    plt.style.use("./mystyle.txt")
+    mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
+    plt.style.use(mystyle.as_posix())
 
     pars = params(0)
     # Read in the directory data from the yaml file
     if len(sys.argv) > 1:
-        config_file = sys.argv[1]
+        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
     else:
-        config_file = "data_dir.yaml"
+        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
     print(f"Reading directories from: {config_file}\n")
     with open(config_file) as f:
         config = yaml.safe_load(f)
+
     # Set parameters to defaults defined in another YAML file
-    with open("defaults.yaml") as f:
+    with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
         defaults = yaml.safe_load(f)
     for key, value in defaults.items():
         config.setdefault(key, value)

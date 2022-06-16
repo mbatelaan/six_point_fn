@@ -942,13 +942,11 @@ def main():
         config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
     else:
         config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
-        # config_file = "data_dir_theta2_fix.yaml"
     print(f"Reading directories from: {config_file}\n")
     with open(config_file) as f:
         config = yaml.safe_load(f)
 
     # Set parameters to defaults defined in another YAML file
-    # with open("defaults.yaml") as f:
     with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
         defaults = yaml.safe_load(f)
     for key, value in defaults.items():

@@ -8,6 +8,8 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
+from gevpanalysis.definitions import PROJECT_BASE_DIRECTORY
+
 from analysis import stats
 from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
@@ -693,20 +695,26 @@ def fit_lmb(ydata, function, lambdas):
 def main():
     """Script to look at the energy differences between the states to make sure the calculation worked correctly"""
 
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
+    plt.style.use(mystyle.as_posix())
 
     pars = params(0)  # Get the parameters for this lattice
 
     # Read in the directory data from the yaml file if one is given
     if len(sys.argv) == 2:
-        config_file = sys.argv[1]
+        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
     else:
-        config_file = "data_dir_qmax.yaml"
+        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
     print("Reading directories from: ", config_file)
     with open(config_file) as f:
         config = yaml.safe_load(f)
+
+    # Set parameters to defaults defined in another YAML file
+    with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
+        defaults = yaml.safe_load(f)
+    for key, value in defaults.items():
+        config.setdefault(key, value)
+
     pickledir_k1 = Path(config["pickle_dir1"])
     pickledir_k2 = Path(config["pickle_dir2"])
     plotdir = Path(config["analysis_dir"]) / Path("plots")
