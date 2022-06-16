@@ -424,7 +424,7 @@ def plotting_script_unpert(
     plt.ylim(-0.1, 0.1)
     plt.savefig(plotdir / ("unpert_effmass.pdf"))
 
-    plt.figure(figsize=(5, 5))
+    plt.figure(figsize=(7, 5))
     plt.errorbar(
         efftime[:xlim],
         yavg_1[:xlim],
@@ -447,37 +447,38 @@ def plotting_script_unpert(
         markerfacecolor="none",
         # label=f"{redchisqs[1]:.2f}"
     )
-    plt.plot(nucl_t_range, len(nucl_t_range) * [np.average(fitvals1)], color=_colors[0])
+
+    fit_energy_nucl = fitvals1["param"][:, 1]
+    fit_redchisq_nucl = fitvals1["redchisq"]
+    plt.plot(nucl_t_range, len(nucl_t_range) * [np.average(fit_energy_nucl)], color=_colors[0])
     plt.fill_between(
         nucl_t_range,
-        np.average(fitvals1) - np.std(fitvals1),
-        np.average(fitvals1) + np.std(fitvals1),
+        np.average(fit_energy_nucl) - np.std(fit_energy_nucl),
+        np.average(fit_energy_nucl) + np.std(fit_energy_nucl),
         alpha=0.3,
         color=_colors[0],
-        # label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
-        label=rf"$E_N(\mathbf{{0}}) = {err_brackets(np.average(fitvals1),np.std(fitvals1))}$; $\chi^2_{{\textrm{{dof}}}} = {redchisqs[0]:.2f}$",
+        # label=rf"$E_N(\mathbf{{0}}) = {err_brackets(np.average(fitvals1),np.std(fitvals1))}$; $\chi^2_{{\textrm{{dof}}}} = {redchisqs[0]:.2f}$",
+        label=rf"$E_N(\mathbf{{0}}) = {err_brackets(np.average(fit_energy_nucl),np.std(fit_energy_nucl))}$; $\chi^2_{{\textrm{{dof}}}} = {fit_redchisq_nucl:.2f}$",
     )
+
+    fit_energy_sigma = fitvals2["param"][:, 1]
+    fit_redchisq_sigma = fitvals2["redchisq"]
     plt.plot(
-        sigma_t_range, len(sigma_t_range) * [np.average(fitvals2)], color=_colors[1]
+        sigma_t_range, len(sigma_t_range) * [np.average(fit_energy_sigma)], color=_colors[1]
     )
     plt.fill_between(
         sigma_t_range,
-        np.average(fitvals2) - np.std(fitvals2),
-        np.average(fitvals2) + np.std(fitvals2),
+        np.average(fit_energy_sigma) - np.std(fit_energy_sigma),
+        np.average(fit_energy_sigma) + np.std(fit_energy_sigma),
         alpha=0.3,
         color=_colors[1],
-        label=rf"$E_{{\Sigma}}(\mathbf{{0}}) = {err_brackets(np.average(fitvals2),np.std(fitvals2))}$; $\chi^2_{{\textrm{{dof}}}} = {redchisqs[1]:.2f}$",
+        label=rf"$E_{{\Sigma}}(\mathbf{{0}}) = {err_brackets(np.average(fit_energy_sigma),np.std(fit_energy_sigma))}$; $\chi^2_{{\textrm{{dof}}}} = {fit_redchisq_sigma:.2f}$",
     )
     # plt.plot(
     #     1000,
     #     1,
-    #     label=rf"$\Delta E = {err_brackets(np.average(fitvals2-fitvals1),np.std(fitvals2-fitvals1))}$",
+    #     label=rf"$\Delta E = {err_brackets(np.average(fitvals_effratio),np.std(fitvals_effratio))}$",
     # )
-    plt.plot(
-        1000,
-        1,
-        label=rf"$\Delta E = {err_brackets(np.average(fitvals_effratio),np.std(fitvals_effratio))}$",
-    )
     plt.legend(fontsize="x-small")
     plt.ylabel(r"$\textrm{Effective energy}$")
     plt.xlabel(r"$t/a$")
@@ -485,6 +486,7 @@ def plotting_script_unpert(
     # plt.setp(axs, xlim=(0, xlim), ylim=(0, 2))
     plt.xlim(0, xlim)
     plt.ylim(0, 1)
+    plt.grid(True, alpha=0.3)
     plt.savefig(plotdir / ("unpert_energies.pdf"))
 
     f, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True)
@@ -512,32 +514,32 @@ def plotting_script_unpert(
         # label=r"$\Sigma$",
     )
     axs[0].plot(
-        nucl_t_range, len(nucl_t_range) * [np.average(fitvals1)], color=_colors[0]
+        nucl_t_range, len(nucl_t_range) * [np.average(fit_energy_nucl)], color=_colors[0]
     )
     axs[0].fill_between(
         nucl_t_range,
-        np.average(fitvals1) - np.std(fitvals1),
-        np.average(fitvals1) + np.std(fitvals1),
+        np.average(fit_energy_nucl) - np.std(fit_energy_nucl),
+        np.average(fit_energy_nucl) + np.std(fit_energy_nucl),
         alpha=0.3,
         color=_colors[0],
         # label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
-        label=rf"$E_N(\mathbf{{0}})$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
+        label=rf"$E_N(\mathbf{{0}})$ = {err_brackets(np.average(fit_energy_nucl),np.std(fit_energy_nucl))}",
     )
     axs[0].plot(
-        sigma_t_range, len(sigma_t_range) * [np.average(fitvals2)], color=_colors[1]
+        sigma_t_range, len(sigma_t_range) * [np.average(fit_energy_sigma)], color=_colors[1]
     )
     axs[0].fill_between(
         sigma_t_range,
-        np.average(fitvals2) - np.std(fitvals2),
-        np.average(fitvals2) + np.std(fitvals2),
+        np.average(fit_energy_sigma) - np.std(fit_energy_sigma),
+        np.average(fit_energy_sigma) + np.std(fit_energy_sigma),
         alpha=0.3,
         color=_colors[1],
-        label=rf"$E_{{\Sigma}}(\mathbf{{0}})$ = {err_brackets(np.average(fitvals2),np.std(fitvals2))}",
+        label=rf"$E_{{\Sigma}}(\mathbf{{0}})$ = {err_brackets(np.average(fit_energy_sigma),np.std(fit_energy_sigma))}",
     )
     axs[0].plot(
         1000,
         1,
-        label=rf"$\Delta E$ = {err_brackets(np.average(fitvals2-fitvals1),np.std(fitvals2-fitvals1))}",
+        label=rf"$\Delta E$ = {err_brackets(np.average(fit_energy_sigma-fit_energy_nucl),np.std(fit_energy_sigma-fit_energy_nucl))}",
     )
     axs[0].legend(fontsize="x-small")
 
@@ -653,6 +655,7 @@ def fit_loop(
     delta_t,
     datadir,
     time_limits,
+    time_limits2,
     which_corr=[True, True, True],
 ):
     # Nucleon fit loop
@@ -683,7 +686,7 @@ def fit_loop(
         fitlist_nucl_2exp = stats.fit_loop(
             np.abs(G2_nucl[0]),
             twoexp_function,
-            time_limits[0],
+            time_limits2[0],
             plot=False,
             disp=True,
             time=False,
@@ -709,7 +712,7 @@ def fit_loop(
         fitlist_nucldivsigma_2exp = stats.fit_loop(
             ratio_unpert,
             twoexp_function,
-            time_limits[0],
+            time_limits2[0],
             plot=False,
             disp=True,
             time=False,
@@ -737,7 +740,7 @@ def fit_loop(
         fitlist_sigma_2exp = stats.fit_loop(
             np.abs(G2_sigm[0]),
             twoexp_function,
-            time_limits[1],
+            time_limits2[1],
             plot=False,
             disp=True,
             time=False,
@@ -923,20 +926,6 @@ def weighted_avg(
 
     return weighted_energy, fitweights
 
-
-# def normalize_matrices(matrices): #_1, matrix_2, matrix_3, matrix_4):
-#     matrix_list = []
-#     time_choice = 6
-#     for matrix in matrices:
-#         matrix_copy = matrix.copy()
-#         # matrix = matrix.copy()/1e36
-#         for i, elemi in enumerate(matrix):
-#             for j, elemj in enumerate(elemi):
-#                 matrix[i,j] = np.einsum('kl,k->kl', matrix_copy[i,j], np.sqrt(np.abs(matrix_copy[i,i,:,time_choice]*matrix_copy[j,j,:,time_choice]))**(-1))
-#         matrix_list.append(matrix)
-#     return matrix_list
-
-
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     # Plotting setup
@@ -1026,9 +1015,16 @@ def main():
         which_corr = [True, False, True]
         time_limits = np.array(
             [
-                [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 5]],
-                [[1, 18], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 5]],
-                [[5, 18], [config["tmax_ratio"] - 2, config["tmax_ratio"] + 5]],
+                [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
+                [[1, 18], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 2]],
+                [[5, 18], [config["tmax_ratio"] - 2, config["tmax_ratio"] + 2]],
+            ]
+        )
+        time_limits2 = np.array(
+            [
+                [[1, 10], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
+                [[1, 10], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 2]],
+                [[5, 10], [config["tmax_ratio"] - 2, config["tmax_ratio"] + 2]],
             ]
         )
         (
@@ -1049,6 +1045,7 @@ def main():
             delta_t,
             datadir,
             time_limits,
+            time_limits2,
             which_corr,
         )
     else:
@@ -1065,11 +1062,19 @@ def main():
         ]
         time_limits = np.array(
             [
-                [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 5]],
-                [[1, 18], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 5]],
-                [[5, 18], [config["tmax_ratio"] - 2, config["tmax_ratio"] + 5]],
+                [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
+                [[1, 18], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 2]],
+                [[5, 18], [config["tmax_ratio"] - 2, config["tmax_ratio"] + 2]],
             ]
         )
+        time_limits2 = np.array(
+            [
+                [[1, 10], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
+                [[1, 10], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 2]],
+                [[5, 10], [config["tmax_ratio"] - 2, config["tmax_ratio"] + 2]],
+            ]
+        )
+
         (
             fitlist_nucl_1exp,
             fitlist_nucl_2exp,
@@ -1088,6 +1093,7 @@ def main():
             delta_t,
             datadir,
             time_limits,
+            time_limits2,
             which_corr,
         )
         if nucl_exist:
@@ -1199,9 +1205,33 @@ def main():
     bootfit_effratio, redchisq_effratio = fit_value3(
         ratio_unpert, ratio_t_range, aexp_function, norm=1
     )
-    # bootfit_effratio, redchisq_effratio = fit_value3(
-    #     ratio_unpert, nucl_t_range, aexp_function, norm=1
-    # )
+
+
+    # ==================================================
+    # Plot the effective energy of the unperturbed correlators
+    tmax_choice=config["tmax_nucl"]
+    tmin_choice=config["tmin_nucl"]
+    tmax_1exp = np.array([i["x"][-1] for i in fitlist_nucl_1exp])
+    tmin_1exp = np.array([i["x"][0] for i in fitlist_nucl_1exp])
+    indices = np.where(tmax_1exp == tmax_choice)
+    index = indices[0][np.where(tmin_1exp[indices] == tmin_choice)]
+    print(f"\n\nIndex = {index}\n\n")
+    chosen_nucl_fit = fitlist_nucl_1exp[index[0]]
+    print(chosen_nucl_fit["x"])
+    nucl_t_range = np.arange(tmin_choice, tmax_choice+1)
+
+    tmax_choice=config["tmax_sigma"]
+    tmin_choice=config["tmin_sigma"]
+    tmax_1exp = np.array([i["x"][-1] for i in fitlist_sigma_1exp])
+    tmin_1exp = np.array([i["x"][0] for i in fitlist_sigma_1exp])
+    print(tmin_1exp)
+    print(tmax_1exp)
+    indices = np.where(tmax_1exp == tmax_choice)
+    index = indices[0][np.where(tmin_1exp[indices] == tmin_choice)]
+    print(f"\n\nIndex = {index}\n\n")
+    chosen_sigma_fit = fitlist_sigma_1exp[index[0]]
+    print(chosen_sigma_fit["x"])
+    sigma_t_range = np.arange(tmin_choice, tmax_choice+1)
 
     plotting_script_unpert(
         np.abs(G2_nucl[0]),
@@ -1209,8 +1239,8 @@ def main():
         ratio_unpert,
         # bootfit_unpert_nucl[:, 1],
         # bootfit_unpert_sigma[:, 1],
-        weighted_energy_nucl,
-        weighted_energy_sigma,
+        chosen_nucl_fit,
+        chosen_sigma_fit,
         bootfit_ratio[:, 0],
         weighted_energy_nucldivsigma,
         # bootfit_effratio[:, 1],
