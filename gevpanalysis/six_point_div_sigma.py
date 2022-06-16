@@ -452,7 +452,11 @@ def plotting_script_unpert(
 
     fit_energy_nucl = fitvals1["param"][:, 1]
     fit_redchisq_nucl = fitvals1["redchisq"]
-    plt.plot(nucl_t_range, len(nucl_t_range) * [np.average(fit_energy_nucl)], color=_colors[0])
+    plt.plot(
+        nucl_t_range,
+        len(nucl_t_range) * [np.average(fit_energy_nucl)],
+        color=_colors[0],
+    )
     plt.fill_between(
         nucl_t_range,
         np.average(fit_energy_nucl) - np.std(fit_energy_nucl),
@@ -466,7 +470,9 @@ def plotting_script_unpert(
     fit_energy_sigma = fitvals2["param"][:, 1]
     fit_redchisq_sigma = fitvals2["redchisq"]
     plt.plot(
-        sigma_t_range, len(sigma_t_range) * [np.average(fit_energy_sigma)], color=_colors[1]
+        sigma_t_range,
+        len(sigma_t_range) * [np.average(fit_energy_sigma)],
+        color=_colors[1],
     )
     plt.fill_between(
         sigma_t_range,
@@ -516,7 +522,9 @@ def plotting_script_unpert(
         # label=r"$\Sigma$",
     )
     axs[0].plot(
-        nucl_t_range, len(nucl_t_range) * [np.average(fit_energy_nucl)], color=_colors[0]
+        nucl_t_range,
+        len(nucl_t_range) * [np.average(fit_energy_nucl)],
+        color=_colors[0],
     )
     axs[0].fill_between(
         nucl_t_range,
@@ -528,7 +536,9 @@ def plotting_script_unpert(
         label=rf"$E_N(\mathbf{{0}})$ = {err_brackets(np.average(fit_energy_nucl),np.std(fit_energy_nucl))}",
     )
     axs[0].plot(
-        sigma_t_range, len(sigma_t_range) * [np.average(fit_energy_sigma)], color=_colors[1]
+        sigma_t_range,
+        len(sigma_t_range) * [np.average(fit_energy_sigma)],
+        color=_colors[1],
     )
     axs[0].fill_between(
         sigma_t_range,
@@ -928,6 +938,7 @@ def weighted_avg(
 
     return weighted_energy, fitweights
 
+
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     # Plotting setup
@@ -995,22 +1006,6 @@ def main():
     aexp_function = ff.initffncs("Aexp")
     twoexp_function = ff.initffncs("Twoexp")
 
-    # # Loop over time windows, it fits the correlators and calculates a weight for each fit window.
-    # nucl_exist = exists(datadir / (f"time_window_loop_nucl_1exp.pkl")) and exists(
-    #     datadir / (f"time_window_loop_nucl_2exp.pkl")
-    # )
-    # sigma_exists = exists(
-    #     "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_1exp.pkl"
-    # )
-    # small_exist = exists(datadir / (f"time_window_loop_lambda_small.pkl"))
-    # large_exist = exists(datadir / (f"time_window_loop_lambda_large.pkl"))
-    # file_missing = [
-    #     not nucl_exist,
-    #     not sigma_exist,
-    #     not small_exist,
-    #     not large_exist,
-    # ]
-    # time_loop = any(file_missing)
     if time_loop:
         which_corr = [True, False, True]
         time_limits = np.array(
@@ -1206,11 +1201,10 @@ def main():
         ratio_unpert, ratio_t_range, aexp_function, norm=1
     )
 
-
     # ==================================================
     # Plot the effective energy of the unperturbed correlators
-    tmax_choice=config["tmax_nucl"]
-    tmin_choice=config["tmin_nucl"]
+    tmax_choice = config["tmax_nucl"]
+    tmin_choice = config["tmin_nucl"]
     tmax_1exp = np.array([i["x"][-1] for i in fitlist_nucl_1exp])
     tmin_1exp = np.array([i["x"][0] for i in fitlist_nucl_1exp])
     indices = np.where(tmax_1exp == tmax_choice)
@@ -1218,10 +1212,10 @@ def main():
     print(f"\n\nIndex = {index}\n\n")
     chosen_nucl_fit = fitlist_nucl_1exp[index[0]]
     print(chosen_nucl_fit["x"])
-    nucl_t_range = np.arange(tmin_choice, tmax_choice+1)
+    nucl_t_range = np.arange(tmin_choice, tmax_choice + 1)
 
-    tmax_choice=config["tmax_sigma"]
-    tmin_choice=config["tmin_sigma"]
+    tmax_choice = config["tmax_sigma"]
+    tmin_choice = config["tmin_sigma"]
     tmax_1exp = np.array([i["x"][-1] for i in fitlist_sigma_1exp])
     tmin_1exp = np.array([i["x"][0] for i in fitlist_sigma_1exp])
     print(tmin_1exp)
@@ -1231,7 +1225,7 @@ def main():
     print(f"\n\nIndex = {index}\n\n")
     chosen_sigma_fit = fitlist_sigma_1exp[index[0]]
     print(chosen_sigma_fit["x"])
-    sigma_t_range = np.arange(tmin_choice, tmax_choice+1)
+    sigma_t_range = np.arange(tmin_choice, tmax_choice + 1)
 
     plotting_script_unpert(
         np.abs(G2_nucl[0]),
