@@ -77,7 +77,7 @@ def plot_matrix(fitlist, plotdir, name):
     plt.colorbar(mat, label=r"$\chi^2_{\textrm{dof}}$")
     plt.xlabel(r"$t_{\textrm{min}}$")
     plt.ylabel(r"$t_{\textrm{max}}$")
-    plt.savefig(plotdir / (f"chisq_matrix_time_" + name + ".pdf"))
+    plt.savefig(plotdir / (f"chisq_matrix_time_" + name + ".pdf"), metadata=_metadata)
     plt.close()
 
     # matrix = np.zeros((len(unique_x), len(unique_y)))
@@ -91,7 +91,7 @@ def plot_matrix(fitlist, plotdir, name):
     plt.colorbar(mat, label="weight")
     plt.xlabel(r"$t_{\textrm{min}}$")
     plt.ylabel(r"$t_{\textrm{max}}$")
-    plt.savefig(plotdir / (f"weights_matrix_time_" + name + ".pdf"))
+    plt.savefig(plotdir / (f"weights_matrix_time_" + name + ".pdf"), metadata=_metadata)
     plt.close()
 
     # matrix = np.zeros((len(unique_x), len(unique_y)))
@@ -105,7 +105,7 @@ def plot_matrix(fitlist, plotdir, name):
     plt.colorbar(mat, label="energy")
     plt.xlabel(r"$t_{\textrm{min}}$")
     plt.ylabel(r"$t_{\textrm{max}}$")
-    plt.savefig(plotdir / (f"energy_matrix_time_" + name + ".pdf"))
+    plt.savefig(plotdir / (f"energy_matrix_time_" + name + ".pdf"), metadata=_metadata)
     plt.close()
     return
 
@@ -263,7 +263,7 @@ def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=24, tmin
     # ax1.legend(fontsize="xx-small", framealpha=1, facecolor='blue')
     # fig.legend(fontsize="xx-small", framealpha=0.8, loc="upper right")
     fig.legend(fontsize="x-small", framealpha=1)
-    fig.savefig(plotdir / ("tmin_energies_weights_" + name + ".pdf"))
+    fig.savefig(plotdir / ("tmin_energies_weights_" + name + ".pdf"), metadata=_metadata)
     return
 
 

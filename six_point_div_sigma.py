@@ -138,7 +138,7 @@ def plotting_script_all(
     plt.title("$\lambda=" + str(lmb_val) + "$")
     # plt.xlabel(r"$\textrm{t/a}$")
     plt.xlabel(r"$t/a$")
-    plt.savefig(plotdir / ("comp_plot_all_SS_" + name + ".pdf"))
+    plt.savefig(plotdir / ("comp_plot_all_SS_" + name + ".pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -234,7 +234,7 @@ def plotting_script_all_N(
     plt.title("$\lambda=" + str(lmb_val) + "$")
     # plt.xlabel(r"$\textrm{t/a}$")
     plt.xlabel(r"$t/a$")
-    plt.savefig(plotdir / ("comp_plot_all_NN_" + name + ".pdf"))
+    plt.savefig(plotdir / ("comp_plot_all_NN_" + name + ".pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -351,7 +351,7 @@ def plotting_script_diff_2(
     plt.xlabel("$t/a$")
     plt.legend(fontsize="x-small")
     plt.title("$\lambda=" + str(lmb_val) + "$")
-    plt.savefig(plotdir / ("diff_G" + name + ".pdf"))
+    plt.savefig(plotdir / ("diff_G" + name + ".pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -422,7 +422,7 @@ def plotting_script_unpert(
     plt.xlabel(r"$t/a$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.ylim(-0.1, 0.1)
-    plt.savefig(plotdir / ("unpert_effmass.pdf"))
+    plt.savefig(plotdir / ("unpert_effmass.pdf"), metadata=_metadata)
 
     plt.figure(figsize=(7, 5))
     plt.errorbar(
@@ -487,7 +487,7 @@ def plotting_script_unpert(
     plt.xlim(0, xlim)
     plt.ylim(0, 1)
     plt.grid(True, alpha=0.3)
-    plt.savefig(plotdir / ("unpert_energies.pdf"))
+    plt.savefig(plotdir / ("unpert_energies.pdf"), metadata=_metadata)
 
     f, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True)
     f.tight_layout()
@@ -575,7 +575,7 @@ def plotting_script_unpert(
     plt.xlabel("$t/a$")
     axs[1].legend(fontsize="x-small")
     # plt.title("$\lambda=" + str(lmb_val) + "$")
-    plt.savefig(plotdir / ("unpert_ratio" + name + ".pdf"))
+    plt.savefig(plotdir / ("unpert_ratio" + name + ".pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -640,7 +640,7 @@ def plot_lmb_dep(all_data, plotdir):
     plt.ylabel("$\Delta E$")
     plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
-    plt.savefig(plotdir / ("lambda_dep.pdf"))
+    plt.savefig(plotdir / ("lambda_dep.pdf"), metadata=_metadata)
     # plt.show()
     plt.close()
     return

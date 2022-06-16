@@ -287,7 +287,7 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.tight_layout()
-    plt.savefig(plotdir / ("lambda_dep_bands.pdf"))
+    plt.savefig(plotdir / ("lambda_dep_bands.pdf"), metadata=_metadata)
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
@@ -397,9 +397,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         # plt.ylim(np.average(all_data["order3_fit"], axis=1)[0] * 0.9, np.average(all_data["order3_fit"], axis=1)[-1] * 1.1)
         plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
         plt.tight_layout()
-        plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"))
+        plt.savefig(plotdir / ("lambda_dep_bands_fit.pdf"), metadata=_metadata)
         plt.ylim(0, 0.15)
-        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim.pdf"))
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim.pdf"), metadata=_metadata)
 
     plt.close()
     return
@@ -434,7 +434,7 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None):
     plt.ylabel("$\Delta E$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.tight_layout()
-    plt.savefig(plotdir / ("lambda_dep_bands_4.pdf"))
+    plt.savefig(plotdir / ("lambda_dep_bands_4.pdf"), metadata=_metadata)
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
@@ -478,9 +478,9 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None):
         plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
         plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
         plt.tight_layout()
-        plt.savefig(plotdir / ("lambda_dep_bands_fit_4.pdf"))
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_4.pdf"), metadata=_metadata)
         plt.ylim(0, 0.15)
-        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4.pdf"))
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4.pdf"), metadata=_metadata)
 
     plt.close()
     return
@@ -559,9 +559,9 @@ def plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix):
         plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
         plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
         plt.tight_layout()
-        plt.savefig(plotdir / ("lambda_dep_bands_fit_4_1par.pdf"))
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_4_1par.pdf"), metadata=_metadata)
         plt.ylim(0, 0.15)
-        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4_1par.pdf"))
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4_1par.pdf"), metadata=_metadata)
 
     plt.close()
     return
