@@ -9,6 +9,8 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
+from gevpanalysis.definitions import PROJECT_BASE_DIRECTORY
+
 from analysis import stats
 from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
@@ -929,25 +931,25 @@ def weighted_avg(
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     # Plotting setup
-    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    # plt.rc("text", usetex=True)
-    # rcParams.update({"figure.autolayout": True})
-    plt.style.use("./mystyle.txt")
+    mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
+    plt.style.use(mystyle.as_posix())
 
     # Get the parameters for this lattice ensemble (kp121040kp120620)
     pars = params(0)
 
     # Read in the analysis data from the yaml file if one is given
     if len(sys.argv) == 2:
-        config_file = sys.argv[1]
+        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
     else:
-        config_file = "data_dir_theta2_fix.yaml"
+        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
+        # config_file = "data_dir_theta2_fix.yaml"
     print(f"Reading directories from: {config_file}\n")
     with open(config_file) as f:
         config = yaml.safe_load(f)
 
     # Set parameters to defaults defined in another YAML file
-    with open("defaults.yaml") as f:
+    # with open("defaults.yaml") as f:
+    with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
         defaults = yaml.safe_load(f)
     for key, value in defaults.items():
         config.setdefault(key, value)

@@ -52,7 +52,8 @@ m_S = 0.4641829
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     # Plotting setup
-    plt.style.use(Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt"))
+    mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
+    plt.style.use(mystyle.as_posix())
 
     # Get the parameters for this lattice ensemble (kp121040kp120620)
     pars = params(0)
