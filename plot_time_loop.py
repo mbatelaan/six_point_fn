@@ -181,7 +181,7 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
 
 
 
-def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=17, tminmin_1exp=3, tminmax_1exp=16, tminmin_2exp=0, tminmax_2exp=4):
+def weighted_avg(fitlist_1exp, fitlist_2exp, plotdir, name, tmax_choice=24, tminmin_1exp=3, tminmax_1exp=16, tminmin_2exp=0, tminmax_2exp=4):
     print("\n")
 
     tmax_1exp = np.array([i["x"][-1] for i in fitlist_1exp])
