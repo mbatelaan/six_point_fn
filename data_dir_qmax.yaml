@@ -10,7 +10,7 @@ lmb_i : 0
 lmb_f : 0.05
 lmb_init : 0
 lmb_final : 10
-tmax_nucl : 22
+tmax_nucl : 24
 tmax_sigma : 17
 tmax_ratio : 17
 plotting : True

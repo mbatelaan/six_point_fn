@@ -484,7 +484,7 @@ def plotting_script_unpert(
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # plt.setp(axs, xlim=(0, xlim), ylim=(0, 2))
     plt.xlim(0, xlim)
-    plt.ylim(0, 2)
+    plt.ylim(0, 1)
     plt.savefig(plotdir / ("unpert_energies.pdf"))
 
     f, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True)

@@ -343,13 +343,6 @@ def main():
     # print("maxweight",max(weights_nucl))
     print("max: redchisq = ", fitlist_nucl_1exp[high_weight_nucl]["redchisq"])
     print("max: range = ", fitlist_nucl_1exp[high_weight_nucl]["x"])
-    # print("max-1: redchisq = ", fitlist_nucl_1exp[high_weight_nucl-1]["redchisq"])
-    # print("max-1: range = ", fitlist_nucl_1exp[high_weight_nucl-1]["x"])
-    # print("max-2: redchisq = ", fitlist_nucl_1exp[high_weight_nucl-2]["redchisq"])
-    # print("max-2: range = ", fitlist_nucl_1exp[high_weight_nucl-2]["x"])
-    # print("max-3: redchisq = ", fitlist_nucl_1exp[high_weight_nucl-3]["redchisq"])
-    # print("max-3: weight = ", fitlist_nucl_1exp[high_weight_nucl-3]["weight"])
-    # print("max-3: range = ", fitlist_nucl_1exp[high_weight_nucl-3]["x"])
 
     # ===== Sigma data =====
     weights_sigma = np.array([i["weight"] for i in fitlist_sigma_1exp])
