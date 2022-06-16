@@ -1,7 +1,9 @@
 from fractions import Fraction
 import numpy as np
 import yaml
+from pathlib import Path
 
+from gevpanalysis.definitions import PROJECT_BASE_DIRECTORY
 
 def recursive_cast(value, dtype):
     try:
@@ -14,10 +16,11 @@ def recursive_cast(value, dtype):
 
 class params:
     def __init__(self, kappas):
+        basedir = Path(".")
         files = {0: "kp121040kp120620.yaml"}
 
         try:
-            ConfigFile = files[kappas]
+            ConfigFile = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(files[kappas])
         except KeyError:
             raise ValueError(f"Sorry, no config file for kappa={kappas}")
 
@@ -25,7 +28,7 @@ class params:
             config = yaml.safe_load(f)
 
         # Set things to defaults defined in another YAML file
-        with open("defaults.yaml") as f:
+        with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
             defaults = yaml.safe_load(f)
         for key, value in defaults.items():
             config.setdefault(key, value)
