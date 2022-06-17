@@ -841,7 +841,7 @@ def main():
     twoexp_function = ff.initffncs("Twoexp")
 
     # Check if the data from a fitting loop exists, otherwise loop through the fitting windows
-    sigma_exist = "qmax" in config
+
 
     # sigma_exist = exists(datadir / (f"time_window_loop_sigma_Aexp.pkl")) and exists(
     #     datadir / (f"time_window_loop_sigma_Twoexp.pkl")
@@ -875,7 +875,12 @@ def main():
             fitlist_nucl_2exp = pickle.load(file_in)
 
     # Sigma correlators
-    sigma_exist = True  # Because we'll use the fit from qmax for all other datasets
+    if "qmax" in config:
+        sigma_exist = exists(datadir / (f"time_window_loop_sigma_Aexp.pkl")) and exists(
+        datadir / (f"time_window_loop_sigma_Twoexp.pkl")
+    )
+    else:
+        sigma_exist = True
     if not sigma_exist:
         time_limits_sigma = np.array(
             [
