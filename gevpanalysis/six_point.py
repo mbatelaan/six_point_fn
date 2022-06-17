@@ -656,68 +656,68 @@ def main():
     aexp_function = ff.initffncs("Aexp")
     twoexp_function = ff.initffncs("Twoexp")
 
-    # # ============================================================
-    # # Nucleon correlators
-    # with open(datadir / (f"time_window_loop_nucl_Aexp.pkl"), "rb") as file_in:
-    #     fitlist_nucl_1exp = pickle.load(file_in)
-    # with open(datadir / (f"time_window_loop_nucl_Twoexp.pkl"), "rb") as file_in:
-    #     fitlist_nucl_2exp = pickle.load(file_in)
+    # ============================================================
+    # Nucleon correlators
+    with open(datadir / (f"time_window_loop_nucl_Aexp.pkl"), "rb") as file_in:
+        fitlist_nucl_1exp = pickle.load(file_in)
+    with open(datadir / (f"time_window_loop_nucl_Twoexp.pkl"), "rb") as file_in:
+        fitlist_nucl_2exp = pickle.load(file_in)
 
-    # # ============================================================
-    # # Sigma correlators
-    # with open(
-    #     "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Aexp.pkl",
-    #     "rb",
-    # ) as file_in:
-    #     fitlist_sigma_1exp = pickle.load(file_in)
-    # with open(
-    #     "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Twoexp.pkl",
-    #     "rb",
-    # ) as file_in:
-    #     fitlist_sigma_2exp = pickle.load(file_in)
+    # ============================================================
+    # Sigma correlators
+    with open(
+        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Aexp.pkl",
+        "rb",
+    ) as file_in:
+        fitlist_sigma_1exp = pickle.load(file_in)
+    with open(
+        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Twoexp.pkl",
+        "rb",
+    ) as file_in:
+        fitlist_sigma_2exp = pickle.load(file_in)
 
-    # # ============================================================
-    # # Nucleon divided by Sigma correlators
-    # with open(datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl"), "rb") as file_in:
-    #     fitlist_nucldivsigma_1exp = pickle.load(file_in)
-    # with open(datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"), "rb") as file_in:
-    #     fitlist_nucldivsigma_2exp = pickle.load(file_in)
+    # ============================================================
+    # Nucleon divided by Sigma correlators
+    with open(datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl"), "rb") as file_in:
+        fitlist_nucldivsigma_1exp = pickle.load(file_in)
+    with open(datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"), "rb") as file_in:
+        fitlist_nucldivsigma_2exp = pickle.load(file_in)
 
-    # # =============================================================
-    # weighted_energy_nucl, fitweights = weighted_avg(
-    #     fitlist_nucl_1exp,
-    #     fitlist_nucl_2exp,
-    #     plotdir,
-    #     "nucl",
-    #     tmax_choice=config["tmax_nucl"],
-    #     tminmin_2exp=0,
-    #     tminmax_2exp=4,
-    #     tminmin_1exp=3,
-    #     tminmax_1exp=16,
-    # )
-    # weighted_energy_nucldivsigma, fitweights = weighted_avg(
-    #     fitlist_nucldivsigma_1exp,
-    #     fitlist_nucldivsigma_2exp,
-    #     plotdir,
-    #     "nucldivsigma",
-    #     tmax_choice=config["tmax_nucl"],
-    #     tminmin_2exp=2,
-    #     tminmax_2exp=2,
-    #     tminmin_1exp=1,
-    #     tminmax_1exp=15,
-    # )
-    # weighted_energy_sigma, fitweights = weighted_avg(
-    #     fitlist_sigma_1exp,
-    #     fitlist_sigma_2exp,
-    #     plotdir,
-    #     "sigma",
-    #     tmax_choice=config["tmax_sigma"],
-    #     tminmin_2exp=0,
-    #     tminmax_2exp=4,
-    #     tminmin_1exp=3,
-    #     tminmax_1exp=16,
-    # )
-    # # =========================================
+    # =============================================================
+    weighted_energy_nucl, fitweights = weighted_avg(
+        fitlist_nucl_1exp,
+        fitlist_nucl_2exp,
+        plotdir,
+        "nucl",
+        tmax_choice=config["tmax_nucl"],
+        tminmin_2exp=0,
+        tminmax_2exp=4,
+        tminmin_1exp=3,
+        tminmax_1exp=16,
+    )
+    weighted_energy_nucldivsigma, fitweights = weighted_avg(
+        fitlist_nucldivsigma_1exp,
+        fitlist_nucldivsigma_2exp,
+        plotdir,
+        "nucldivsigma",
+        tmax_choice=config["tmax_nucl"],
+        tminmin_2exp=2,
+        tminmax_2exp=2,
+        tminmin_1exp=1,
+        tminmax_1exp=15,
+    )
+    weighted_energy_sigma, fitweights = weighted_avg(
+        fitlist_sigma_1exp,
+        fitlist_sigma_2exp,
+        plotdir,
+        "sigma",
+        tmax_choice=config["tmax_sigma"],
+        tminmin_2exp=0,
+        tminmax_2exp=4,
+        tminmin_1exp=3,
+        tminmax_1exp=16,
+    )
+    # =========================================
 
     # weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
     # high_weight_nucl = np.argmax(weights_nucl)
@@ -743,52 +743,52 @@ def main():
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
 
-    bootfit_unpert_nucl, redchisq1 = fit_value3(
-        np.abs(G2_nucl[0]), nucl_t_range, aexp_function, norm=1
-    )
-    bootfit_unpert_sigma, redchisq2 = fit_value3(
-        np.abs(G2_sigm[0]), sigma_t_range, aexp_function, norm=1
-    )
+    # bootfit_unpert_nucl, redchisq1 = fit_value3(
+    #     np.abs(G2_nucl[0]), nucl_t_range, aexp_function, norm=1
+    # )
+    # bootfit_unpert_sigma, redchisq2 = fit_value3(
+    #     np.abs(G2_sigm[0]), sigma_t_range, aexp_function, norm=1
+    # )
 
-    ratio_unpert = np.abs(G2_nucl[0] / G2_sigm[0])
-    bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, ratio_t_range)
-    bootfit_effratio, redchisq_effratio = fit_value3(
-        ratio_unpert, ratio_t_range, aexp_function, norm=1
-    )
+    # ratio_unpert = np.abs(G2_nucl[0] / G2_sigm[0])
+    # bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, ratio_t_range)
+    # bootfit_effratio, redchisq_effratio = fit_value3(
+    #     ratio_unpert, ratio_t_range, aexp_function, norm=1
+    # )
 
-    # ==================================================
-    # Plot the effective energy of the unperturbed correlators
-    # Pick out the fit determined by tmin and tmax set in the parameters file
-    chosen_nucl_fit = [
-        i
-        for i in fitlist_nucl_1exp
-        if i["x"][0] == config["tmin_nucl"] and i["x"][-1] == config["tmax_nucl"]
-    ][0]
-    nucl_t_range = np.arange(config["tmin_nucl"], config["tmax_nucl"] + 1)
+    # # ==================================================
+    # # Plot the effective energy of the unperturbed correlators
+    # # Pick out the fit determined by tmin and tmax set in the parameters file
+    # chosen_nucl_fit = [
+    #     i
+    #     for i in fitlist_nucl_1exp
+    #     if i["x"][0] == config["tmin_nucl"] and i["x"][-1] == config["tmax_nucl"]
+    # ][0]
+    # nucl_t_range = np.arange(config["tmin_nucl"], config["tmax_nucl"] + 1)
 
-    chosen_sigma_fit = [
-        i
-        for i in fitlist_sigma_1exp
-        if i["x"][0] == config["tmin_sigma"] and i["x"][-1] == config["tmax_sigma"]
-    ][0]
-    sigma_t_range = np.arange(config["tmin_sigma"], config["tmax_sigma"] + 1)
+    # chosen_sigma_fit = [
+    #     i
+    #     for i in fitlist_sigma_1exp
+    #     if i["x"][0] == config["tmin_sigma"] and i["x"][-1] == config["tmax_sigma"]
+    # ][0]
+    # sigma_t_range = np.arange(config["tmin_sigma"], config["tmax_sigma"] + 1)
 
-    plotting_script_unpert(
-        np.abs(G2_nucl[0]),
-        np.abs(G2_sigm[0]),
-        ratio_unpert,
-        chosen_nucl_fit,
-        chosen_sigma_fit,
-        bootfit_ratio[:, 0],
-        weighted_energy_nucldivsigma,
-        nucl_t_range,
-        sigma_t_range,
-        ratio_t_range,
-        plotdir,
-        [redchisq1, redchisq2, redchisq_ratio],
-        name="_unpert_ratio",
-        show=False,
-    )
+    # plotting_script_unpert(
+    #     np.abs(G2_nucl[0]),
+    #     np.abs(G2_sigm[0]),
+    #     ratio_unpert,
+    #     chosen_nucl_fit,
+    #     chosen_sigma_fit,
+    #     bootfit_ratio[:, 0],
+    #     weighted_energy_nucldivsigma,
+    #     nucl_t_range,
+    #     sigma_t_range,
+    #     ratio_t_range,
+    #     plotdir,
+    #     [redchisq1, redchisq2, redchisq_ratio],
+    #     name="_unpert_ratio",
+    #     show=False,
+    # )
 
     fitlist = []
     for i, lmb_val in enumerate(lambdas):
