@@ -832,20 +832,10 @@ def main():
     # Read in the analysis data from the yaml file if one is given
     if len(sys.argv) == 2:
         config = read_config(sys.argv[1])
-        # config_file = find_file("config", sys.argv[1])
-        # config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
     else:
         config = read_config("data_dir_qmax")
-        # config_file = find_file("config", "data_dir_theta7.yaml")
-        # config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
-    # print(f"Reading directories from: {config_file}\n")
-    # with open(config_file) as f:
-    #     config = yaml.safe_load(f)
 
     # Set parameters to defaults defined in another YAML file
-    # with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
-    # with open(find_file(PROJECT_BASE_DIRECTORY, "config", "defaults.yaml")) as f:
-    #     defaults = yaml.safe_load(f)
     defaults = read_config("defaults")
     for key, value in defaults.items():
         config.setdefault(key, value)
@@ -870,12 +860,6 @@ def main():
         )
     elif "onlytwist2" in config and config["onlytwist2"]:
         G2_nucl, G2_sigm = read_correlators5_complex(
-            pars, pickledir_k1, pickledir_k2, mom_strings
-        )
-    elif "one_fourier" in config and config["one_fourier"]:
-        # As a test to see if the momenta are correct
-        mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
-        G2_nucl, G2_sigm = read_correlators6(
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
     else:
@@ -1013,12 +997,6 @@ def main():
                 fitlist_large = pickle.load(file_in)
 
     # =========================================
-    # weighted_energy_nucl, fitweights = weighted_avg_1_2_exp(
-    #     fitlist_nucl_1exp,
-    #     fitlist_nucl_2exp,
-    #     print=False,
-    #     tmax_choice=config["tmax_nucl"],
-    # )
     weighted_energy_nucl, fitweights = weighted_avg(
         fitlist_nucl_1exp,
         fitlist_nucl_2exp,
@@ -1052,12 +1030,6 @@ def main():
         tminmin_1exp=3,
         tminmax_1exp=16,
     )
-    # weighted_energy_sigma, fitweights = weighted_avg_1_2_exp(
-    #     fitlist_sigma_1exp,
-    #     fitlist_sigma_2exp,
-    #     print=False,
-    #     tmax_choice=config["tmax_sigma"],
-    # )
     # =========================================
 
     weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
