@@ -1005,11 +1005,22 @@ def main():
                 fitlist_large = pickle.load(file_in)
 
     # =========================================
-    weighted_energy_nucl, fitweights = weighted_avg_1_2_exp(
+    # weighted_energy_nucl, fitweights = weighted_avg_1_2_exp(
+    #     fitlist_nucl_1exp,
+    #     fitlist_nucl_2exp,
+    #     print=False,
+    #     tmax_choice=config["tmax_nucl"],
+    # )
+    weighted_energy_nucl, fitweights = weighted_avg(
         fitlist_nucl_1exp,
         fitlist_nucl_2exp,
-        print=False,
+        plotdir,
+        "nucl",
         tmax_choice=config["tmax_nucl"],
+        tminmin_2exp=0,
+        tminmax_2exp=4,
+        tminmin_1exp=3,
+        tminmax_1exp=16,
     )
     weighted_energy_nucldivsigma, fitweights = weighted_avg(
         fitlist_nucldivsigma_1exp,
@@ -1022,12 +1033,23 @@ def main():
         tminmin_1exp=1,
         tminmax_1exp=15,
     )
-    weighted_energy_sigma, fitweights = weighted_avg_1_2_exp(
+    weighted_energy_sigma, fitweights = weighted_avg(
         fitlist_sigma_1exp,
         fitlist_sigma_2exp,
-        print=False,
+        plotdir,
+        "sigma",
         tmax_choice=config["tmax_sigma"],
+        tminmin_2exp=0,
+        tminmax_2exp=4,
+        tminmin_1exp=3,
+        tminmax_1exp=16,
     )
+    # weighted_energy_sigma, fitweights = weighted_avg_1_2_exp(
+    #     fitlist_sigma_1exp,
+    #     fitlist_sigma_2exp,
+    #     print=False,
+    #     tmax_choice=config["tmax_sigma"],
+    # )
     # =========================================
 
     weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])

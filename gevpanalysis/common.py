@@ -1363,20 +1363,20 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
 def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=None):
     """Take two lists of dictionaries, one for a fit using the one-exponential function and one using a two-exponential function, Return the weighted average of the energies across these fits"""
 
-    if tmax_choice:
-        tmax_1exp = np.array([i["x"][-1] for i in fitlist_1exp])
-        tmin_1exp = np.array([i["x"][0] for i in fitlist_1exp])
-        indices = np.where(tmax_1exp == tmax_choice)
-        indices = indices[0][np.where(3 < tmin_1exp[indices])]
-        indices = indices[np.where(16 > tmin_1exp[indices])]
-        fitlist_1exp = [fitlist_1exp[index] for index in indices]
+    # if tmax_choice:
+    #     tmax_1exp = np.array([i["x"][-1] for i in fitlist_1exp])
+    #     tmin_1exp = np.array([i["x"][0] for i in fitlist_1exp])
+    #     indices = np.where(tmax_1exp == tmax_choice)
+    #     indices = indices[0][np.where(3 < tmin_1exp[indices])]
+    #     indices = indices[np.where(16 > tmin_1exp[indices])]
+    #     fitlist_1exp = [fitlist_1exp[index] for index in indices]
 
-        if len(fitlist_2exp) > 0:
-            tmax_2exp = np.array([i["x"][-1] for i in fitlist_2exp])
-            tmin_2exp = np.array([i["x"][0] for i in fitlist_2exp])
-            indices_2exp = np.where(tmax_2exp == tmax_choice)
-            indices_2exp = indices_2exp[0][np.where(tmin_2exp[indices_2exp] < 4)]
-            fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
+    #     if len(fitlist_2exp) > 0:
+    #         tmax_2exp = np.array([i["x"][-1] for i in fitlist_2exp])
+    #         tmin_2exp = np.array([i["x"][0] for i in fitlist_2exp])
+    #         indices_2exp = np.where(tmax_2exp == tmax_choice)
+    #         indices_2exp = indices_2exp[0][np.where(tmin_2exp[indices_2exp] < 4)]
+    #         fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
 
     dE_1exp = np.std([i["param"][:, 1] for i in fitlist_1exp], axis=1)
     dof_1exp = np.array([i["dof"] for i in fitlist_1exp])
@@ -1443,8 +1443,12 @@ def weighted_avg(
     tminmax_2exp=4,
     plot=False,
 ):
+    """
+    Take two lists of dictionaries containing fit information. A selection of the fits will be chosen and the weighted average of these calculated.
+    """
     print("\n")
 
+    # Filter out the desired one-exponential fits
     tmax_1exp = np.array([i["x"][-1] for i in fitlist_1exp])
     tmin_1exp = np.array([i["x"][0] for i in fitlist_1exp])
     indices = np.where(tmax_1exp == tmax_choice)
@@ -1454,6 +1458,7 @@ def weighted_avg(
     tmin_ = tmin_1exp[indices]
     reduced_fitlist_1exp = [fitlist_1exp[index] for index in indices]
 
+    # Filter out the desired two-exponential fits
     tmax_2exp = np.array([i["x"][-1] for i in fitlist_2exp])
     tmin_2exp = np.array([i["x"][0] for i in fitlist_2exp])
     indices_2exp = np.where(tmax_2exp == tmax_choice)
@@ -1462,25 +1467,27 @@ def weighted_avg(
     tmin_2 = tmin_2exp[indices_2exp]
     reduced_fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
 
+    # Calculate the weighted average of the chosen fits.
     weighted_energy, fitweights = weighted_avg_1_2_exp(
         reduced_fitlist_1exp, reduced_fitlist_2exp, print=False
     )
 
-    weights = fitweights[: len(reduced_fitlist_1exp)]
-    weights_2 = fitweights[len(reduced_fitlist_1exp) :]
-
-    energies_1exp = np.array([i["param"][:, 1] for i in reduced_fitlist_1exp])
-    energies_avg = np.average(energies_1exp, axis=1)
-    energies_std = np.std(energies_1exp, axis=1)
-    weights_ = weights
-
-    if len(reduced_fitlist_2exp) > 0:
-        energies_2exp = np.array([i["param"][:, 1] for i in reduced_fitlist_2exp])
-        energies_avg_2 = np.average(energies_2exp, axis=1)
-        energies_std_2 = np.std(energies_2exp, axis=1)
-        weights_2 = weights_2
-
     if plot:
+        # Separate the weights of the two fit functions to allow better plotting
+        weights = fitweights[: len(reduced_fitlist_1exp)]
+        weights_2 = fitweights[len(reduced_fitlist_1exp) :]
+
+        energies_1exp = np.array([i["param"][:, 1] for i in reduced_fitlist_1exp])
+        energies_avg = np.average(energies_1exp, axis=1)
+        energies_std = np.std(energies_1exp, axis=1)
+        weights_ = weights
+
+        if len(reduced_fitlist_2exp) > 0:
+            energies_2exp = np.array([i["param"][:, 1] for i in reduced_fitlist_2exp])
+            energies_avg_2 = np.average(energies_2exp, axis=1)
+            energies_std_2 = np.std(energies_2exp, axis=1)
+            weights_2 = weights_2
+
         # fig, ax1 = plt.subplots(figsize=(5, 4))
         fig, ax1 = plt.subplots(figsize=(7, 5))
         ax1.errorbar(
