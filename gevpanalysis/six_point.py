@@ -597,6 +597,73 @@ def plotting_script_unpert(
     return
 
 
+def fit_loop_weighted(
+    datadir, config, time_limits_nucl, time_limits_sigma, time_limits_nucl_div_sigma
+):
+    # ============================================================
+    # Nucleon correlators
+    with open(datadir / (f"time_window_loop_nucl_Aexp.pkl"), "rb") as file_in:
+        fitlist_nucl_1exp = pickle.load(file_in)
+    with open(datadir / (f"time_window_loop_nucl_Twoexp.pkl"), "rb") as file_in:
+        fitlist_nucl_2exp = pickle.load(file_in)
+
+    # ============================================================
+    # Sigma correlators
+    with open(
+        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Aexp.pkl",
+        "rb",
+    ) as file_in:
+        fitlist_sigma_1exp = pickle.load(file_in)
+    with open(
+        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Twoexp.pkl",
+        "rb",
+    ) as file_in:
+        fitlist_sigma_2exp = pickle.load(file_in)
+
+    # ============================================================
+    # Nucleon divided by Sigma correlators
+    with open(datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl"), "rb") as file_in:
+        fitlist_nucldivsigma_1exp = pickle.load(file_in)
+    with open(datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"), "rb") as file_in:
+        fitlist_nucldivsigma_2exp = pickle.load(file_in)
+
+    # =============================================================
+    weighted_energy_nucl, fitweights = weighted_avg(
+        fitlist_nucl_1exp,
+        fitlist_nucl_2exp,
+        plotdir,
+        "nucl",
+        tmax_choice=config["tmax_nucl"],
+        tminmin_1exp=time_limits_nucl[0, 0],
+        tminmax_1exp=time_limits_nucl[0, 1],
+        tminmin_2exp=time_limits_nucl[1, 0],
+        tminmax_2exp=time_limits_nucl[1, 1],
+    )
+    weighted_energy_sigma, fitweights = weighted_avg(
+        fitlist_sigma_1exp,
+        fitlist_sigma_2exp,
+        plotdir,
+        "sigma",
+        tmax_choice=config["tmax_sigma"],
+        tminmin_1exp=time_limits_sigma[0, 0],
+        tminmax_1exp=time_limits_sigma[0, 1],
+        tminmin_2exp=time_limits_sigma[1, 0],
+        tminmax_2exp=time_limits_sigma[1, 1],
+    )
+    weighted_energy_nucldivsigma, fitweights = weighted_avg(
+        fitlist_nucldivsigma_1exp,
+        fitlist_nucldivsigma_2exp,
+        plotdir,
+        "nucldivsigma",
+        tmax_choice=config["tmax_nucl"],
+        tminmin_1exp=time_limits_nucldivsigma[0, 0],
+        tminmax_1exp=time_limits_nucldivsigma[0, 1],
+        tminmin_2exp=time_limits_nucldivsigma[1, 0],
+        tminmax_2exp=time_limits_nucldivsigma[1, 1],
+    )
+    return weighted_energy_nucl, weighted_energy_sigma, weighted_energy_nucldivsigma
+
+
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     # Plotting setup
@@ -657,67 +724,17 @@ def main():
     twoexp_function = ff.initffncs("Twoexp")
 
     # ============================================================
-    # Nucleon correlators
-    with open(datadir / (f"time_window_loop_nucl_Aexp.pkl"), "rb") as file_in:
-        fitlist_nucl_1exp = pickle.load(file_in)
-    with open(datadir / (f"time_window_loop_nucl_Twoexp.pkl"), "rb") as file_in:
-        fitlist_nucl_2exp = pickle.load(file_in)
-
+    time_limits_nucl = np.array([[3, 16], [0, 4]])
+    time_limits_sigma = np.array([[3, 16], [0, 4]])
+    time_limits_nucldivsigma = np.array([[1, 15], [2, 2]])
+    (
+        weighted_energy_nucl,
+        weighted_energy_sigma,
+        weighted_energy_nucldivsigma,
+    ) = fit_loop_weighted(
+        datadir, config, time_limits_nucl, time_limits_sigma, time_limits_nucl_div_sigma
+    )
     # ============================================================
-    # Sigma correlators
-    with open(
-        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Aexp.pkl",
-        "rb",
-    ) as file_in:
-        fitlist_sigma_1exp = pickle.load(file_in)
-    with open(
-        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Twoexp.pkl",
-        "rb",
-    ) as file_in:
-        fitlist_sigma_2exp = pickle.load(file_in)
-
-    # ============================================================
-    # Nucleon divided by Sigma correlators
-    with open(datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl"), "rb") as file_in:
-        fitlist_nucldivsigma_1exp = pickle.load(file_in)
-    with open(datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"), "rb") as file_in:
-        fitlist_nucldivsigma_2exp = pickle.load(file_in)
-
-    # =============================================================
-    weighted_energy_nucl, fitweights = weighted_avg(
-        fitlist_nucl_1exp,
-        fitlist_nucl_2exp,
-        plotdir,
-        "nucl",
-        tmax_choice=config["tmax_nucl"],
-        tminmin_2exp=0,
-        tminmax_2exp=4,
-        tminmin_1exp=3,
-        tminmax_1exp=16,
-    )
-    weighted_energy_nucldivsigma, fitweights = weighted_avg(
-        fitlist_nucldivsigma_1exp,
-        fitlist_nucldivsigma_2exp,
-        plotdir,
-        "nucldivsigma",
-        tmax_choice=config["tmax_nucl"],
-        tminmin_2exp=2,
-        tminmax_2exp=2,
-        tminmin_1exp=1,
-        tminmax_1exp=15,
-    )
-    weighted_energy_sigma, fitweights = weighted_avg(
-        fitlist_sigma_1exp,
-        fitlist_sigma_2exp,
-        plotdir,
-        "sigma",
-        tmax_choice=config["tmax_sigma"],
-        tminmin_2exp=0,
-        tminmax_2exp=4,
-        tminmin_1exp=3,
-        tminmax_1exp=16,
-    )
-    # =========================================
 
     # weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
     # high_weight_nucl = np.argmax(weights_nucl)
