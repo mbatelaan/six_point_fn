@@ -842,9 +842,8 @@ def main():
     aexp_function = ff.initffncs("Aexp")
     twoexp_function = ff.initffncs("Twoexp")
 
-    # Check if the data from a fitting loop exists, otherwise loop through the fitting windows
     # ============================================================
-    # Nucleon correlators
+    # Check if the data from a fitting loop exists, otherwise loop through the fitting windows
     if fit_loop:
         nucl_exist = False
         sigma_exist = False
@@ -860,6 +859,8 @@ def main():
             qmax_datadir / (f"time_window_loop_sigma_Aexp.pkl")
         ) and exists(qmax_datadir / (f"time_window_loop_sigma_Twoexp.pkl"))
 
+    # ============================================================
+    # Nucleon correlators
     if not nucl_exist:
         time_limits_nucl = np.array(
             [
