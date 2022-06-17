@@ -1065,6 +1065,7 @@ def main():
     # ===============================
     # HARD CODED RANGE!!!
     ratio_t_range = np.arange(7, 18)
+    ratio_t_range = np.arange(7, 20)
     # ===============================
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
@@ -1085,42 +1086,20 @@ def main():
     # ==================================================
     # Plot the effective energy of the unperturbed correlators
     # Pick out the fit determined by tmin and tmax set in the parameters file
-    tmax_choice = config["tmax_nucl"]
-    tmin_choice = config["tmin_nucl"]
-    tmax_1exp = np.array([i["x"][-1] for i in fitlist_nucl_1exp])
-    tmin_1exp = np.array([i["x"][0] for i in fitlist_nucl_1exp])
-    indices = np.where(tmax_1exp == tmax_choice)
-    index = indices[0][np.where(tmin_1exp[indices] == tmin_choice)]
-    print(f"\n\nIndex = {index}\n\n")
-    # chosen_nucl_fit = fitlist_nucl_1exp[index[0]]
-    chosen_nucl_fit = [i if (i["x"][0] == config["tmin_nucl"] and i["x"][-1] == config["tmax_nucl"]) for i in  fitlist_nucl_1exp][0]
-    print(chosen_nucl_fit["x"])
-    nucl_t_range = np.arange(tmin_choice, tmax_choice + 1)
+    chosen_nucl_fit = [i for i in fitlist_nucl_1exp if i["x"][0] == config["tmin_nucl"] and i["x"][-1] == config["tmax_nucl"]][0]
+    nucl_t_range = np.arange(config["tmin_nucl"], config["tmax_nucl"] + 1)
 
-    tmax_choice = config["tmax_sigma"]
-    tmin_choice = config["tmin_sigma"]
-    tmax_1exp = np.array([i["x"][-1] for i in fitlist_sigma_1exp])
-    tmin_1exp = np.array([i["x"][0] for i in fitlist_sigma_1exp])
-    print(tmin_1exp)
-    print(tmax_1exp)
-    indices = np.where(tmax_1exp == tmax_choice)
-    index = indices[0][np.where(tmin_1exp[indices] == tmin_choice)]
-    print(f"\n\nIndex = {index}\n\n")
-    chosen_sigma_fit = fitlist_sigma_1exp[index[0]]
-    print(chosen_sigma_fit["x"])
-    sigma_t_range = np.arange(tmin_choice, tmax_choice + 1)
+    chosen_sigma_fit = [i for i in fitlist_sigma_1exp if i["x"][0] == config["tmin_sigma"] and i["x"][-1] == config["tmax_sigma"]][0]
+    sigma_t_range = np.arange(config["tmin_sigma"], config["tmax_sigma"] + 1)
 
     plotting_script_unpert(
         np.abs(G2_nucl[0]),
         np.abs(G2_sigm[0]),
         ratio_unpert,
-        # bootfit_unpert_nucl[:, 1],
-        # bootfit_unpert_sigma[:, 1],
         chosen_nucl_fit,
         chosen_sigma_fit,
         bootfit_ratio[:, 0],
         weighted_energy_nucldivsigma,
-        # bootfit_effratio[:, 1],
         nucl_t_range,
         sigma_t_range,
         ratio_t_range,
@@ -1142,13 +1121,6 @@ def main():
         [matrix_1, matrix_2, matrix_3, matrix_4] = normalize_matrices(
             [matrix_1, matrix_2, matrix_3, matrix_4], time_choice=6
         )
-
-        # print("\n\nmatrix shape = \n", np.shape(matrix_4))
-        # print("\n\nmatrix elem = \n", matrix_4[1, 1, 3, 16])
-        # print("\n\nmatrix1 elem = \n", np.average(matrix_1[0, 1, :, 1:13], axis=0))
-        # print("\n\nmatrix2 elem = \n", np.average(matrix_2[0, 1, :, 1:13], axis=0))
-        # print("\n\nmatrix3 elem = \n", np.average(matrix_3[0, 1, :, 1:13], axis=0))
-        # print("\n\nmatrix4 elem = \n", np.average(matrix_4[0, 1, :, 1:13], axis=0))
 
         # ==================================================
         # O(lambda^0) fit
