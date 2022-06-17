@@ -598,7 +598,7 @@ def plotting_script_unpert(
 
 
 def fit_loop_weighted(
-    datadir, config, time_limits_nucl, time_limits_sigma, time_limits_nucl_div_sigma
+    datadir, plotdir, config, time_limits_nucl, time_limits_sigma, time_limits_nucldivsigma
 ):
     # ============================================================
     # Nucleon correlators
@@ -732,7 +732,7 @@ def main():
         weighted_energy_sigma,
         weighted_energy_nucldivsigma,
     ) = fit_loop_weighted(
-        datadir, config, time_limits_nucl, time_limits_sigma, time_limits_nucl_div_sigma
+        datadir, plotdir, config, time_limits_nucl, time_limits_sigma, time_limits_nucldivsigma
     )
     # ============================================================
 
