@@ -1084,6 +1084,7 @@ def main():
 
     # ==================================================
     # Plot the effective energy of the unperturbed correlators
+    # Pick out the fit determined by tmin and tmax set in the parameters file
     tmax_choice = config["tmax_nucl"]
     tmin_choice = config["tmin_nucl"]
     tmax_1exp = np.array([i["x"][-1] for i in fitlist_nucl_1exp])
@@ -1091,7 +1092,8 @@ def main():
     indices = np.where(tmax_1exp == tmax_choice)
     index = indices[0][np.where(tmin_1exp[indices] == tmin_choice)]
     print(f"\n\nIndex = {index}\n\n")
-    chosen_nucl_fit = fitlist_nucl_1exp[index[0]]
+    # chosen_nucl_fit = fitlist_nucl_1exp[index[0]]
+    chosen_nucl_fit = [i if (i["x"][0] == config["tmin_nucl"] and i["x"][-1] == config["tmax_nucl"]) for i in  fitlist_nucl_1exp][0]
     print(chosen_nucl_fit["x"])
     nucl_t_range = np.arange(tmin_choice, tmax_choice + 1)
 
