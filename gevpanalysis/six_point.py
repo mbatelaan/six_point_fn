@@ -597,192 +597,6 @@ def plotting_script_unpert(
     return
 
 
-def fit_loop(
-    G2_nucl,
-    G2_sigm,
-    aexp_function,
-    twoexp_function,
-    time_choice,
-    delta_t,
-    datadir,
-    time_limits,
-    time_limits2,
-    which_corr=[True, True, True],
-):
-    # Nucleon fit loop
-    # time_limits = [[5, 18], [10, 25]]
-    (
-        fitlist_nucl,
-        fitlist_nucl_2exp,
-        fitlist_sigma,
-        fitlist_sigma_2exp,
-        fitlist_small,
-        fitlist_large,
-        fitlist_nucldivsigma,
-        fitlist_nucldivsigma_2exp,
-    ) = ([], [], [], [], [], [], [], [])
-    if which_corr[0]:
-        print("\n\nNucleon fitting")
-        fitlist_nucl = stats.fit_loop(
-            np.abs(G2_nucl[0]),
-            aexp_function,
-            time_limits[0],
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_nucl_1exp.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_nucl, file_out)
-        fitlist_nucl_2exp = stats.fit_loop(
-            np.abs(G2_nucl[0]),
-            twoexp_function,
-            time_limits2[0],
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_nucl_2exp.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_nucl_2exp, file_out)
-
-        ratio_unpert = np.abs(G2_nucl[0] / G2_sigm[0])
-        fitlist_nucldivsigma = stats.fit_loop(
-            ratio_unpert,
-            aexp_function,
-            time_limits[0],
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(
-            datadir / (f"time_window_loop_nucldivsigma_1exp.pkl"), "wb"
-        ) as file_out:
-            pickle.dump(fitlist_nucldivsigma, file_out)
-        fitlist_nucldivsigma_2exp = stats.fit_loop(
-            ratio_unpert,
-            twoexp_function,
-            time_limits2[0],
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(
-            datadir / (f"time_window_loop_nucldivsigma_2exp.pkl"), "wb"
-        ) as file_out:
-            pickle.dump(fitlist_nucldivsigma_2exp, file_out)
-
-    if which_corr[1]:
-        print("\n\nSigma fitting")
-        # Sigma fit loop
-        fitlist_sigma = stats.fit_loop(
-            np.abs(G2_sigm[0]),
-            aexp_function,
-            time_limits[1],
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_sigma_1exp.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_sigma, file_out)
-        fitlist_sigma_2exp = stats.fit_loop(
-            np.abs(G2_sigm[0]),
-            twoexp_function,
-            time_limits2[1],
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_sigma_2exp.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_sigma_2exp, file_out)
-
-    if which_corr[2]:
-        print("\n\nSmall lambda fitting")
-        # small lambda fit loop
-        lmb_val = 0.003
-        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
-            G2_nucl, G2_sigm, lmb_val
-        )
-        Gt1_4, Gt2_4, evals = gevp(
-            matrix_4, time_choice, delta_t, name="_test", show=False
-        )
-        ratio4 = Gt1_4 / Gt2_4
-        fitlist_small = stats.fit_loop(
-            ratio4,
-            aexp_function,
-            time_limits[2],
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_lambda_small.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_small, file_out)
-
-        # large lambda fit loop
-        print("\n\nLarge lambda fitting")
-        lmb_val = 0.05
-        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
-            G2_nucl, G2_sigm, lmb_val
-        )
-        Gt1_4, Gt2_4, evals = gevp(
-            matrix_4, time_choice, delta_t, name="_test", show=False
-        )
-        ratio4 = Gt1_4 / Gt2_4
-        fitlist_large = stats.fit_loop(
-            ratio4,
-            aexp_function,
-            time_limits[2],
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        with open(datadir / (f"time_window_loop_lambda_large.pkl"), "wb") as file_out:
-            pickle.dump(fitlist_large, file_out)
-    return (
-        fitlist_nucl,
-        fitlist_nucl_2exp,
-        fitlist_sigma,
-        fitlist_sigma_2exp,
-        fitlist_small,
-        fitlist_large,
-        fitlist_nucldivsigma,
-        fitlist_nucldivsigma_2exp,
-    )
-
-
-def fit_loop_new(correlator, fitfunctions, time_limits, datadir, data_label):
-    """Take a correlator with values for each bootstrap and each timeslice and a fitfunction, then loop over the fit windows given by the parameters and return a fit for each window.
-    The function here is an object which has labels and initial parameters defined
-
-    fitfunctions: A list of objects which contain fitting functions
-    time_limits: A list of arrays defining the extent of the fit windows in the format [[tminmin, tminmax], [tmaxmin, tmaxmax]] for each fit function.
-    """
-    fitlist_list = []
-    for ifunc, function in enumerate(fitfunctions):
-        fitlist = stats.fit_loop(
-            correlator,
-            function,
-            time_limits[ifunc],
-            plot=False,
-            disp=True,
-            time=False,
-            weights_=True,
-        )
-        fitlist_list.append(fitlist)
-        # with open(datadir / (f"time_window_loop_nucl_1exp.pkl"), "wb") as file_out:
-        filename = f"time_window_loop_" + data_label + "_" + function.label + ".pkl"
-        with open(datadir / filename, "wb") as file_out:
-            pickle.dump(fitlist, file_out)
-
-    return fitlist_list
-
-
 def main():
     """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
     # Plotting setup
@@ -842,174 +656,84 @@ def main():
     aexp_function = ff.initffncs("Aexp")
     twoexp_function = ff.initffncs("Twoexp")
 
-    # ============================================================
-    # Check if the data from a fitting loop exists, otherwise loop through the fitting windows
-    if fit_loop:
-        nucl_exist = False
-        sigma_exist = False
-        nucldivsigma_exist = False
-    else:
-        nucl_exist = exists(datadir / (f"time_window_loop_nucl_Aexp.pkl")) and exists(
-            datadir / (f"time_window_loop_nucl_Twoexp.pkl")
-        )
-        nucldivsigma_exist = exists(
-            datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl")
-        ) and exists(datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"))
-        sigma_exist = exists(
-            qmax_datadir / (f"time_window_loop_sigma_Aexp.pkl")
-        ) and exists(qmax_datadir / (f"time_window_loop_sigma_Twoexp.pkl"))
+    # # ============================================================
+    # # Nucleon correlators
+    # with open(datadir / (f"time_window_loop_nucl_Aexp.pkl"), "rb") as file_in:
+    #     fitlist_nucl_1exp = pickle.load(file_in)
+    # with open(datadir / (f"time_window_loop_nucl_Twoexp.pkl"), "rb") as file_in:
+    #     fitlist_nucl_2exp = pickle.load(file_in)
 
-    # ============================================================
-    # Nucleon correlators
-    if not nucl_exist:
-        time_limits_nucl = np.array(
-            [
-                [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
-                [[1, 10], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
-            ]
-        )
+    # # ============================================================
+    # # Sigma correlators
+    # with open(
+    #     "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Aexp.pkl",
+    #     "rb",
+    # ) as file_in:
+    #     fitlist_sigma_1exp = pickle.load(file_in)
+    # with open(
+    #     "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Twoexp.pkl",
+    #     "rb",
+    # ) as file_in:
+    #     fitlist_sigma_2exp = pickle.load(file_in)
 
-        [fitlist_nucl_1exp, fitlist_nucl_2exp] = fit_loop_new(
-            np.abs(G2_nucl[0]),
-            [aexp_function, twoexp_function],
-            time_limits_nucl,
-            datadir,
-            "nucl",
-        )
-    else:
-        with open(datadir / (f"time_window_loop_nucl_Aexp.pkl"), "rb") as file_in:
-            fitlist_nucl_1exp = pickle.load(file_in)
-        with open(datadir / (f"time_window_loop_nucl_Twoexp.pkl"), "rb") as file_in:
-            fitlist_nucl_2exp = pickle.load(file_in)
+    # # ============================================================
+    # # Nucleon divided by Sigma correlators
+    # with open(datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl"), "rb") as file_in:
+    #     fitlist_nucldivsigma_1exp = pickle.load(file_in)
+    # with open(datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"), "rb") as file_in:
+    #     fitlist_nucldivsigma_2exp = pickle.load(file_in)
 
-    # ============================================================
-    # Sigma correlators
-    if not sigma_exist:
-        time_limits_sigma = np.array(
-            [
-                [[1, 18], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 2]],
-                [[1, 10], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 2]],
-            ]
-        )
-        [fitlist_sigma_1exp, fitlist_sigma_2exp] = fit_loop_new(
-            np.abs(G2_sigm[0]),
-            [aexp_function, twoexp_function],
-            time_limits_sigma,
-            datadir,
-            "sigma",
-        )
-    else:
-        with open(
-            "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Aexp.pkl",
-            "rb",
-        ) as file_in:
-            fitlist_sigma_1exp = pickle.load(file_in)
-        with open(
-            "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Twoexp.pkl",
-            "rb",
-        ) as file_in:
-            fitlist_sigma_2exp = pickle.load(file_in)
-
-    # ============================================================
-    # Nucleon divided by Sigma correlators
-    if not nucldivsigma_exist:
-        time_limits_nucldivsigma = np.array(
-            [
-                [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
-                [[1, 3], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
-            ]
-        )
-        [fitlist_nucldivsigma_1exp, fitlist_nucldivsigma_2exp] = fit_loop_new(
-            np.abs(G2_nucl[0] / G2_sigm[0]),
-            [aexp_function, twoexp_function],
-            time_limits_nucl_div_sigma,
-            datadir,
-            "nucldivsigma",
-        )
-    else:
-        with open(
-            datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl"), "rb"
-        ) as file_in:
-            fitlist_nucldivsigma_1exp = pickle.load(file_in)
-        with open(
-            datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"), "rb"
-        ) as file_in:
-            fitlist_nucldivsigma_2exp = pickle.load(file_in)
-
-        # if small_exist and large_exist:
-        #     with open(
-        #         datadir / (f"time_window_loop_lambda_small.pkl"), "rb"
-        #     ) as file_in:
-        #         fitlist_small = pickle.load(file_in)
-        #     with open(
-        #         datadir / (f"time_window_loop_lambda_large.pkl"), "rb"
-        #     ) as file_in:
-        #         fitlist_large = pickle.load(file_in)
-
-    # =============================================================
-    weighted_energy_nucl, fitweights = weighted_avg(
-        fitlist_nucl_1exp,
-        fitlist_nucl_2exp,
-        plotdir,
-        "nucl",
-        tmax_choice=config["tmax_nucl"],
-        tminmin_2exp=0,
-        tminmax_2exp=4,
-        tminmin_1exp=3,
-        tminmax_1exp=16,
-    )
-    weighted_energy_nucldivsigma, fitweights = weighted_avg(
-        fitlist_nucldivsigma_1exp,
-        fitlist_nucldivsigma_2exp,
-        plotdir,
-        "nucldivsigma",
-        tmax_choice=config["tmax_nucl"],
-        tminmin_2exp=2,
-        tminmax_2exp=2,
-        tminmin_1exp=1,
-        tminmax_1exp=15,
-    )
-    weighted_energy_sigma, fitweights = weighted_avg(
-        fitlist_sigma_1exp,
-        fitlist_sigma_2exp,
-        plotdir,
-        "sigma",
-        tmax_choice=config["tmax_sigma"],
-        tminmin_2exp=0,
-        tminmax_2exp=4,
-        tminmin_1exp=3,
-        tminmax_1exp=16,
-    )
-    # =========================================
-
-    weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
-    high_weight_nucl = np.argmax(weights_nucl)
-    nucl_t_range = np.arange(
-        fitlist_nucl_1exp[high_weight_nucl]["x"][0],
-        fitlist_nucl_1exp[high_weight_nucl]["x"][-1] + 1,
-    )
-    print(f"nucl_t_range = {nucl_t_range}")
-
-    weights_sigma = np.array([i["weight"] for i in fitlist_sigma_1exp])
-    high_weight_sigma = np.argmax(weights_sigma)
-    sigma_t_range = np.arange(
-        fitlist_sigma_1exp[high_weight_sigma]["x"][0],
-        fitlist_sigma_1exp[high_weight_sigma]["x"][-1] + 1,
-    )
-    print(f"sigma_t_range = {sigma_t_range}")
-
-    # weights_small = np.array([i["weight"] for i in fitlist_small])
-    # high_weight_small = np.argmax(weights_small)
-    # weights_large = np.array([i["weight"] for i in fitlist_large])
-    # high_weight_large = np.argmax(weights_large)
-    # ratio_t_range = np.arange(
-    #     min(
-    #         fitlist_small[high_weight_small]["x"][0],
-    #         fitlist_large[high_weight_large]["x"][0],
-    #     ),
-    #     fitlist_large[high_weight_large]["x"][-1] + 1,
+    # # =============================================================
+    # weighted_energy_nucl, fitweights = weighted_avg(
+    #     fitlist_nucl_1exp,
+    #     fitlist_nucl_2exp,
+    #     plotdir,
+    #     "nucl",
+    #     tmax_choice=config["tmax_nucl"],
+    #     tminmin_2exp=0,
+    #     tminmax_2exp=4,
+    #     tminmin_1exp=3,
+    #     tminmax_1exp=16,
     # )
-    # print(f"ratio_t_range = {ratio_t_range}")
+    # weighted_energy_nucldivsigma, fitweights = weighted_avg(
+    #     fitlist_nucldivsigma_1exp,
+    #     fitlist_nucldivsigma_2exp,
+    #     plotdir,
+    #     "nucldivsigma",
+    #     tmax_choice=config["tmax_nucl"],
+    #     tminmin_2exp=2,
+    #     tminmax_2exp=2,
+    #     tminmin_1exp=1,
+    #     tminmax_1exp=15,
+    # )
+    # weighted_energy_sigma, fitweights = weighted_avg(
+    #     fitlist_sigma_1exp,
+    #     fitlist_sigma_2exp,
+    #     plotdir,
+    #     "sigma",
+    #     tmax_choice=config["tmax_sigma"],
+    #     tminmin_2exp=0,
+    #     tminmax_2exp=4,
+    #     tminmin_1exp=3,
+    #     tminmax_1exp=16,
+    # )
+    # # =========================================
+
+    # weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
+    # high_weight_nucl = np.argmax(weights_nucl)
+    # nucl_t_range = np.arange(
+    #     fitlist_nucl_1exp[high_weight_nucl]["x"][0],
+    #     fitlist_nucl_1exp[high_weight_nucl]["x"][-1] + 1,
+    # )
+    # print(f"nucl_t_range = {nucl_t_range}")
+
+    # weights_sigma = np.array([i["weight"] for i in fitlist_sigma_1exp])
+    # high_weight_sigma = np.argmax(weights_sigma)
+    # sigma_t_range = np.arange(
+    #     fitlist_sigma_1exp[high_weight_sigma]["x"][0],
+    #     fitlist_sigma_1exp[high_weight_sigma]["x"][-1] + 1,
+    # )
+    # print(f"sigma_t_range = {sigma_t_range}")
 
     # ===============================
     # HARD CODED RANGE!!!

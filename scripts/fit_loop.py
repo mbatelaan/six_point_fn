@@ -136,10 +136,12 @@ def main():
     twoexp_function = ff.initffncs("Twoexp")
 
     # ============================================================
-    # Check if the data from a fitting loop exists, otherwise loop through the fitting windows
-    nucl_exist = False
-    sigma_exist = False
-    nucldivsigma_exist = False
+    fit_loop_config = read_config("fit_loop")
+    # [nucl_loop, sigma_loop, nucldivsigma_loop] = read_config("fit_loop")
+    nucl_loop = fit_loop_config["nucl"]
+    sigma_loop = fit_loop_config["sigma"]
+    nucldivsigma_loop = fit_loop_config["nucldivsigma"]
+
     # if fit_loop:
     #     nucl_exist = False
     #     sigma_exist = False
@@ -157,7 +159,7 @@ def main():
 
     # ============================================================
     # Nucleon correlators
-    if not nucl_exist:
+    if not nucl_loop:
         time_limits_nucl = np.array(
             [
                 [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
@@ -180,7 +182,7 @@ def main():
 
     # ============================================================
     # Sigma correlators
-    if not sigma_exist:
+    if not sigma_loop:
         time_limits_sigma = np.array(
             [
                 [[1, 18], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 2]],
@@ -208,7 +210,7 @@ def main():
 
     # ============================================================
     # Nucleon divided by Sigma correlators
-    if not nucldivsigma_exist:
+    if not nucldivsigma_loop:
         time_limits_nucldivsigma = np.array(
             [
                 [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
@@ -231,16 +233,6 @@ def main():
             datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"), "rb"
         ) as file_in:
             fitlist_nucldivsigma_2exp = pickle.load(file_in)
-
-        # if small_exist and large_exist:
-        #     with open(
-        #         datadir / (f"time_window_loop_lambda_small.pkl"), "rb"
-        #     ) as file_in:
-        #         fitlist_small = pickle.load(file_in)
-        #     with open(
-        #         datadir / (f"time_window_loop_lambda_large.pkl"), "rb"
-        #     ) as file_in:
-        #         fitlist_large = pickle.load(file_in)
 
     # =============================================================
     weighted_energy_nucl, fitweights = weighted_avg(
