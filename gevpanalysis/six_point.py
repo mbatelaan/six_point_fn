@@ -793,10 +793,12 @@ def main():
     pars = params(0)
 
     # Read in the analysis data from the yaml file if one is given
+    qmax_config = read_config("qmax")
+    qmax_datadir = Path(qmax_config["analysis_dir"]) / Path("data")
     if len(sys.argv) == 2:
         config = read_config(sys.argv[1])
     else:
-        config = read_config("data_dir_qmax")
+        config = read_config("qmax")
 
     # Set parameters to defaults defined in another YAML file
     defaults = read_config("defaults")
@@ -841,18 +843,23 @@ def main():
     twoexp_function = ff.initffncs("Twoexp")
 
     # Check if the data from a fitting loop exists, otherwise loop through the fitting windows
-
-
-    # sigma_exist = exists(datadir / (f"time_window_loop_sigma_Aexp.pkl")) and exists(
-    #     datadir / (f"time_window_loop_sigma_Twoexp.pkl")
-    # )
-
-    # Loop through the fitting windows
-
+    # ============================================================
     # Nucleon correlators
-    nucl_exist = exists(datadir / (f"time_window_loop_nucl_Aexp.pkl")) and exists(
-        datadir / (f"time_window_loop_nucl_Twoexp.pkl")
-    )
+    if fit_loop:
+        nucl_exist = False
+        sigma_exist = False
+        nucldivsigma_exist = False
+    else:
+        nucl_exist = exists(datadir / (f"time_window_loop_nucl_Aexp.pkl")) and exists(
+            datadir / (f"time_window_loop_nucl_Twoexp.pkl")
+        )
+        nucldivsigma_exist = exists(
+            datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl")
+        ) and exists(datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"))
+        sigma_exist = exists(
+            qmax_datadir / (f"time_window_loop_sigma_Aexp.pkl")
+        ) and exists(qmax_datadir / (f"time_window_loop_sigma_Twoexp.pkl"))
+
     if not nucl_exist:
         time_limits_nucl = np.array(
             [
@@ -874,13 +881,8 @@ def main():
         with open(datadir / (f"time_window_loop_nucl_Twoexp.pkl"), "rb") as file_in:
             fitlist_nucl_2exp = pickle.load(file_in)
 
+    # ============================================================
     # Sigma correlators
-    if "qmax" in config:
-        sigma_exist = exists(datadir / (f"time_window_loop_sigma_Aexp.pkl")) and exists(
-        datadir / (f"time_window_loop_sigma_Twoexp.pkl")
-    )
-    else:
-        sigma_exist = True
     if not sigma_exist:
         time_limits_sigma = np.array(
             [
@@ -907,10 +909,8 @@ def main():
         ) as file_in:
             fitlist_sigma_2exp = pickle.load(file_in)
 
+    # ============================================================
     # Nucleon divided by Sigma correlators
-    nucldivsigma_exist = exists(
-        datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl")
-    ) and exists(datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"))
     if not nucldivsigma_exist:
         time_limits_nucldivsigma = np.array(
             [
@@ -945,7 +945,7 @@ def main():
         #     ) as file_in:
         #         fitlist_large = pickle.load(file_in)
 
-    # =========================================
+    # =============================================================
     weighted_energy_nucl, fitweights = weighted_avg(
         fitlist_nucl_1exp,
         fitlist_nucl_2exp,
@@ -983,7 +983,6 @@ def main():
 
     weights_nucl = np.array([i["weight"] for i in fitlist_nucl_1exp])
     high_weight_nucl = np.argmax(weights_nucl)
-    # print(fitlist_nucl_1exp[high_weight_nucl]["redchisq"])
     nucl_t_range = np.arange(
         fitlist_nucl_1exp[high_weight_nucl]["x"][0],
         fitlist_nucl_1exp[high_weight_nucl]["x"][-1] + 1,
