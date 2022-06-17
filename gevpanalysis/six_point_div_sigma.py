@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 from gevpanalysis.definitions import PROJECT_BASE_DIRECTORY
 from gevpanalysis.util import find_file
+from gevpanalysis.util import read_config
 
 from analysis import stats
 from analysis.bootstrap import bootstrap
@@ -830,19 +831,22 @@ def main():
 
     # Read in the analysis data from the yaml file if one is given
     if len(sys.argv) == 2:
-        config_file = find_file("config", sys.argv[1])
+        config = read_config(sys.argv[1])
+        # config_file = find_file("config", sys.argv[1])
         # config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
     else:
-        config_file = find_file("config", "data_dir_theta7.yaml")
+        config = read_config("data_dir_qmax")
+        # config_file = find_file("config", "data_dir_theta7.yaml")
         # config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
-    print(f"Reading directories from: {config_file}\n")
-    with open(config_file) as f:
-        config = yaml.safe_load(f)
+    # print(f"Reading directories from: {config_file}\n")
+    # with open(config_file) as f:
+    #     config = yaml.safe_load(f)
 
     # Set parameters to defaults defined in another YAML file
     # with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
-    with open(find_file(PROJECT_BASE_DIRECTORY, "config", "defaults.yaml")) as f:
-        defaults = yaml.safe_load(f)
+    # with open(find_file(PROJECT_BASE_DIRECTORY, "config", "defaults.yaml")) as f:
+    #     defaults = yaml.safe_load(f)
+    defaults = read_config("defaults")
     for key, value in defaults.items():
         config.setdefault(key, value)
 
