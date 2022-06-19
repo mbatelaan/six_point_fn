@@ -259,7 +259,7 @@ def plotting_script_diff_2(
     show=False,
 ):
     spacing = 2
-    xlim = 20
+    xlim = 25
     time = np.arange(0, np.shape(diffG1)[1])
     efftime = time[:-spacing] + 0.5
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
@@ -755,7 +755,8 @@ def main():
     # ===============================
     # HARD CODED RANGE!!!
     # ratio_t_range = np.arange(7, 18)
-    ratio_t_range = np.arange(7, 20)
+    # ratio_t_range = np.arange(7, 20)
+    ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"]+1)
     # ===============================
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap

@@ -17,23 +17,23 @@ from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
 from analysis import fitfunc as ff
 
-from common import read_pickle
-from common import fit_value
-from common import fit_value3
-from common import read_correlators
-from common import read_correlators2
-from common import read_correlators3
-from common import read_correlators4
-from common import read_correlators5_complex
-from common import read_correlators6
-from common import make_matrices
-from common import normalize_matrices
-from common import gevp
-from common import gevp_bootstrap
-from common import weighted_avg_1_2_exp
-from common import weighted_avg
+from gevpanalysis.common import read_pickle
+from gevpanalysis.common import fit_value
+from gevpanalysis.common import fit_value3
+from gevpanalysis.common import read_correlators
+from gevpanalysis.common import read_correlators2
+from gevpanalysis.common import read_correlators3
+from gevpanalysis.common import read_correlators4
+from gevpanalysis.common import read_correlators5_complex
+from gevpanalysis.common import read_correlators6
+from gevpanalysis.common import make_matrices
+from gevpanalysis.common import normalize_matrices
+from gevpanalysis.common import gevp
+from gevpanalysis.common import gevp_bootstrap
+from gevpanalysis.common import weighted_avg_1_2_exp
+from gevpanalysis.common import weighted_avg
 
-from params import params
+from gevpanalysis.params import params
 
 
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
@@ -52,6 +52,241 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 # From the theta tuning:
 m_N = 0.4179255
 m_S = 0.4641829
+
+def plotting_script_unpert(
+    correlator1,
+    correlator2,
+    ratio,
+    fitvals1,
+    fitvals2,
+    fitvals,
+    fitvals_effratio,
+    nucl_t_range,
+    sigma_t_range,
+    ratio_t_range,
+    plotdir,
+    redchisq,
+    name="",
+    show=False,
+):
+    spacing = 2
+    xlim = 28
+    time = np.arange(0, np.shape(correlator1)[1])
+    efftime = time[:-spacing] + 0.5
+    correlator1 = stats.bs_effmass(correlator1, time_axis=1, spacing=1)
+    correlator2 = stats.bs_effmass(correlator2, time_axis=1, spacing=1)
+    effratio = stats.bs_effmass(ratio, time_axis=1, spacing=1)
+    yavg_1 = np.average(correlator1, axis=0)
+    ystd_1 = np.std(correlator1, axis=0)
+    yavg_2 = np.average(correlator2, axis=0)
+    ystd_2 = np.std(correlator2, axis=0)
+    yavg_ratio = np.average(ratio, axis=0)
+    ystd_ratio = np.std(ratio, axis=0)
+    yavg_effratio = np.average(effratio, axis=0)
+    ystd_effratio = np.std(effratio, axis=0)
+
+    fit_energy_ratio = fitvals_effratio["param"][:, 1]
+    fit_redchisq_ratio = fitvals_effratio["redchisq"]
+    plt.figure(figsize=(5, 5))
+    plt.errorbar(
+        efftime[:xlim],
+        yavg_effratio[:xlim],
+        ystd_effratio[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+    )
+    plt.plot(
+        ratio_t_range,
+        len(ratio_t_range) * [np.average(fit_energy_ratio)],
+        color=_colors[0],
+    )
+    plt.fill_between(
+        ratio_t_range,
+        np.average(fit_energy_ratio) - np.std(fit_energy_ratio),
+        np.average(fit_energy_ratio) + np.std(fit_energy_ratio),
+        alpha=0.3,
+        color=_colors[0],
+        # label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fit_energy_ratio),np.std(fit_energy_ratio))}",
+        label=rf"$\Delta E(\lambda=0)$ = {err_brackets(np.average(fit_energy_ratio),np.std(fit_energy_ratio))}",
+    )
+
+    plt.legend(fontsize="x-small")
+    # plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})]$")
+    plt.ylabel(r"$\textrm{eff. energy}[G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})]$")
+    plt.xlabel(r"$t/a$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.ylim(-0.1, 0.1)
+    plt.savefig(plotdir / ("unpert_effmass.pdf"), metadata=_metadata)
+
+    plt.figure(figsize=(7, 5))
+    plt.errorbar(
+        efftime[:xlim],
+        yavg_1[:xlim],
+        ystd_1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        # label=f"{redchisqs[0]:.2f}"
+    )
+    plt.errorbar(
+        efftime[:xlim],
+        yavg_2[:xlim],
+        ystd_2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        # label=f"{redchisqs[1]:.2f}"
+    )
+
+    fit_energy_nucl = fitvals1["param"][:, 1]
+    fit_redchisq_nucl = fitvals1["redchisq"]
+    plt.plot(
+        nucl_t_range,
+        len(nucl_t_range) * [np.average(fit_energy_nucl)],
+        color=_colors[0],
+    )
+    plt.fill_between(
+        nucl_t_range,
+        np.average(fit_energy_nucl) - np.std(fit_energy_nucl),
+        np.average(fit_energy_nucl) + np.std(fit_energy_nucl),
+        alpha=0.3,
+        color=_colors[0],
+        # label=rf"$E_N(\mathbf{{0}}) = {err_brackets(np.average(fitvals1),np.std(fitvals1))}$; $\chi^2_{{\textrm{{dof}}}} = {redchisqs[0]:.2f}$",
+        label=rf"$E_N(\mathbf{{0}}) = {err_brackets(np.average(fit_energy_nucl),np.std(fit_energy_nucl))}$; $\chi^2_{{\textrm{{dof}}}} = {fit_redchisq_nucl:.2f}$",
+    )
+
+    fit_energy_sigma = fitvals2["param"][:, 1]
+    fit_redchisq_sigma = fitvals2["redchisq"]
+    plt.plot(
+        sigma_t_range,
+        len(sigma_t_range) * [np.average(fit_energy_sigma)],
+        color=_colors[1],
+    )
+    plt.fill_between(
+        sigma_t_range,
+        np.average(fit_energy_sigma) - np.std(fit_energy_sigma),
+        np.average(fit_energy_sigma) + np.std(fit_energy_sigma),
+        alpha=0.3,
+        color=_colors[1],
+        label=rf"$E_{{\Sigma}}(\mathbf{{0}}) = {err_brackets(np.average(fit_energy_sigma),np.std(fit_energy_sigma))}$; $\chi^2_{{\textrm{{dof}}}} = {fit_redchisq_sigma:.2f}$",
+    )
+    # plt.plot(
+    #     1000,
+    #     1,
+    #     label=rf"$\Delta E = {err_brackets(np.average(fitvals_effratio),np.std(fitvals_effratio))}$",
+    # )
+    plt.legend(fontsize="x-small")
+    plt.ylabel(r"$\textrm{Effective energy}$")
+    plt.xlabel(r"$t/a$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    # plt.setp(axs, xlim=(0, xlim), ylim=(0, 2))
+    plt.xlim(0, xlim)
+    plt.ylim(0, 1)
+    plt.grid(True, alpha=0.3)
+    plt.savefig(plotdir / ("unpert_energies.pdf"), metadata=_metadata)
+
+    f, axs = plt.subplots(2, 1, figsize=(6, 6), sharex=True)
+    f.tight_layout()
+    axs[0].errorbar(
+        efftime[:xlim],
+        yavg_1[:xlim],
+        ystd_1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$N$",
+    )
+    axs[0].errorbar(
+        efftime[:xlim],
+        yavg_2[:xlim],
+        ystd_2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$\Sigma$",
+    )
+    axs[0].plot(
+        nucl_t_range,
+        len(nucl_t_range) * [np.average(fit_energy_nucl)],
+        color=_colors[0],
+    )
+    axs[0].fill_between(
+        nucl_t_range,
+        np.average(fit_energy_nucl) - np.std(fit_energy_nucl),
+        np.average(fit_energy_nucl) + np.std(fit_energy_nucl),
+        alpha=0.3,
+        color=_colors[0],
+        # label=rf"$E_N(\mathbf{{p}}')$ = {err_brackets(np.average(fitvals1),np.std(fitvals1))}",
+        label=rf"$E_N(\mathbf{{0}})$ = {err_brackets(np.average(fit_energy_nucl),np.std(fit_energy_nucl))}",
+    )
+    axs[0].plot(
+        sigma_t_range,
+        len(sigma_t_range) * [np.average(fit_energy_sigma)],
+        color=_colors[1],
+    )
+    axs[0].fill_between(
+        sigma_t_range,
+        np.average(fit_energy_sigma) - np.std(fit_energy_sigma),
+        np.average(fit_energy_sigma) + np.std(fit_energy_sigma),
+        alpha=0.3,
+        color=_colors[1],
+        label=rf"$E_{{\Sigma}}(\mathbf{{0}})$ = {err_brackets(np.average(fit_energy_sigma),np.std(fit_energy_sigma))}",
+    )
+    axs[0].plot(
+        1000,
+        1,
+        label=rf"$\Delta E$ = {err_brackets(np.average(fit_energy_sigma-fit_energy_nucl),np.std(fit_energy_sigma-fit_energy_nucl))}",
+    )
+    axs[0].legend(fontsize="x-small")
+
+    axs[1].errorbar(
+        time[:xlim],
+        yavg_ratio[:xlim],
+        ystd_ratio[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$G_{N}/G_{\Sigma}$",
+    )
+    axs[1].plot(
+        ratio_t_range, len(ratio_t_range) * [np.average(fitvals)], color=_colors[0]
+    )
+    axs[1].fill_between(
+        ratio_t_range,
+        np.average(fitvals) - np.std(fitvals),
+        np.average(fitvals) + np.std(fitvals),
+        alpha=0.3,
+        color=_colors[2],
+        label=rf"Fit = ${err_brackets(np.average(fitvals),np.std(fitvals))}$; $\chi^2_{{\textrm{{dof}}}} = {redchisq:.2f}$",
+    )
+
+    # axs[0].axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
+    plt.setp(axs, xlim=(0, xlim), ylim=(0, 2))
+    axs[0].set_ylabel(r"$\textrm{Effective energy}$")
+    # axs[1].set_ylabel(r"$G_n(\mathbf{p}')/G_{\Sigma}(\mathbf{0})$")
+    axs[1].set_ylabel(r"$G_n(\mathbf{0})/G_{\Sigma}(\mathbf{0})$")
+    plt.xlabel("$t/a$")
+    axs[1].legend(fontsize="x-small")
+    # plt.title("$\lambda=" + str(lmb_val) + "$")
+    plt.savefig(plotdir / ("unpert_ratio" + name + ".pdf"), metadata=_metadata)
+    if show:
+        plt.show()
+    plt.close()
+    return
 
 
 def fit_loop_new(correlator, fitfunctions, time_limits, datadir, data_label):
@@ -159,7 +394,7 @@ def main():
 
     # ============================================================
     # Nucleon correlators
-    if not nucl_loop:
+    if nucl_loop:
         time_limits_nucl = np.array(
             [
                 [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
@@ -182,7 +417,7 @@ def main():
 
     # ============================================================
     # Sigma correlators
-    if not sigma_loop:
+    if sigma_loop:
         time_limits_sigma = np.array(
             [
                 [[1, 18], [config["tmax_sigma"] - 2, config["tmax_sigma"] + 2]],
@@ -210,7 +445,7 @@ def main():
 
     # ============================================================
     # Nucleon divided by Sigma correlators
-    if not nucldivsigma_loop:
+    if nucldivsigma_loop:
         time_limits_nucldivsigma = np.array(
             [
                 [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
@@ -324,6 +559,13 @@ def main():
     ][0]
     sigma_t_range = np.arange(config["tmin_sigma"], config["tmax_sigma"] + 1)
 
+    chosen_nucldivsigma_fit = [
+        i
+        for i in fitlist_nucldivsigma_1exp
+        if i["x"][0] == config["tmin_ratio"] and i["x"][-1] == config["tmax_ratio"]
+    ][0]
+    ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"] + 1)
+
     plotting_script_unpert(
         np.abs(G2_nucl[0]),
         np.abs(G2_sigm[0]),
@@ -331,12 +573,14 @@ def main():
         chosen_nucl_fit,
         chosen_sigma_fit,
         bootfit_ratio[:, 0],
-        weighted_energy_nucldivsigma,
+        # weighted_energy_nucldivsigma,
+        chosen_nucldivsigma_fit,
         nucl_t_range,
         sigma_t_range,
         ratio_t_range,
         plotdir,
-        [redchisq1, redchisq2, redchisq_ratio],
+        # [redchisq1, redchisq2, redchisq_ratio],
+        redchisq_ratio,
         name="_unpert_ratio",
         show=False,
     )
