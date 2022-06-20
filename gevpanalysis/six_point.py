@@ -598,7 +598,12 @@ def plotting_script_unpert(
 
 
 def fit_loop_weighted(
-    datadir, plotdir, config, time_limits_nucl, time_limits_sigma, time_limits_nucldivsigma
+    datadir,
+    plotdir,
+    config,
+    time_limits_nucl,
+    time_limits_sigma,
+    time_limits_nucldivsigma,
 ):
     # ============================================================
     # Nucleon correlators
@@ -682,8 +687,14 @@ def fit_loop_weighted(
     ][0]
     ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"] + 1)
 
-
-    return weighted_energy_nucl, weighted_energy_sigma, weighted_energy_nucldivsigma, chosen_nucl_fit, chosen_sigma_fit, chosen_nucldivsigma_fit
+    return (
+        weighted_energy_nucl,
+        weighted_energy_sigma,
+        weighted_energy_nucldivsigma,
+        chosen_nucl_fit,
+        chosen_sigma_fit,
+        chosen_nucldivsigma_fit,
+    )
 
 
 def main():
@@ -711,8 +722,10 @@ def main():
     # Set the directories for reading data, saving data and saving plots
     pickledir_k1 = Path(config["pickle_dir1"])
     pickledir_k2 = Path(config["pickle_dir2"])
-    plotdir = Path(config["analysis_dir"]) / Path("plots")
-    datadir = Path(config["analysis_dir"]) / Path("data")
+    # plotdir = Path(config["analysis_dir"]) / Path("plots")
+    # datadir = Path(config["analysis_dir"]) / Path("data")
+    plotdir = PROJECT_BASE_DIRECTORY / Path("data/plots") / Path(config["name"])
+    datadir = PROJECT_BASE_DIRECTORY / Path("data/pickles") / Path(config["name"])
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
 
@@ -753,11 +766,16 @@ def main():
         weighted_energy_nucl,
         weighted_energy_sigma,
         weighted_energy_nucldivsigma,
-        chosen_nucl_fit, 
+        chosen_nucl_fit,
         chosen_sigma_fit,
         chosen_nucldivsigma_fit,
     ) = fit_loop_weighted(
-        datadir, plotdir, config, time_limits_nucl, time_limits_sigma, time_limits_nucldivsigma
+        datadir,
+        plotdir,
+        config,
+        time_limits_nucl,
+        time_limits_sigma,
+        time_limits_nucldivsigma,
     )
     # ============================================================
 
@@ -1006,9 +1024,9 @@ def main():
             "weighted_energy_nucl": weighted_energy_nucl,
             "weighted_energy_nucldivsigma": weighted_energy_nucldivsigma,
             "weighted_energy_sigma": weighted_energy_sigma,
-            "chosen_nucl_fit" : chosen_nucl_fit,
-            "chosen_sigma_fit" : chosen_sigma_fit,
-            "chosen_nucldivsigma_fit" : chosen_nucldivsigma_fit,
+            "chosen_nucl_fit": chosen_nucl_fit,
+            "chosen_sigma_fit": chosen_sigma_fit,
+            "chosen_nucldivsigma_fit": chosen_nucldivsigma_fit,
         }
         fitlist.append(fitparams)
         print("Saved the data")
