@@ -341,8 +341,10 @@ def main():
     # Set the directories for reading data, saving data and saving plots
     pickledir_k1 = Path(config["pickle_dir1"])
     pickledir_k2 = Path(config["pickle_dir2"])
-    plotdir = Path(config["analysis_dir"]) / Path("plots")
-    datadir = Path(config["analysis_dir"]) / Path("data")
+    # plotdir = Path(config["analysis_dir"]) / Path("plots")
+    # datadir = Path(config["analysis_dir"]) / Path("data")
+    plotdir = PROJECT_BASE_DIRECTORY / Path("data/plots") / Path(config["name"])
+    datadir = PROJECT_BASE_DIRECTORY / Path("data/pickles") / Path(config["name"])
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
 
