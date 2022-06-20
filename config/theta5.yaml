@@ -14,4 +14,5 @@ tmin_nucl : 12
 tmin_sigma : 12
 tmax_nucl : 24
 tmax_sigma : 24
+tmin_ratio : 10
 tmax_ratio : 24
