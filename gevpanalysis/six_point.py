@@ -661,7 +661,29 @@ def fit_loop_weighted(
         tminmin_2exp=time_limits_nucldivsigma[1, 0],
         tminmax_2exp=time_limits_nucldivsigma[1, 1],
     )
-    return weighted_energy_nucl, weighted_energy_sigma, weighted_energy_nucldivsigma
+    chosen_nucl_fit = [
+        i
+        for i in fitlist_nucl_1exp
+        if i["x"][0] == config["tmin_nucl"] and i["x"][-1] == config["tmax_nucl"]
+    ][0]
+    nucl_t_range = np.arange(config["tmin_nucl"], config["tmax_nucl"] + 1)
+
+    chosen_sigma_fit = [
+        i
+        for i in fitlist_sigma_1exp
+        if i["x"][0] == config["tmin_sigma"] and i["x"][-1] == config["tmax_sigma"]
+    ][0]
+    sigma_t_range = np.arange(config["tmin_sigma"], config["tmax_sigma"] + 1)
+
+    chosen_nucldivsigma_fit = [
+        i
+        for i in fitlist_nucldivsigma_1exp
+        if i["x"][0] == config["tmin_ratio"] and i["x"][-1] == config["tmax_ratio"]
+    ][0]
+    ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"] + 1)
+
+
+    return weighted_energy_nucl, weighted_energy_sigma, weighted_energy_nucldivsigma, chosen_nucl_fit, chosen_sigma_fit, chosen_nucldivsigma_fit
 
 
 def main():
@@ -731,6 +753,9 @@ def main():
         weighted_energy_nucl,
         weighted_energy_sigma,
         weighted_energy_nucldivsigma,
+        chosen_nucl_fit, 
+        chosen_sigma_fit,
+        chosen_nucldivsigma_fit,
     ) = fit_loop_weighted(
         datadir, plotdir, config, time_limits_nucl, time_limits_sigma, time_limits_nucldivsigma
     )
@@ -756,7 +781,7 @@ def main():
     # HARD CODED RANGE!!!
     # ratio_t_range = np.arange(7, 18)
     # ratio_t_range = np.arange(7, 20)
-    ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"]+1)
+    # ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"]+1)
     # ===============================
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
@@ -782,14 +807,21 @@ def main():
     #     for i in fitlist_nucl_1exp
     #     if i["x"][0] == config["tmin_nucl"] and i["x"][-1] == config["tmax_nucl"]
     # ][0]
-    # nucl_t_range = np.arange(config["tmin_nucl"], config["tmax_nucl"] + 1)
+    nucl_t_range = np.arange(config["tmin_nucl"], config["tmax_nucl"] + 1)
 
     # chosen_sigma_fit = [
     #     i
     #     for i in fitlist_sigma_1exp
     #     if i["x"][0] == config["tmin_sigma"] and i["x"][-1] == config["tmax_sigma"]
     # ][0]
-    # sigma_t_range = np.arange(config["tmin_sigma"], config["tmax_sigma"] + 1)
+    sigma_t_range = np.arange(config["tmin_sigma"], config["tmax_sigma"] + 1)
+
+    # chosen_nucldivsigma_fit = [
+    #     i
+    #     for i in fitlist_nucldivsigma_1exp
+    #     if i["x"][0] == config["tmin_ratio"] and i["x"][-1] == config["tmax_ratio"]
+    # ][0]
+    ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"] + 1)
 
     # plotting_script_unpert(
     #     np.abs(G2_nucl[0]),
@@ -974,6 +1006,9 @@ def main():
             "weighted_energy_nucl": weighted_energy_nucl,
             "weighted_energy_nucldivsigma": weighted_energy_nucldivsigma,
             "weighted_energy_sigma": weighted_energy_sigma,
+            "chosen_nucl_fit" : chosen_nucl_fit,
+            "chosen_sigma_fit" : chosen_sigma_fit,
+            "chosen_nucldivsigma_fit" : chosen_nucldivsigma_fit,
         }
         fitlist.append(fitparams)
         print("Saved the data")
