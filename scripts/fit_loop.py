@@ -450,14 +450,14 @@ def main():
     if nucldivsigma_loop:
         time_limits_nucldivsigma = np.array(
             [
-                [[1, 18], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
-                [[1, 3], [config["tmax_nucl"] - 2, config["tmax_nucl"] + 2]],
+                [[1, 18], [config["tmax_ratio"] - 2, config["tmax_ratio"] + 2]],
+                [[1, 3], [config["tmax_ratio"] - 2, config["tmax_ratio"] + 2]],
             ]
         )
         [fitlist_nucldivsigma_1exp, fitlist_nucldivsigma_2exp] = fit_loop_new(
             np.abs(G2_nucl[0] / G2_sigm[0]),
             [aexp_function, twoexp_function],
-            time_limits_nucl_div_sigma,
+            time_limits_nucldivsigma,
             datadir,
             "nucldivsigma",
         )
@@ -488,9 +488,9 @@ def main():
         fitlist_nucldivsigma_2exp,
         plotdir,
         "nucldivsigma",
-        tmax_choice=config["tmax_nucl"],
-        tminmin_2exp=2,
-        tminmax_2exp=2,
+        tmax_choice=config["tmax_ratio"],
+        tminmin_2exp=0,
+        tminmax_2exp=0,
         tminmin_1exp=1,
         tminmax_1exp=15,
     )

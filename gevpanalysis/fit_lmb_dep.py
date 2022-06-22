@@ -193,8 +193,8 @@ def fit_lambda_dep_2(fitlist, delta_E_fix, order, lmb_range, fitfunction):
         method="Nelder-Mead",
         options={"disp": False},
     )
-    print('\nresavg.x = ', resavg.x)
-    print('resavg.fun = ', resavg.fun)
+    # print('\nresavg.x = ', resavg.x)
+    # print('resavg.fun = ', resavg.fun)
 
     bootfit = []
     chisq_vals = []
@@ -215,9 +215,9 @@ def fit_lambda_dep_2(fitlist, delta_E_fix, order, lmb_range, fitfunction):
     dof = len(xdata) -  len(p0_1)
     redchisq = chisq / dof
 
-    print('\nbootfit avg fn6 = ',np.average(bootfit, axis=0))
-    print('bootfit chisq fn6 = ',np.average(chisq_vals, axis=0))
-    print('bootfit chisq fn6 = ',redchisq, '\n\n')
+    # print('\nbootfit avg fn6 = ',np.average(bootfit, axis=0))
+    # print('bootfit chisq fn6 = ',np.average(chisq_vals, axis=0))
+    # print('bootfit chisq fn6 = ',redchisq, '\n\n')
     return bootfit, redchisq
 
 def plot_lmb_depR(all_data, plotdir, fit_data=None):
@@ -225,11 +225,11 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     Where the plot uses colored bands to show the dependence
     """
 
-    print(all_data["lambdas0"])
-    print(
-        np.average(all_data["order0_fit"], axis=1)
-        - np.std(all_data["order0_fit"], axis=1)
-    )
+    # print(all_data["lambdas0"])
+    # print(
+    #     np.average(all_data["order0_fit"], axis=1)
+    #     - np.std(all_data["order0_fit"], axis=1)
+    # )
     plt.figure(figsize=(9, 6))
     plt.fill_between(
         all_data["lambdas0"],
@@ -413,11 +413,11 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None):
     Where the plot uses colored bands to show the dependence
     """
 
-    print(all_data["lambdas0"])
-    print(
-        np.average(all_data["order0_fit"], axis=1)
-        - np.std(all_data["order0_fit"], axis=1)
-    )
+    # print(all_data["lambdas0"])
+    # print(
+    #     np.average(all_data["order0_fit"], axis=1)
+    #     - np.std(all_data["order0_fit"], axis=1)
+    # )
     plt.figure(figsize=(9, 6))
     plt.fill_between(
         all_data["lambdas3"],
@@ -494,11 +494,11 @@ def plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix):
     Where the plot uses colored bands to show the dependence
     """
 
-    print(all_data["lambdas0"])
-    print(
-        np.average(all_data["order0_fit"], axis=1)
-        - np.std(all_data["order0_fit"], axis=1)
-    )
+    # print(all_data["lambdas0"])
+    # print(
+    #     np.average(all_data["order0_fit"], axis=1)
+    #     - np.std(all_data["order0_fit"], axis=1)
+    # )
     plt.figure(figsize=(9, 6))
     plt.fill_between(
         all_data["lambdas3"],
@@ -643,16 +643,16 @@ def main():
     fit_data = {"lmb_range": lmb_range}
     for order in np.arange(4):
         lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
+        print('\n==========\nOrder: ', order)
+        print('lmb_range = ', lmb_range)
         lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
             fitlists[order], order, lmb_range
         )
-        print('\n\nOrder: ', order)
-        print('lmb_range = ', lmb_range)
         fit_data[f"lmb_range{order}"] = lmb_range
         fit_data[f"bootfit{order}"] = bootfit
         fit_data[f"redchisq{order}"] = redchisq_fit
 
-    print([key for key in fit_data])
+    # print([key for key in fit_data])
     with open(datadir / (f"matrix_element.pkl"), "wb") as file_out:
         pickle.dump(fit_data, file_out)
 
@@ -676,7 +676,7 @@ def main():
     plot_lmb_dep4(all_data, plotdir, fit_data)
 
     delta_E_fix = np.average(data[0]["weighted_energy_nucldivsigma"])
-    print('\n\n',delta_E_fix)
+    # print('\n\n',delta_E_fix)
     fit_data = {"lmb_range": lmb_range}
     bootfit, redchisq = fit_lambda_dep_2(fitlist3, delta_E_fix, order, lmb_range, fitfunction6)
     fit_data[f"bootfit3"] = bootfit

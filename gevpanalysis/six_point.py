@@ -660,7 +660,7 @@ def fit_loop_weighted(
         fitlist_nucldivsigma_2exp,
         plotdir,
         "nucldivsigma",
-        tmax_choice=config["tmax_nucl"],
+        tmax_choice=config["tmax_ratio"],
         tminmin_1exp=time_limits_nucldivsigma[0, 0],
         tminmax_1exp=time_limits_nucldivsigma[0, 1],
         tminmin_2exp=time_limits_nucldivsigma[1, 0],

@@ -10,13 +10,15 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 from gevpanalysis.definitions import PROJECT_BASE_DIRECTORY
+from gevpanalysis.util import find_file
+from gevpanalysis.util import read_config
 
 from analysis import stats
 from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
 from analysis import fitfunc as ff
 
-from params import params
+from gevpanalysis.params import params
 
 
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
@@ -61,7 +63,7 @@ def fitfunction4(lmb, E_nucl_p, E_sigma_p, matrix_element):
 
 
 def fitfunction5(lmb, Delta_E, matrix_element):
-    deltaE = 0.5 * np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
+    deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
     return deltaE
 
 
@@ -195,6 +197,113 @@ def fit_lambda_dep(fitlist, order, lmb_range):
     print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
     return lmb_range, bootfit, redchisq_fit, chisq_fit
 
+def lambdafit_3pt(lambdas3, fitlists, datadir):
+    p0 = (1e-3, 0.7)
+    fitlim = 30
+    fit_data_list = []
+    min_len = len(lambdas3)
+    for lmb_initial in np.arange(0,4):
+        for lmb_step in np.arange(1,min_len/2-1):
+            lmb_range = np.array([lmb_initial, int(lmb_initial + lmb_step),int(lmb_initial + lmb_step*2)])
+            if lmb_range[-1]>=min_len:
+                continue
+            print(f'lmb_range = {lmb_range}')
+            try:
+                if lmb_range[-1] < len(lambdas3):
+                    order=3
+                    lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
+                        fitlists[order], order, lmb_range
+                    )
+                fit_data = {
+                    "lmb_range": lmb_range,
+                    "fitlim": fitlim,
+                    "bootfit3": bootfit,
+                    # "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3])[lmb_range],
+                    "lambdas3": lambdas3[lmb_range],
+                    "chisq3": chisq_fit,
+                    "redchisq3": redchisq_fit,
+                }
+                fit_data_list.append(fit_data)
+            except RuntimeError as e:
+                print("====================\nFitting Failed\n", e, "\n====================")
+                fit_data = None
+                
+    with open(datadir / (f"matrix_elements_loop_3pts.pkl"), "wb") as file_out:
+        pickle.dump(fit_data_list, file_out)
+    return fit_data_list
+
+
+def lambdafit_4pt(lambdas3, fitlists, datadir):
+    p0 = (1e-3, 0.7)
+    fitlim = 30
+    fit_data_list = []
+    min_len = len(lambdas3)
+    for lmb_initial in np.arange(0,4):
+        for lmb_step in np.arange(1,min_len/3):
+            lmb_range = np.array([lmb_initial, int(lmb_initial + lmb_step), int(lmb_initial + lmb_step*2), int(lmb_initial + lmb_step*3)])
+            if lmb_range[-1]>=min_len:
+                continue
+            print(f'lmb_range = {lmb_range}')
+            try:
+                if lmb_range[-1] < len(lambdas3):
+                    order=3
+                    lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
+                        fitlists[order], order, lmb_range
+                    )
+                fit_data = {
+                    "lmb_range": lmb_range,
+                    "fitlim": fitlim,
+                    "bootfit3": bootfit,
+                    "lambdas3": lambdas3[lmb_range],
+                    # "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3])[lmb_range],
+                    "chisq3": chisq_fit,
+                    "redchisq3": redchisq_fit,
+                }
+                fit_data_list.append(fit_data)
+            except RuntimeError as e:
+                print("====================\nFitting Failed\n", e, "\n====================")
+                fit_data = None
+                
+    with open(datadir / (f"matrix_elements_loop_4pts.pkl"), "wb") as file_out:
+        pickle.dump(fit_data_list, file_out)
+    return fit_data_list
+
+
+def lambdafit_allpt(lambdas3, fitlists, datadir):
+    p0 = (1e-3, 0.7)
+    fitlim = 30
+    fit_data_list = []
+    min_len = len(lambdas3)
+    # print('len(lambdas3) = ', min_len)
+    for lmb_initial in np.arange(0,min_len):
+        for lmb_final in np.arange(lmb_initial+3,min_len):
+            lmb_range = np.arange(lmb_initial, lmb_final)
+            print(f'lmb_range = {lmb_range}')
+            try:
+                if lmb_range[-1] < len(lambdas3):
+                    order=3
+                    lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
+                        fitlists[order], order, lmb_range
+                    )
+
+                fit_data = {
+                    "lmb_range": lmb_range,
+                    "fitlim": fitlim,
+                    "bootfit3": bootfit,
+                    "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3])[lmb_range],
+                    "chisq3": chisq_fit,
+                    "redchisq3": redchisq_fit,
+                }
+                fit_data_list.append(fit_data)
+            except RuntimeError as e:
+                print("====================\nFitting Failed\n", e, "\n====================")
+                fit_data = None
+                
+    with open(datadir / (f"matrix_elements_loop.pkl"), "wb") as file_out:
+        pickle.dump(fit_data_list, file_out)
+    return fit_data_list
+
+
 def main_loop():
     """ Fit to the lambda dependence of the energy shift and loop over the fit windows """
     mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
@@ -206,22 +315,17 @@ def main_loop():
 
     # Read in the directory data from the yaml file
     if len(sys.argv) == 2:
-        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
+        config = read_config(sys.argv[1])
     else:
-        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
-    with open(config_file) as f:
-        config = yaml.safe_load(f)
-
-    # Set parameters to defaults defined in another YAML file
-    with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
-        defaults = yaml.safe_load(f)
+        config = read_config("qmax")
+    defaults = read_config("defaults")
     for key, value in defaults.items():
         config.setdefault(key, value)
 
     pickledir = Path(config["pickle_dir1"])
     pickledir2 = Path(config["pickle_dir2"])
-    plotdir = Path(config["analysis_dir"]) / Path("plots")
-    datadir = Path(config["analysis_dir"]) / Path("data")
+    plotdir = PROJECT_BASE_DIRECTORY / Path("data/plots") / Path(config["name"])
+    datadir = PROJECT_BASE_DIRECTORY / Path("data/pickles") / Path(config["name"])
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
     print("datadir: ", datadir / ("lambda_dep.pkl"))
@@ -254,43 +358,43 @@ def main_loop():
     fitlist2 = [data[ind] for ind in indices2]
     fitlist3 = [data[ind] for ind in indices3]
     fitlists = [fitlist0, fitlist1, fitlist2, fitlist3]
-
     lambdas3 =  np.array([fit[f"lambdas"] for fit in fitlist3])
-    p0 = (1e-3, 0.7)
-    fitlim = 30
-    # lmb_range = np.arange(1, 22)
-    # Fit to the lambda dependence at each order in lambda
-    print("\n")
-    
-    fit_data_list = []
-    min_len = len(lambdas3)
-    # print('len(lambdas3) = ', min_len)
-    for lmb_initial in np.arange(0,min_len):
-        for lmb_final in np.arange(lmb_initial+3,min_len):
-            lmb_range = np.arange(lmb_initial, lmb_final)
-            print(f'lmb_range = {lmb_range}')
-            try:
-                if lmb_range[-1] < len(lambdas3):
-                    order=3
-                    lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
-                        fitlists[order], order, lmb_range
-                    )
 
-                fit_data = {
-                    "lmb_range": lmb_range,
-                    "fitlim": fitlim,
-                    "bootfit3": bootfit,
-                    "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3])[lmb_range],
-                    "chisq3": chisq_fit,
-                    "redchisq3": redchisq_fit,
-                }
-                fit_data_list.append(fit_data)
-            except RuntimeError as e:
-                print("====================\nFitting Failed\n", e, "\n====================")
-                fit_data = None
+    lambdafit_3pt(lambdas3, fitlists, datadir)
+    lambdafit_4pt(lambdas3, fitlists, datadir)
+    lambdafit_allpt(lambdas3, fitlists, datadir)
+
+    # p0 = (1e-3, 0.7)
+    # fitlim = 30
+    # fit_data_list = []
+    # min_len = len(lambdas3)
+    # # print('len(lambdas3) = ', min_len)
+    # for lmb_initial in np.arange(0,min_len):
+    #     for lmb_final in np.arange(lmb_initial+3,min_len):
+    #         lmb_range = np.arange(lmb_initial, lmb_final)
+    #         print(f'lmb_range = {lmb_range}')
+    #         try:
+    #             if lmb_range[-1] < len(lambdas3):
+    #                 order=3
+    #                 lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
+    #                     fitlists[order], order, lmb_range
+    #                 )
+
+    #             fit_data = {
+    #                 "lmb_range": lmb_range,
+    #                 "fitlim": fitlim,
+    #                 "bootfit3": bootfit,
+    #                 "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3])[lmb_range],
+    #                 "chisq3": chisq_fit,
+    #                 "redchisq3": redchisq_fit,
+    #             }
+    #             fit_data_list.append(fit_data)
+    #         except RuntimeError as e:
+    #             print("====================\nFitting Failed\n", e, "\n====================")
+    #             fit_data = None
                 
-    with open(datadir / (f"matrix_elements_loop.pkl"), "wb") as file_out:
-        pickle.dump(fit_data_list, file_out)
+    # with open(datadir / (f"matrix_elements_loop.pkl"), "wb") as file_out:
+    #     pickle.dump(fit_data_list, file_out)
 
 if __name__ == "__main__":
     main_loop()
