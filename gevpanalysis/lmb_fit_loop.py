@@ -177,7 +177,6 @@ def lambdafit_3pt(lambdas3, fitlists, datadir, fitfunction):
 
 
 def lambdafit_4pt(lambdas3, fitlists, datadir, fitfunction):
-    # p0 = (1e-3, 0.7)
     p0 = fitfunction.initpar
     bounds = fitfunction.bounds
     fitlim = 30
@@ -310,9 +309,9 @@ def main_loop():
     fitfunc5 = Fitfunction5()
     fitfunc4 = Fitfunction_order4()
 
-    lambdafit_3pt(lambdas3, fitlists, datadir, fitfunc5)
-    lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc5)
-    lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc5)
+    # lambdafit_3pt(lambdas3, fitlists, datadir, fitfunc5)
+    # lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc5)
+    # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc5)
 
     lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
     # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc4)
