@@ -16,7 +16,7 @@ from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
 from analysis import fitfunc as ff
 
-from params import params
+from gevpanalysis.params import params
 
 
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}

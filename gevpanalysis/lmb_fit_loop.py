@@ -38,103 +38,42 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
-# pars1 = 0
+# def fitfunction5(lmb, Delta_E, matrix_element):
+#     deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
+#     return deltaE
 
+class Fitfunction5:
+    def __init__(self):
+        self.npar = 2
+        self.label = r"fn1"
+        self.initpar = np.array([1.0, 1.0])
+        self.bounds = ([0, 0], [np.inf, np.inf])
 
-def fitfunction2(lmb, E_nucl_p, E_sigma_p, matrix_element):
-    deltaE = 0.5 * (E_nucl_p + E_sigma_p) - 0.5 * np.sqrt(
-        (E_nucl_p - E_sigma_p) ** 2 + 4 * lmb ** 2 * matrix_element ** 2
-    )
-    return deltaE
+    def eval(self, lmb, Delta_E, matrix_element):
+        deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
+        return deltaE
+            
+class Fitfunction_order4:
+    def __init__(self):
+        self.npar = 3
+        self.label = r"fn4"
+        self.initpar = np.array([1.0, 1.0, 1.0])
+        self.bounds = ([0, 0, 0], [np.inf, np.inf, np.inf])
 
-
-def fitfunction3(lmb, pars0, pars2):
-    deltaE = 0.5 * (pars0 + pars1) + 0.5 * np.sqrt(
-        (pars0 - pars1) ** 2 + 4 * lmb ** 2 * pars2 ** 2
-    )
-    return deltaE
-
-
-def fitfunction4(lmb, E_nucl_p, E_sigma_p, matrix_element):
-    deltaE = 0.5 * np.sqrt(
-        (E_nucl_p - E_sigma_p) ** 2 + 4 * lmb ** 2 * matrix_element ** 2
-    )
-    return deltaE
-
-
-def fitfunction5(lmb, Delta_E, matrix_element):
-    deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
-    return deltaE
-
-
-# def fit_lmb(ydata, function, lambdas, plotdir, p0=None, order=1, svd_inv = True):
-#     """Fit the lambda dependence
-
-#     data is a correlator with tht bootstraps on the first index and the time on the second
-#     lambdas is an array of time values to fit over
-#     the function will return an array of fit parameters for each bootstrap
-#     """
-
-#     # bounds = ([0, 0, 0], [np.inf, np.inf, np.inf])
-#     bounds = ([0, 0], [np.inf, np.inf])
-#     ydata = ydata.T
-#     data_set = ydata
-#     ydata_avg = np.average(data_set, axis=0)
-
-#     covmat = np.cov(data_set.T)
-#     diag = np.diagonal(covmat)
-
-#     if svd_inv:
-#         # Calculate the eigenvalues of the covariance matrix
-#         eval_left, evec_left = np.linalg.eig(covmat)
-#         sorted_evals = np.sort(eval_left)[::-1]
-#         svd = 5 #How many singular values do we want to keep for the inversion
-#         rcond = (sorted_evals[svd-1] - sorted_evals[svd+1]) / 2 / sorted_evals[0]
-#         covmat_inverse = np.linalg.pinv(covmat, rcond=rcond)
-#         dof = svd-2
-#     else:
-#         covmat_inverse = linalg.pinv(covmat)
-#         dof = len(lambdas)
+    def eval(self, lmb, Delta_E, A, B):
+        """The fit function Ross proposed to capture the compton amplitude"""
+        deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * A**2 +  lmb**4 * B**2)
+        return deltaE
         
-#     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
-#     popt_avg, pcov_avg = curve_fit(
-#         function,
-#         lambdas,
-#         ydata_avg,
-#         sigma=diag_sigma,
-#         p0=p0,
-#         maxfev=4000,
-#         bounds=bounds,
-#     )
-#     chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, covmat_inverse)
-#     p0 = popt_avg
-#     redchisq = chisq / dof
-#     bootfit = []
-#     for iboot, values in enumerate(ydata):
-#         # print(iboot)
-#         popt, pcov = curve_fit(
-#             function,
-#             lambdas,
-#             values,
-#             sigma=diag_sigma,
-#             # maxfev=4000,
-#             p0=p0,
-#             bounds=bounds,
-#         )  # , p0=popt_avg)
-#         # print(popt)
-#         bootfit.append(popt)
-#     bootfit = np.array(bootfit)
-#     print("bootfit", np.average(bootfit, axis=0))
-#     return bootfit, redchisq, chisq
 
-def fit_lmb(ydata, function, lambdas, p0=None):
+def fit_lmb(ydata, function, lambdas, p0=None, bounds=None):
     """Fit the lambda dependence
 
     ydata is an array with the lambda values on the first index and bootstraps on the second index
     lambdas is an array of values to fit over
     the function will return an array of fit parameters for each bootstrap
     """
-    bounds = ([0, 0], [np.inf, np.inf])
+    # bounds = ([0, 0], [np.inf, np.inf])
     # get the bootstrp on the first index
     ydata = ydata.T
     ydata_avg = np.average(ydata, axis=0)
@@ -156,6 +95,7 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     )
 
     chisq = ff.chisqfn2(popt_avg, function, lambdas, ydata_avg, covmat_inverse)
+    print(f"dof = {dof}")
     redchisq = chisq / dof
 
     # Fit each bootstrap resample
@@ -175,9 +115,9 @@ def fit_lmb(ydata, function, lambdas, p0=None):
     return bootfit, redchisq, chisq
 
 
-def fit_lambda_dep(fitlist, order, lmb_range):
+def fit_lambda_dep(fitlist, order, lmb_range, fitfunction, p0, bounds):
     """Fit the lambda dependence of the energy shift"""
-    p0 = (1e-3, 0.7)
+    # p0 = (1e-3, 0.7)
     fit_data = np.array([fit[f"order{order}_fit"][:, 1] for fit in fitlist])
     lambdas = np.array([fit[f"lambdas"] for fit in fitlist])
 
@@ -188,17 +128,20 @@ def fit_lambda_dep(fitlist, order, lmb_range):
         lmb_range = lmb_range
     bootfit, redchisq_fit, chisq_fit = fit_lmb(
         fit_data[lmb_range],
-        fitfunction5,
+        fitfunction,
         lambdas[lmb_range],
         p0=p0,
+        bounds=bounds,
     )
     print(f"redchisq order {order}:", redchisq_fit)
     print(f"chisq order {order}:", chisq_fit)
     print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
     return lmb_range, bootfit, redchisq_fit, chisq_fit
 
-def lambdafit_3pt(lambdas3, fitlists, datadir):
-    p0 = (1e-3, 0.7)
+def lambdafit_3pt(lambdas3, fitlists, datadir, fitfunction):
+    # p0 = (1e-3, 0.7)
+    p0 = fitfunction.initpar
+    bounds = fitfunction.bounds
     fitlim = 30
     fit_data_list = []
     min_len = len(lambdas3)
@@ -212,7 +155,7 @@ def lambdafit_3pt(lambdas3, fitlists, datadir):
                 if lmb_range[-1] < len(lambdas3):
                     order=3
                     lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
-                        fitlists[order], order, lmb_range
+                        fitlists[order], order, lmb_range, fitfunction.eval, p0, bounds
                     )
                 fit_data = {
                     "lmb_range": lmb_range,
@@ -228,13 +171,15 @@ def lambdafit_3pt(lambdas3, fitlists, datadir):
                 print("====================\nFitting Failed\n", e, "\n====================")
                 fit_data = None
                 
-    with open(datadir / (f"matrix_elements_loop_3pts.pkl"), "wb") as file_out:
+    with open(datadir / (f"matrix_elements_loop_3pts_{fitfunction.label}.pkl"), "wb") as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
 
 
-def lambdafit_4pt(lambdas3, fitlists, datadir):
-    p0 = (1e-3, 0.7)
+def lambdafit_4pt(lambdas3, fitlists, datadir, fitfunction):
+    # p0 = (1e-3, 0.7)
+    p0 = fitfunction.initpar
+    bounds = fitfunction.bounds
     fitlim = 30
     fit_data_list = []
     min_len = len(lambdas3)
@@ -248,7 +193,7 @@ def lambdafit_4pt(lambdas3, fitlists, datadir):
                 if lmb_range[-1] < len(lambdas3):
                     order=3
                     lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
-                        fitlists[order], order, lmb_range
+                        fitlists[order], order, lmb_range, fitfunction.eval, p0, bounds
                     )
                 fit_data = {
                     "lmb_range": lmb_range,
@@ -264,33 +209,35 @@ def lambdafit_4pt(lambdas3, fitlists, datadir):
                 print("====================\nFitting Failed\n", e, "\n====================")
                 fit_data = None
                 
-    with open(datadir / (f"matrix_elements_loop_4pts.pkl"), "wb") as file_out:
+    with open(datadir / (f"matrix_elements_loop_4pts_{fitfunction.label}.pkl"), "wb") as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
 
 
-def lambdafit_allpt(lambdas3, fitlists, datadir):
-    p0 = (1e-3, 0.7)
+def lambdafit_allpt(lambdas3, fitlists, datadir, fitfunction):
+    # p0 = (1e-3, 0.7)
+    p0 = fitfunction.initpar
+    bounds = fitfunction.bounds
     fitlim = 30
     fit_data_list = []
     min_len = len(lambdas3)
     # print('len(lambdas3) = ', min_len)
     for lmb_initial in np.arange(0,min_len):
-        for lmb_final in np.arange(lmb_initial+3,min_len):
+        for lmb_final in np.arange(lmb_initial+len(p0)+1,min_len):
             lmb_range = np.arange(lmb_initial, lmb_final)
             print(f'lmb_range = {lmb_range}')
             try:
                 if lmb_range[-1] < len(lambdas3):
                     order=3
                     lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
-                        fitlists[order], order, lmb_range
+                        fitlists[order], order, lmb_range, fitfunction.eval, p0, bounds
                     )
 
                 fit_data = {
                     "lmb_range": lmb_range,
                     "fitlim": fitlim,
                     "bootfit3": bootfit,
-                    "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3])[lmb_range],
+                    "lambdas3": lambdas3[lmb_range],
                     "chisq3": chisq_fit,
                     "redchisq3": redchisq_fit,
                 }
@@ -299,7 +246,7 @@ def lambdafit_allpt(lambdas3, fitlists, datadir):
                 print("====================\nFitting Failed\n", e, "\n====================")
                 fit_data = None
                 
-    with open(datadir / (f"matrix_elements_loop.pkl"), "wb") as file_out:
+    with open(datadir / (f"matrix_elements_loop_{fitfunction.label}.pkl"), "wb") as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
 
@@ -360,41 +307,15 @@ def main_loop():
     fitlists = [fitlist0, fitlist1, fitlist2, fitlist3]
     lambdas3 =  np.array([fit[f"lambdas"] for fit in fitlist3])
 
-    lambdafit_3pt(lambdas3, fitlists, datadir)
-    lambdafit_4pt(lambdas3, fitlists, datadir)
-    lambdafit_allpt(lambdas3, fitlists, datadir)
+    fitfunc5 = Fitfunction5()
+    fitfunc4 = Fitfunction_order4()
 
-    # p0 = (1e-3, 0.7)
-    # fitlim = 30
-    # fit_data_list = []
-    # min_len = len(lambdas3)
-    # # print('len(lambdas3) = ', min_len)
-    # for lmb_initial in np.arange(0,min_len):
-    #     for lmb_final in np.arange(lmb_initial+3,min_len):
-    #         lmb_range = np.arange(lmb_initial, lmb_final)
-    #         print(f'lmb_range = {lmb_range}')
-    #         try:
-    #             if lmb_range[-1] < len(lambdas3):
-    #                 order=3
-    #                 lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
-    #                     fitlists[order], order, lmb_range
-    #                 )
+    lambdafit_3pt(lambdas3, fitlists, datadir, fitfunc5)
+    lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc5)
+    lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc5)
 
-    #             fit_data = {
-    #                 "lmb_range": lmb_range,
-    #                 "fitlim": fitlim,
-    #                 "bootfit3": bootfit,
-    #                 "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3])[lmb_range],
-    #                 "chisq3": chisq_fit,
-    #                 "redchisq3": redchisq_fit,
-    #             }
-    #             fit_data_list.append(fit_data)
-    #         except RuntimeError as e:
-    #             print("====================\nFitting Failed\n", e, "\n====================")
-    #             fit_data = None
-                
-    # with open(datadir / (f"matrix_elements_loop.pkl"), "wb") as file_out:
-    #     pickle.dump(fit_data_list, file_out)
+    lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
+    # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc4)
 
 if __name__ == "__main__":
     main_loop()

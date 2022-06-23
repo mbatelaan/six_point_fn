@@ -184,16 +184,22 @@ def main():
     delta_t = config["delta_t"]
     lmb_val = config["lmb_val"]
 
-    with open(datadir / (f"matrix_elements_loop_3pts.pkl"), "rb") as file_in:
+    with open(datadir / (f"matrix_elements_loop_3pts_fn1.pkl"), "rb") as file_in:
         data_3pts = pickle.load(file_in)
-    with open(datadir / (f"matrix_elements_loop_4pts.pkl"), "rb") as file_in:
+    with open(datadir / (f"matrix_elements_loop_4pts_fn1.pkl"), "rb") as file_in:
         data_4pts = pickle.load(file_in)
+    with open(datadir / (f"matrix_elements_loop_4pts_fn4.pkl"), "rb") as file_in:
+        data_4pts_fn4 = pickle.load(file_in)
 
     print("\n3 points")
     for i, elem in enumerate(data_3pts):
         print(elem["lmb_range"], "\t\t", elem["redchisq3"])
     print("\n4 points")
     for i, elem in enumerate(data_4pts):
+        print(elem["lmb_range"], "\t\t", elem["redchisq3"])
+
+    print("\n\n4 points fn4")
+    for i, elem in enumerate(data_4pts_fn4):
         print(elem["lmb_range"], "\t\t", elem["redchisq3"])
 
 

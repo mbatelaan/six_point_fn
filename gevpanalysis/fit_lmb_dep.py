@@ -48,6 +48,10 @@ def fitfunction6(lmb, matrix_element, delta_E_fix):
     deltaE = np.sqrt(delta_E_fix**2 + 4 * lmb**2 * matrix_element**2)
     return deltaE
 
+def fitfunction_order4(lmb, Delta_E, A, B):
+    """The fit function Ross proposed to capture the compton amplitude"""
+    deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * A**2 +  lmb**4 * B**2)
+    return deltaE
 
 def fit_lmb(ydata, function, lambdas, p0=None):
     """Fit the lambda dependence
@@ -584,25 +588,13 @@ def main():
         config = read_config(sys.argv[1])
     else:
         config = read_config("qmax")
-    #     config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
-    #     # config_file = sys.argv[1]
-    # else:
-    #     config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
-    #     # config_file = "data_dir_theta2.yaml"  # default file
-    # with open(config_file) as f:
-    #     config = yaml.safe_load(f)
-
     # Set parameters to defaults defined in another YAML file
-    # with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
-    #     defaults = yaml.safe_load(f)
     defaults = read_config("defaults")
     for key, value in defaults.items():
         config.setdefault(key, value)
 
     pickledir = Path(config["pickle_dir1"])
     pickledir2 = Path(config["pickle_dir2"])
-    # plotdir = Path(config["analysis_dir"]) / Path("plots")
-    # datadir = Path(config["analysis_dir"]) / Path("data")
     plotdir = PROJECT_BASE_DIRECTORY / Path("data/plots") / Path(config["name"])
     datadir = PROJECT_BASE_DIRECTORY / Path("data/pickles") / Path(config["name"])
     plotdir.mkdir(parents=True, exist_ok=True)

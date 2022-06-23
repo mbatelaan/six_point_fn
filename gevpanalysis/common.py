@@ -60,14 +60,14 @@ def fit_value(diffG, t_range):
     data_set = diffG[:, t_range]
     diffG_avg = np.average(data_set, axis=0)
     covmat = np.cov(data_set.T)
-    pypl.figure(figsize=(11, 11))
     diag = np.diagonal(covmat)
     norms = np.einsum("i,j->ij", diag, diag) ** 0.5
     covmat_norm = covmat / norms
-    pypl.figure(figsize=(11, 11))
-    mat = pypl.matshow(np.linalg.inv(covmat))
-    pypl.colorbar(mat, shrink=0.5)
-    pypl.savefig("cov_matrix_corr.pdf")
+    # pypl.figure(figsize=(11, 11))
+    # pypl.figure(figsize=(11, 11))
+    # mat = pypl.matshow(np.linalg.inv(covmat))
+    # pypl.colorbar(mat, shrink=0.5)
+    # pypl.savefig("cov_matrix_corr.pdf")
 
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     popt_avg, pcov_avg = curve_fit(ff.constant, t_range, diffG_avg, sigma=covmat)

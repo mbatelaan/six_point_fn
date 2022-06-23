@@ -19,7 +19,7 @@ from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
 from analysis import fitfunc as ff
 
-from params import params
+from gevpanalysis.params import params
 
 
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
@@ -873,7 +873,7 @@ def main_loop():
     }
 
     # Fit to the lambda dependence at each order in lambda
-    with open(datadir / (f"matrix_elements_loop.pkl"), "rb") as file_in:
+    with open(datadir / (f"matrix_elements_loop_fn1.pkl"), "rb") as file_in:
         fit_data_list = pickle.load(file_in)
 
     x_coord = np.array([elem["lmb_range"][0] for elem in fit_data_list])
