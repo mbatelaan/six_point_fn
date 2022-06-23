@@ -1110,24 +1110,24 @@ def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
     matrix_2 = np.array(
         [
             [
-                G2_nucl[0][:, :, 0] + lmb_val**2 * G2_nucl[2][:, :, 0],
+                G2_nucl[0][:, :, 0] + lmb_val ** 2 * G2_nucl[2][:, :, 0],
                 lmb_val * G2_nucl[1][:, :, 0],
             ],
             [
                 lmb_val * G2_sigm[1][:, :, 0],
-                G2_sigm[0][:, :, 0] + lmb_val**2 * G2_sigm[2][:, :, 0],
+                G2_sigm[0][:, :, 0] + lmb_val ** 2 * G2_sigm[2][:, :, 0],
             ],
         ]
     )
     matrix_3 = np.array(
         [
             [
-                G2_nucl[0][:, :, 0] + lmb_val**2 * G2_nucl[2][:, :, 0],
-                lmb_val * G2_nucl[1][:, :, 0] + lmb_val**3 * G2_nucl[3][:, :, 0],
+                G2_nucl[0][:, :, 0] + lmb_val ** 2 * G2_nucl[2][:, :, 0],
+                lmb_val * G2_nucl[1][:, :, 0] + lmb_val ** 3 * G2_nucl[3][:, :, 0],
             ],
             [
-                lmb_val * G2_sigm[1][:, :, 0] + lmb_val**3 * G2_sigm[3][:, :, 0],
-                G2_sigm[0][:, :, 0] + lmb_val**2 * G2_sigm[2][:, :, 0],
+                lmb_val * G2_sigm[1][:, :, 0] + lmb_val ** 3 * G2_sigm[3][:, :, 0],
+                G2_sigm[0][:, :, 0] + lmb_val ** 2 * G2_sigm[2][:, :, 0],
             ],
         ]
     )
@@ -1135,15 +1135,15 @@ def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
         [
             [
                 G2_nucl[0][:, :, 0]
-                + (lmb_val**2) * G2_nucl[2][:, :, 0]
-                + (lmb_val**4) * G2_nucl[4][:, :, 0],
-                lmb_val * G2_nucl[1][:, :, 0] + (lmb_val**3) * G2_nucl[3][:, :, 0],
+                + (lmb_val ** 2) * G2_nucl[2][:, :, 0]
+                + (lmb_val ** 4) * G2_nucl[4][:, :, 0],
+                lmb_val * G2_nucl[1][:, :, 0] + (lmb_val ** 3) * G2_nucl[3][:, :, 0],
             ],
             [
-                lmb_val * G2_sigm[1][:, :, 0] + (lmb_val**3) * G2_sigm[3][:, :, 0],
+                lmb_val * G2_sigm[1][:, :, 0] + (lmb_val ** 3) * G2_sigm[3][:, :, 0],
                 G2_sigm[0][:, :, 0]
-                + (lmb_val**2) * G2_sigm[2][:, :, 0]
-                + (lmb_val**4) * G2_sigm[4][:, :, 0],
+                + (lmb_val ** 2) * G2_sigm[2][:, :, 0]
+                + (lmb_val ** 4) * G2_sigm[4][:, :, 0],
             ],
         ]
     )
@@ -1163,24 +1163,24 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
     matrix_2 = np.array(
         [
             [
-                G2_nucl[0][:, :] + lmb_val**2 * G2_nucl[2][:, :],
+                G2_nucl[0][:, :] + lmb_val ** 2 * G2_nucl[2][:, :],
                 lmb_val * G2_nucl[1][:, :],
             ],
             [
                 lmb_val * G2_sigm[1][:, :],
-                G2_sigm[0][:, :] + lmb_val**2 * G2_sigm[2][:, :],
+                G2_sigm[0][:, :] + lmb_val ** 2 * G2_sigm[2][:, :],
             ],
         ]
     )
     matrix_3 = np.array(
         [
             [
-                G2_nucl[0][:, :] + lmb_val**2 * G2_nucl[2][:, :],
-                lmb_val * G2_nucl[1][:, :] + lmb_val**3 * G2_nucl[3][:, :],
+                G2_nucl[0][:, :] + lmb_val ** 2 * G2_nucl[2][:, :],
+                lmb_val * G2_nucl[1][:, :] + lmb_val ** 3 * G2_nucl[3][:, :],
             ],
             [
-                lmb_val * G2_sigm[1][:, :] + lmb_val**3 * G2_sigm[3][:, :],
-                G2_sigm[0][:, :] + lmb_val**2 * G2_sigm[2][:, :],
+                lmb_val * G2_sigm[1][:, :] + lmb_val ** 3 * G2_sigm[3][:, :],
+                G2_sigm[0][:, :] + lmb_val ** 2 * G2_sigm[2][:, :],
             ],
         ]
     )
@@ -1188,15 +1188,15 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
         [
             [
                 G2_nucl[0][:, :]
-                + (lmb_val**2) * G2_nucl[2][:, :]
-                + (lmb_val**4) * G2_nucl[4][:, :],
-                lmb_val * G2_nucl[1][:, :] + (lmb_val**3) * G2_nucl[3][:, :],
+                + (lmb_val ** 2) * G2_nucl[2][:, :]
+                + (lmb_val ** 4) * G2_nucl[4][:, :],
+                lmb_val * G2_nucl[1][:, :] + (lmb_val ** 3) * G2_nucl[3][:, :],
             ],
             [
-                lmb_val * G2_sigm[1][:, :] + (lmb_val**3) * G2_sigm[3][:, :],
+                lmb_val * G2_sigm[1][:, :] + (lmb_val ** 3) * G2_sigm[3][:, :],
                 G2_sigm[0][:, :]
-                + (lmb_val**2) * G2_sigm[2][:, :]
-                + (lmb_val**4) * G2_sigm[4][:, :],
+                + (lmb_val ** 2) * G2_sigm[2][:, :]
+                + (lmb_val ** 4) * G2_sigm[4][:, :],
             ],
         ]
     )
@@ -1420,7 +1420,7 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
             np.array([(E_avg - np.average(energy)) ** 2 for energy in energies_comb]),
         )
     )
-    E_comberr = np.sqrt(E_staterr**2 + E_systerr**2)
+    E_comberr = np.sqrt(E_staterr ** 2 + E_systerr ** 2)
     for ival, value in enumerate(weighted_energy):
         weighted_energy[ival] = E_avg + (value - E_avg) * E_comberr / E_staterr
 

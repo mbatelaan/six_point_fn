@@ -42,6 +42,7 @@ m_S = 0.4641829
 #     deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
 #     return deltaE
 
+
 class Fitfunction5:
     def __init__(self):
         self.npar = 2
@@ -52,7 +53,8 @@ class Fitfunction5:
     def eval(self, lmb, Delta_E, matrix_element):
         deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
         return deltaE
-            
+
+
 class Fitfunction_order4:
     def __init__(self):
         self.npar = 3
@@ -62,9 +64,9 @@ class Fitfunction_order4:
 
     def eval(self, lmb, Delta_E, A, B):
         """The fit function Ross proposed to capture the compton amplitude"""
-        deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * A**2 +  lmb**4 * B**2)
+        deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * A ** 2 + lmb ** 4 * B ** 2)
         return deltaE
-        
+
 
 def fit_lmb(ydata, function, lambdas, p0=None, bounds=None):
     """Fit the lambda dependence
@@ -138,6 +140,7 @@ def fit_lambda_dep(fitlist, order, lmb_range, fitfunction, p0, bounds):
     print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
     return lmb_range, bootfit, redchisq_fit, chisq_fit
 
+
 def lambdafit_3pt(lambdas3, fitlists, datadir, fitfunction):
     # p0 = (1e-3, 0.7)
     p0 = fitfunction.initpar
@@ -145,15 +148,21 @@ def lambdafit_3pt(lambdas3, fitlists, datadir, fitfunction):
     fitlim = 30
     fit_data_list = []
     min_len = len(lambdas3)
-    for lmb_initial in np.arange(0,4):
-        for lmb_step in np.arange(1,min_len/2-1):
-            lmb_range = np.array([lmb_initial, int(lmb_initial + lmb_step),int(lmb_initial + lmb_step*2)])
-            if lmb_range[-1]>=min_len:
+    for lmb_initial in np.arange(0, 4):
+        for lmb_step in np.arange(1, min_len / 2 - 1):
+            lmb_range = np.array(
+                [
+                    lmb_initial,
+                    int(lmb_initial + lmb_step),
+                    int(lmb_initial + lmb_step * 2),
+                ]
+            )
+            if lmb_range[-1] >= min_len:
                 continue
-            print(f'lmb_range = {lmb_range}')
+            print(f"lmb_range = {lmb_range}")
             try:
                 if lmb_range[-1] < len(lambdas3):
-                    order=3
+                    order = 3
                     lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
                         fitlists[order], order, lmb_range, fitfunction.eval, p0, bounds
                     )
@@ -168,10 +177,16 @@ def lambdafit_3pt(lambdas3, fitlists, datadir, fitfunction):
                 }
                 fit_data_list.append(fit_data)
             except RuntimeError as e:
-                print("====================\nFitting Failed\n", e, "\n====================")
+                print(
+                    "====================\nFitting Failed\n",
+                    e,
+                    "\n====================",
+                )
                 fit_data = None
-                
-    with open(datadir / (f"matrix_elements_loop_3pts_{fitfunction.label}.pkl"), "wb") as file_out:
+
+    with open(
+        datadir / (f"matrix_elements_loop_3pts_{fitfunction.label}.pkl"), "wb"
+    ) as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
 
@@ -182,15 +197,22 @@ def lambdafit_4pt(lambdas3, fitlists, datadir, fitfunction):
     fitlim = 30
     fit_data_list = []
     min_len = len(lambdas3)
-    for lmb_initial in np.arange(0,4):
-        for lmb_step in np.arange(1,min_len/3):
-            lmb_range = np.array([lmb_initial, int(lmb_initial + lmb_step), int(lmb_initial + lmb_step*2), int(lmb_initial + lmb_step*3)])
-            if lmb_range[-1]>=min_len:
+    for lmb_initial in np.arange(0, 4):
+        for lmb_step in np.arange(1, min_len / 3):
+            lmb_range = np.array(
+                [
+                    lmb_initial,
+                    int(lmb_initial + lmb_step),
+                    int(lmb_initial + lmb_step * 2),
+                    int(lmb_initial + lmb_step * 3),
+                ]
+            )
+            if lmb_range[-1] >= min_len:
                 continue
-            print(f'lmb_range = {lmb_range}')
+            print(f"lmb_range = {lmb_range}")
             try:
                 if lmb_range[-1] < len(lambdas3):
-                    order=3
+                    order = 3
                     lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
                         fitlists[order], order, lmb_range, fitfunction.eval, p0, bounds
                     )
@@ -205,10 +227,16 @@ def lambdafit_4pt(lambdas3, fitlists, datadir, fitfunction):
                 }
                 fit_data_list.append(fit_data)
             except RuntimeError as e:
-                print("====================\nFitting Failed\n", e, "\n====================")
+                print(
+                    "====================\nFitting Failed\n",
+                    e,
+                    "\n====================",
+                )
                 fit_data = None
-                
-    with open(datadir / (f"matrix_elements_loop_4pts_{fitfunction.label}.pkl"), "wb") as file_out:
+
+    with open(
+        datadir / (f"matrix_elements_loop_4pts_{fitfunction.label}.pkl"), "wb"
+    ) as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
 
@@ -221,13 +249,13 @@ def lambdafit_allpt(lambdas3, fitlists, datadir, fitfunction):
     fit_data_list = []
     min_len = len(lambdas3)
     # print('len(lambdas3) = ', min_len)
-    for lmb_initial in np.arange(0,min_len):
-        for lmb_final in np.arange(lmb_initial+len(p0)+1,min_len):
+    for lmb_initial in np.arange(0, min_len):
+        for lmb_final in np.arange(lmb_initial + len(p0) + 1, min_len):
             lmb_range = np.arange(lmb_initial, lmb_final)
-            print(f'lmb_range = {lmb_range}')
+            print(f"lmb_range = {lmb_range}")
             try:
                 if lmb_range[-1] < len(lambdas3):
-                    order=3
+                    order = 3
                     lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
                         fitlists[order], order, lmb_range, fitfunction.eval, p0, bounds
                     )
@@ -242,16 +270,22 @@ def lambdafit_allpt(lambdas3, fitlists, datadir, fitfunction):
                 }
                 fit_data_list.append(fit_data)
             except RuntimeError as e:
-                print("====================\nFitting Failed\n", e, "\n====================")
+                print(
+                    "====================\nFitting Failed\n",
+                    e,
+                    "\n====================",
+                )
                 fit_data = None
-                
-    with open(datadir / (f"matrix_elements_loop_{fitfunction.label}.pkl"), "wb") as file_out:
+
+    with open(
+        datadir / (f"matrix_elements_loop_{fitfunction.label}.pkl"), "wb"
+    ) as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
 
 
 def main_loop():
-    """ Fit to the lambda dependence of the energy shift and loop over the fit windows """
+    """Fit to the lambda dependence of the energy shift and loop over the fit windows"""
     mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
     plt.style.use(mystyle.as_posix())
 
@@ -283,8 +317,7 @@ def main_loop():
 
     # Read data from the pickle file
     with open(
-        datadir
-        / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"),
+        datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"),
         "rb",
     ) as file_in:
         data = pickle.load(file_in)
@@ -304,7 +337,7 @@ def main_loop():
     fitlist2 = [data[ind] for ind in indices2]
     fitlist3 = [data[ind] for ind in indices3]
     fitlists = [fitlist0, fitlist1, fitlist2, fitlist3]
-    lambdas3 =  np.array([fit[f"lambdas"] for fit in fitlist3])
+    lambdas3 = np.array([fit[f"lambdas"] for fit in fitlist3])
 
     fitfunc5 = Fitfunction5()
     fitfunc4 = Fitfunction_order4()
@@ -315,6 +348,7 @@ def main_loop():
 
     lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
     # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc4)
+
 
 if __name__ == "__main__":
     main_loop()

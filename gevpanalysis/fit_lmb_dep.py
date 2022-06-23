@@ -40,18 +40,20 @@ m_S = 0.4641829
 
 
 def fitfunction5(lmb, Delta_E, matrix_element):
-    deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * matrix_element**2)
+    deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
     return deltaE
 
 
 def fitfunction6(lmb, matrix_element, delta_E_fix):
-    deltaE = np.sqrt(delta_E_fix**2 + 4 * lmb**2 * matrix_element**2)
+    deltaE = np.sqrt(delta_E_fix ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
     return deltaE
+
 
 def fitfunction_order4(lmb, Delta_E, A, B):
     """The fit function Ross proposed to capture the compton amplitude"""
-    deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * A**2 +  lmb**4 * B**2)
+    deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * A ** 2 + lmb ** 4 * B ** 2)
     return deltaE
+
 
 def fit_lmb(ydata, function, lambdas, p0=None):
     """Fit the lambda dependence
@@ -128,7 +130,10 @@ def fit_lambda_dep_2(fitlist, delta_E_fix, order, lmb_range, fitfunction):
     """Fit the lambda dependence of the energy shift
     Now fitting with only one parameter, we set the y-intercept by using the energy ratio gotten from fits.
     """
-    p0_2 = (1e-4, 0.7,)
+    p0_2 = (
+        1e-4,
+        0.7,
+    )
     p0_1 = (0.7,)
     fit_data = np.array([fit[f"order{order}_fit"][:, 1] for fit in fitlist])
     lambdas = np.array([fit[f"lambdas"] for fit in fitlist])
@@ -215,14 +220,17 @@ def fit_lambda_dep_2(fitlist, delta_E_fix, order, lmb_range, fitfunction):
     bootfit = np.array(bootfit)
     chisq_vals = np.array(chisq_vals)
     bootfit_avg = np.average(bootfit, axis=0)
-    chisq = ff.chisqfn4(bootfit_avg, fitfunction6, xdata, ydata_avg, (delta_E_fix,), invcovmat)
-    dof = len(xdata) -  len(p0_1)
+    chisq = ff.chisqfn4(
+        bootfit_avg, fitfunction6, xdata, ydata_avg, (delta_E_fix,), invcovmat
+    )
+    dof = len(xdata) - len(p0_1)
     redchisq = chisq / dof
 
     # print('\nbootfit avg fn6 = ',np.average(bootfit, axis=0))
     # print('bootfit chisq fn6 = ',np.average(chisq_vals, axis=0))
     # print('bootfit chisq fn6 = ',redchisq, '\n\n')
     return bootfit, redchisq
+
 
 def plot_lmb_depR(all_data, plotdir, fit_data=None):
     """Make a plot of the lambda dependence of the energy shift
@@ -412,6 +420,7 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     plt.close()
     return
 
+
 def plot_lmb_dep4(all_data, plotdir, fit_data=None):
     """Make a plot of the lambda dependence of the energy shift
     Where the plot uses colored bands to show the dependence
@@ -493,6 +502,7 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None):
     plt.close()
     return
 
+
 def plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix):
     """Make a plot of the lambda dependence of the energy shift
     Where the plot uses colored bands to show the dependence
@@ -548,7 +558,10 @@ def plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix):
         )
 
         fitBS3 = np.array(
-            [fitfunction6(all_data["lambdas3"], *bf, delta_E_fix) for bf in fit_data["bootfit3"]]
+            [
+                fitfunction6(all_data["lambdas3"], *bf, delta_E_fix)
+                for bf in fit_data["bootfit3"]
+            ]
         )
 
         plt.plot(
@@ -569,7 +582,9 @@ def plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix):
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_bands_fit_4_1par.pdf"), metadata=_metadata)
         plt.ylim(0, 0.15)
-        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4_1par.pdf"), metadata=_metadata)
+        plt.savefig(
+            plotdir / ("lambda_dep_bands_fit_ylim_4_1par.pdf"), metadata=_metadata
+        )
 
     plt.close()
     return
@@ -635,8 +650,8 @@ def main():
     fit_data = {"lmb_range": lmb_range}
     for order in np.arange(4):
         lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
-        print('\n==========\nOrder: ', order)
-        print('lmb_range = ', lmb_range)
+        print("\n==========\nOrder: ", order)
+        print("lmb_range = ", lmb_range)
         lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
             fitlists[order], order, lmb_range
         )
@@ -670,10 +685,13 @@ def main():
     delta_E_fix = np.average(data[0]["weighted_energy_nucldivsigma"])
     # print('\n\n',delta_E_fix)
     fit_data = {"lmb_range": lmb_range}
-    bootfit, redchisq = fit_lambda_dep_2(fitlist3, delta_E_fix, order, lmb_range, fitfunction6)
+    bootfit, redchisq = fit_lambda_dep_2(
+        fitlist3, delta_E_fix, order, lmb_range, fitfunction6
+    )
     fit_data[f"bootfit3"] = bootfit
     fit_data[f"redchisq3"] = redchisq
     plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix)
+
 
 if __name__ == "__main__":
     main()
