@@ -37,10 +37,6 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
-# def fitfunction5(lmb, Delta_E, matrix_element):
-#     deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
-#     return deltaE
-
 
 class Fitfunction5:
     def __init__(self):
@@ -51,6 +47,20 @@ class Fitfunction5:
 
     def eval(self, lmb, Delta_E, matrix_element):
         deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * matrix_element**2)
+        return deltaE
+
+
+class Fitfunction6:
+    """Fitfunction which has one free parameter."""
+
+    def __init__(self):
+        self.npar = 1
+        self.label = r"fn3"
+        self.initpar = np.array([1.0])
+        self.bounds = ([0], [np.inf])
+
+    def eval(self, lmb, matrix_element, delta_E_fix):
+        deltaE = np.sqrt(delta_E_fix**2 + 4 * lmb**2 * matrix_element**2)
         return deltaE
 
 
@@ -237,7 +247,6 @@ def lambdafit_4pt(lambdas3, fitlists, datadir, fitfunction):
 
 
 def lambdafit_allpt(lambdas3, fitlists, datadir, fitfunction):
-    # p0 = (1e-3, 0.7)
     p0 = fitfunction.initpar
     bounds = fitfunction.bounds
     fit_data_list = []
@@ -275,73 +284,3 @@ def lambdafit_allpt(lambdas3, fitlists, datadir, fitfunction):
     ) as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
-
-
-def main_loop():
-    """Fit to the lambda dependence of the energy shift and loop over the fit windows"""
-    mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
-    plt.style.use(mystyle.as_posix())
-
-    pars = params(0)
-    nboot = 200
-    nbin = 1
-
-    # Read in the directory data from the yaml file
-    if len(sys.argv) == 2:
-        config = read_config(sys.argv[1])
-    else:
-        config = read_config("qmax")
-    defaults = read_config("defaults")
-    for key, value in defaults.items():
-        config.setdefault(key, value)
-
-    pickledir = Path(config["pickle_dir1"])
-    pickledir2 = Path(config["pickle_dir2"])
-    plotdir = PROJECT_BASE_DIRECTORY / Path("data/plots") / Path(config["name"])
-    datadir = PROJECT_BASE_DIRECTORY / Path("data/pickles") / Path(config["name"])
-    plotdir.mkdir(parents=True, exist_ok=True)
-    datadir.mkdir(parents=True, exist_ok=True)
-    print("datadir: ", datadir / ("lambda_dep.pkl"))
-
-    t_range = np.arange(config["t_range0"], config["t_range1"])
-    time_choice = config["time_choice"]
-    delta_t = config["delta_t"]
-    lmb_val = config["lmb_val"]
-
-    # Read data from the pickle file
-    with open(
-        datadir / (f"lambda_dep_t{time_choice}_dt{delta_t}.pkl"),
-        "rb",
-    ) as file_in:
-        data = pickle.load(file_in)
-
-    # Filter out data points with a high reduced chi-squared value
-    chisq_tol = 1.5  # 1.7
-    redchisq0 = np.array([d["red_chisq0"] for d in data])
-    redchisq1 = np.array([d["red_chisq1"] for d in data])
-    redchisq2 = np.array([d["red_chisq2"] for d in data])
-    redchisq3 = np.array([d["red_chisq3"] for d in data])
-    indices0 = np.where(redchisq0 <= chisq_tol)[0]
-    indices1 = np.where(redchisq1 <= chisq_tol)[0]
-    indices2 = np.where(redchisq2 <= chisq_tol)[0]
-    indices3 = np.where(redchisq3 <= chisq_tol)[0]
-    fitlist0 = [data[ind] for ind in indices0]
-    fitlist1 = [data[ind] for ind in indices1]
-    fitlist2 = [data[ind] for ind in indices2]
-    fitlist3 = [data[ind] for ind in indices3]
-    fitlists = [fitlist0, fitlist1, fitlist2, fitlist3]
-    lambdas3 = np.array([fit[f"lambdas"] for fit in fitlist3])
-
-    fitfunc5 = Fitfunction5()
-    fitfunc4 = Fitfunction_order4()
-
-    lambdafit_3pt(lambdas3, fitlists, datadir, fitfunc5)
-    lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc5)
-    lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc5)
-
-    lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
-    # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc4)
-
-
-if __name__ == "__main__":
-    main_loop()
