@@ -49,11 +49,6 @@ def fit_lambda_dep_2(fitlist, delta_E_fix, order, lmb_range, fitfunction, p0):
     """Fit the lambda dependence of the energy shift
     Now fitting with only one parameter, we set the y-intercept by using the energy ratio gotten from fits.
     """
-    # p0_2 = (
-    #     1e-4,
-    #     0.7,
-    # )
-    # p0_1 = (0.7,)
     fit_data = np.array([fit[f"order{order}_fit"][:, 1] for fit in fitlist])
     lambdas = np.array([fit[f"lambdas"] for fit in fitlist])
 

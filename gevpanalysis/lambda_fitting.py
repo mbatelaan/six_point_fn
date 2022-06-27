@@ -39,6 +39,10 @@ m_S = 0.4641829
 
 
 class Fitfunction5:
+    """The function to fit to Delta E
+    The function has two parameters, the energy gap at lambda=0 and the matrix element
+    """
+
     def __init__(self):
         self.npar = 2
         self.label = r"fn1"
@@ -50,8 +54,27 @@ class Fitfunction5:
         return deltaE
 
 
+class Fitfunction1:
+    """The function to fit to the square of Delta E
+    The function has two parameters, the energy gap at lambda=0 and the matrix element
+    """
+
+    def __init__(self):
+        self.npar = 2
+        self.label = r"fn1"
+        self.initpar = np.array([1.0, 1.0])
+        self.bounds = ([0, 0], [np.inf, np.inf])
+
+    def eval(self, lmb, Delta_E, matrix_element):
+        deltaE = Delta_E**2 + 4 * lmb**2 * matrix_element**2
+        return deltaE
+
+
 class Fitfunction6:
-    """Fitfunction which has one free parameter."""
+    """A function to fit to Delta E
+    The function has one parameter, the matrix element.
+    The energy difference of the unperturbed correlators is a fixed parameter
+    """
 
     def __init__(self):
         self.npar = 1
@@ -65,6 +88,10 @@ class Fitfunction6:
 
 
 class Fitfunction_order4:
+    """The function to fit to the square of Delta E
+    The function has three parameters, the energy gap at lambda=0, the matrix element and the coefficient of lambda^4 in the higher order term.
+    """
+
     def __init__(self):
         self.npar = 3
         self.label = r"fn4"
