@@ -2,7 +2,7 @@ lattice: Feyn-Hell_kp21374891798173
 kappa: 9
 geom: 32x32
 lmb_i : 0
-lmb_f : 0.03
+lmb_f : 0.05
 tmin_nucl : 12
 tmax_nucl : 24
 tmin_sigma : 13

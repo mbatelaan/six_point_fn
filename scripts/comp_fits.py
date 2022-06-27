@@ -148,29 +148,25 @@ def plot_fits_comb(data_, name, plotdir):
         lmbmin0_lmbmax_,
         lmbmin0_redchisq,
         color=_colors[0],
-        label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin0_fits_[0]['lambdas3'][0]:.3f}$",
+        # label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin0_fits_[0]['lambdas3'][0]:.3f}$",
     )
     ax1.plot(
         lmbmin1_lmbmax_,
         lmbmin1_redchisq,
         color=_colors[1],
-        label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin1_fits_[0]['lambdas3'][0]:.3f}$",
+        # label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin1_fits_[0]['lambdas3'][0]:.3f}$",
     )
     ax1.plot(
         lmbmin2_lmbmax_,
         lmbmin2_redchisq,
         color=_colors[2],
-        label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin2_fits_[0]['lambdas3'][0]:.3f}$",
+        # label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin2_fits_[0]['lambdas3'][0]:.3f}$",
     )
     ax1.set_ylabel(r"$\chi^2_{\textrm{red.}}$")
-    ax1.set_ylim(0, 5)
+    ax1.set_ylim(0, 6)
     ax1.grid(True, alpha=0.3)
     # ax1.set_xticks(np.arange(2,15))
-    # ax1.set_xticks()
     ax1.set_xlabel(r"$\lambda_{\textrm{max}}$")
-
-    # print(f"lmbmin0_lmbmax = {lmbmin0_lmbmax}")
-    # print(f"lmbmin0_me = {np.average(lmbmin0_me, axis=1)}")
 
     ax2 = ax1.twinx()
     ax2.errorbar(
@@ -205,8 +201,9 @@ def plot_fits_comb(data_, name, plotdir):
     )
     ax2.set_ylabel(r"Matrix element")
 
-    ax1.legend(fontsize="small")
+    # ax1.legend(fontsize="small")
     ax2.legend(fontsize="small")
+    # fig.legend(fontsize="small", loc='lower left', framealpha = 0.9)
 
     plt.savefig(plotdir / (f"lambda_fit_" + name + "_comb.pdf"))
     plt.close()
