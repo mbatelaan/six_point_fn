@@ -20,7 +20,8 @@ from analysis import fitfunc as ff
 
 from gevpanalysis.params import params
 
-from gevpanalysis.lambda_fitting import Fitfunction5
+from gevpanalysis.lambda_fitting import Fitfunction1
+from gevpanalysis.lambda_fitting import Fitfunction2
 from gevpanalysis.lambda_fitting import Fitfunction6
 from gevpanalysis.lambda_fitting import Fitfunction_order4
 from gevpanalysis.lambda_fitting import fit_lmb
@@ -28,6 +29,8 @@ from gevpanalysis.lambda_fitting import fit_lambda_dep
 from gevpanalysis.lambda_fitting import lambdafit_3pt
 from gevpanalysis.lambda_fitting import lambdafit_4pt
 from gevpanalysis.lambda_fitting import lambdafit_allpt
+from gevpanalysis.lambda_fitting import lambdafit_3pt_squared
+from gevpanalysis.lambda_fitting import lambdafit_4pt_squared
 
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
 _colors = [
@@ -102,23 +105,19 @@ def main():
     fitlists = [fitlist0, fitlist1, fitlist2, fitlist3]
     lambdas3 = np.array([fit[f"lambdas"] for fit in fitlist3])
 
-    fitlist3_squared = fitlist3
-    for fit in fitlist3_squared:
-        fit["order3_fit"][:, 1] = fit["order3_fit"][:, 1] ** 2
-    print(fitlist3[0]["order3_fit"][:, 1])
-    print(fitlist3_squared[0]["order3_fit"][:, 1])
-
-    fitfunc5 = Fitfunction5()
+    fitfunc1 = Fitfunction1()
+    fitfunc2 = Fitfunction2()
     fitfunc4 = Fitfunction_order4()
 
-    lambdafit_3pt(lambdas3, fitlists, datadir, fitfunc5)
-    lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc5)
-    lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc5)
+    # lambdafit_3pt(lambdas3, fitlists, datadir, fitfunc1)
+    # lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc1)
+    # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc1)
 
-    lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
-    # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc4)
+    # lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
+    # # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc4)
 
-    lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
+    lambdafit_3pt_squared(lambdas3, fitlists, datadir, fitfunc2)
+    lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunc2)
 
 
 if __name__ == "__main__":

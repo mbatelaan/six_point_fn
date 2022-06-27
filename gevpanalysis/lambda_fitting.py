@@ -38,7 +38,7 @@ m_N = 0.4179255
 m_S = 0.4641829
 
 
-class Fitfunction5:
+class Fitfunction1:
     """The function to fit to Delta E
     The function has two parameters, the energy gap at lambda=0 and the matrix element
     """
@@ -54,14 +54,14 @@ class Fitfunction5:
         return deltaE
 
 
-class Fitfunction1:
+class Fitfunction2:
     """The function to fit to the square of Delta E
     The function has two parameters, the energy gap at lambda=0 and the matrix element
     """
 
     def __init__(self):
         self.npar = 2
-        self.label = r"fn1"
+        self.label = r"fn2"
         self.initpar = np.array([1.0, 1.0])
         self.bounds = ([0, 0], [np.inf, np.inf])
 
@@ -159,6 +159,25 @@ def fit_lambda_dep(fitlist, order, lmb_range, fitfunction, p0, bounds):
     fit_data = np.array([fit[f"order{order}_fit"][:, 1] for fit in fitlist])
     lambdas = np.array([fit[f"lambdas"] for fit in fitlist])
 
+    # Check if we haven't excluded some of the chosen fit range
+    if lmb_range[-1] >= len(lambdas):
+        lmb_range = np.arange(min(len(lambdas) - 5, lmb_range[0]), len(lambdas))
+    else:
+        lmb_range = lmb_range
+    bootfit, redchisq_fit, chisq_fit = fit_lmb(
+        fit_data[lmb_range],
+        fitfunction,
+        lambdas[lmb_range],
+        p0=p0,
+        bounds=bounds,
+    )
+    print(f"redchisq order {order}:", redchisq_fit)
+    print(f"chisq order {order}:", chisq_fit)
+    print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
+    return lmb_range, bootfit, redchisq_fit, chisq_fit
+
+def fit_lambda_dep_2(fit_data, lambdas, order, lmb_range, fitfunction, p0, bounds):
+    """Fit the lambda dependence of the energy shift"""
     # Check if we haven't excluded some of the chosen fit range
     if lmb_range[-1] >= len(lambdas):
         lmb_range = np.arange(min(len(lambdas) - 5, lmb_range[0]), len(lambdas))
@@ -292,13 +311,14 @@ def lambdafit_3pt_squared(lambdas3, fitlists, datadir, fitfunction):
             try:
                 if lmb_range[-1] < len(lambdas3):
                     order = 3
-                    lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
-                        fitlists[order], order, lmb_range, fitfunction.eval, p0, bounds
+                    fit_data = np.array([fit[f"order{order}_fit"][:, 1]**2 for fit in fitlists[order]])
+                    lambdas = np.array([fit[f"lambdas"] for fit in fitlists[order]])
+                    lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep_2(
+                        fit_data, lambdas, order, lmb_range, fitfunction.eval, p0, bounds
                     )
                 fit_data = {
                     "lmb_range": lmb_range,
                     "bootfit3": bootfit,
-                    # "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3])[lmb_range],
                     "lambdas3": lambdas3[lmb_range],
                     "chisq3": chisq_fit,
                     "redchisq3": redchisq_fit,
@@ -313,10 +333,59 @@ def lambdafit_3pt_squared(lambdas3, fitlists, datadir, fitfunction):
                 fit_data = None
 
     with open(
-        datadir / (f"matrix_elements_loop_3pts_{fitfunction.label}.pkl"), "wb"
+        datadir / (f"matrix_elements_loop_3pts_sq_{fitfunction.label}.pkl"), "wb"
     ) as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
+
+def lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunction):
+    p0 = fitfunction.initpar
+    bounds = fitfunction.bounds
+    fit_data_list = []
+    min_len = len(lambdas3)
+    for lmb_initial in np.arange(0, 4):
+        for lmb_step in np.arange(1, min_len / 3):
+            lmb_range = np.array(
+                [
+                    lmb_initial,
+                    int(lmb_initial + lmb_step),
+                    int(lmb_initial + lmb_step * 2),
+                    int(lmb_initial + lmb_step * 3),
+                ]
+            )
+            if lmb_range[-1] >= min_len:
+                continue
+            print(f"lmb_range = {lmb_range}")
+            try:
+                if lmb_range[-1] < len(lambdas3):
+                    order = 3
+                    fit_data = np.array([fit[f"order{order}_fit"][:, 1]**2 for fit in fitlists[order]])
+                    lambdas = np.array([fit[f"lambdas"] for fit in fitlists[order]])
+                    lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep_2(
+                        fit_data, lambdas, order, lmb_range, fitfunction.eval, p0, bounds
+                    )
+                fit_data = {
+                    "lmb_range": lmb_range,
+                    "bootfit3": bootfit,
+                    "lambdas3": lambdas3[lmb_range],
+                    "chisq3": chisq_fit,
+                    "redchisq3": redchisq_fit,
+                }
+                fit_data_list.append(fit_data)
+            except RuntimeError as e:
+                print(
+                    "====================\nFitting Failed\n",
+                    e,
+                    "\n====================",
+                )
+                fit_data = None
+
+    with open(
+        datadir / (f"matrix_elements_loop_4pts_sq_{fitfunction.label}.pkl"), "wb"
+    ) as file_out:
+        pickle.dump(fit_data_list, file_out)
+    return fit_data_list
+
 
 
 def lambdafit_allpt(lambdas3, fitlists, datadir, fitfunction):

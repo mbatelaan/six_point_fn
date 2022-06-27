@@ -248,6 +248,10 @@ def main():
         data_4pts = pickle.load(file_in)
     with open(datadir / (f"matrix_elements_loop_4pts_fn4.pkl"), "rb") as file_in:
         data_4pts_fn4 = pickle.load(file_in)
+    with open(datadir / (f"matrix_elements_loop_3pts_sq_fn2.pkl"), "rb") as file_in:
+        data_3pts_sq = pickle.load(file_in)
+    with open(datadir / (f"matrix_elements_loop_4pts_sq_fn2.pkl"), "rb") as file_in:
+        data_4pts_sq = pickle.load(file_in)
 
     print("\n3 points")
     for i, elem in enumerate(data_3pts):
@@ -265,7 +269,12 @@ def main():
     plot_fits_comb(data_3pts, "3points", plotdir)
     plot_fits_comb(data_4pts, "4points", plotdir)
     plot_fits_comb(data_4pts_fn4, "4points_fn4", plotdir)
+    plot_fits_comb(data_3pts_sq, "3points_sq", plotdir)
+    plot_fits_comb(data_4pts_sq, "4points_sq", plotdir)
 
+    print("\n3 points")
+    for i, elem in enumerate(data_3pts_sq):
+        print(elem["lmb_range"], "\t\t", elem["redchisq3"])
 
 if __name__ == "__main__":
     main()
