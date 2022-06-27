@@ -178,7 +178,6 @@ def fit_lambda_dep(fitlist, order, lmb_range, fitfunction, p0, bounds):
 
 
 def lambdafit_3pt(lambdas3, fitlists, datadir, fitfunction):
-    # p0 = (1e-3, 0.7)
     p0 = fitfunction.initpar
     bounds = fitfunction.bounds
     fit_data_list = []
@@ -268,6 +267,53 @@ def lambdafit_4pt(lambdas3, fitlists, datadir, fitfunction):
 
     with open(
         datadir / (f"matrix_elements_loop_4pts_{fitfunction.label}.pkl"), "wb"
+    ) as file_out:
+        pickle.dump(fit_data_list, file_out)
+    return fit_data_list
+
+
+def lambdafit_3pt_squared(lambdas3, fitlists, datadir, fitfunction):
+    p0 = fitfunction.initpar
+    bounds = fitfunction.bounds
+    fit_data_list = []
+    min_len = len(lambdas3)
+    for lmb_initial in np.arange(0, 4):
+        for lmb_step in np.arange(1, min_len / 2 - 1):
+            lmb_range = np.array(
+                [
+                    lmb_initial,
+                    int(lmb_initial + lmb_step),
+                    int(lmb_initial + lmb_step * 2),
+                ]
+            )
+            if lmb_range[-1] >= min_len:
+                continue
+            print(f"lmb_range = {lmb_range}")
+            try:
+                if lmb_range[-1] < len(lambdas3):
+                    order = 3
+                    lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
+                        fitlists[order], order, lmb_range, fitfunction.eval, p0, bounds
+                    )
+                fit_data = {
+                    "lmb_range": lmb_range,
+                    "bootfit3": bootfit,
+                    # "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3])[lmb_range],
+                    "lambdas3": lambdas3[lmb_range],
+                    "chisq3": chisq_fit,
+                    "redchisq3": redchisq_fit,
+                }
+                fit_data_list.append(fit_data)
+            except RuntimeError as e:
+                print(
+                    "====================\nFitting Failed\n",
+                    e,
+                    "\n====================",
+                )
+                fit_data = None
+
+    with open(
+        datadir / (f"matrix_elements_loop_3pts_{fitfunction.label}.pkl"), "wb"
     ) as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list

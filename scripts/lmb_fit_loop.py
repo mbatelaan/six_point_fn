@@ -102,6 +102,12 @@ def main():
     fitlists = [fitlist0, fitlist1, fitlist2, fitlist3]
     lambdas3 = np.array([fit[f"lambdas"] for fit in fitlist3])
 
+    fitlist3_squared = fitlist3
+    for fit in fitlist3_squared:
+        fit["order3_fit"][:, 1] = fit["order3_fit"][:, 1] ** 2
+    print(fitlist3[0]["order3_fit"][:, 1])
+    print(fitlist3_squared[0]["order3_fit"][:, 1])
+
     fitfunc5 = Fitfunction5()
     fitfunc4 = Fitfunction_order4()
 
@@ -111,6 +117,8 @@ def main():
 
     lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
     # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc4)
+
+    lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
 
 
 if __name__ == "__main__":
