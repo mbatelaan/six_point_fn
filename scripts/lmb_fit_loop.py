@@ -24,8 +24,8 @@ from gevpanalysis.lambda_fitting import Fitfunction1
 from gevpanalysis.lambda_fitting import Fitfunction2
 from gevpanalysis.lambda_fitting import Fitfunction6
 from gevpanalysis.lambda_fitting import Fitfunction_order4
-from gevpanalysis.lambda_fitting import fit_lmb
-from gevpanalysis.lambda_fitting import fit_lambda_dep
+# from gevpanalysis.lambda_fitting import fit_lmb
+# from gevpanalysis.lambda_fitting import fit_lambda_dep
 from gevpanalysis.lambda_fitting import lambdafit_3pt
 from gevpanalysis.lambda_fitting import lambdafit_4pt
 from gevpanalysis.lambda_fitting import lambdafit_allpt

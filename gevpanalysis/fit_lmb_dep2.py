@@ -20,10 +20,11 @@ from analysis import fitfunc as ff
 
 from params import params
 
-from gevpanalysis.lambda_fitting import Fitfunction5
+from gevpanalysis.lambda_fitting import Fitfunction1
+from gevpanalysis.lambda_fitting import Fitfunction2
 from gevpanalysis.lambda_fitting import Fitfunction6
 from gevpanalysis.lambda_fitting import Fitfunction_order4
-from gevpanalysis.lambda_fitting import fit_lmb
+# from gevpanalysis.lambda_fitting import fit_lmb
 from gevpanalysis.lambda_fitting import fit_lambda_dep
 
 
@@ -455,6 +456,107 @@ def plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix):
     plt.close()
     return
 
+def plot_lmb_dep4_sq(all_data, plotdir, fit_data=None, fitfunction=None):
+    """Make a plot of the lambda dependence of the energy shift
+    Where the plot uses colored bands to show the dependence
+    """
+    
+    deltaEsquared = np.array(all_data["order3_fit"])**2
+    xdata = np.average(deltaEsquared, axis=1)
+    xerr = np.std(deltaEsquared, axis=1)
+    
+    plt.figure(figsize=(9, 6))
+    plt.fill_between(
+        all_data["lambdas3"],
+        xdata - xerr,
+        xdata + xerr,
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.legend(fontsize="x-small", loc="upper left")
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.ylim(0, xdata[-1] * 1.2)
+
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$\Delta E$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(plotdir / ("lambda_dep_bands_4_sq.pdf"), metadata=_metadata)
+
+    if fit_data:
+        lmb_range = fit_data["lmb_range"]
+        lmb_range3 = fit_data["lmb_range"]
+
+        # plt.fill_between(
+        #     np.array(
+        #         [
+        #             all_data["lambdas3"][lmb_range3[0]],
+        #             all_data["lambdas3"][lmb_range3[-1]],
+        #         ]
+        #     ),
+        #     np.array([-10, -10]),
+        #     np.array([10, 10]),
+        #     color=_colors[3],
+        #     alpha=0.1,
+        #     linewidth=0,
+        # )
+        m_e_3 = err_brackets(
+            np.average(fit_data["bootfit3"], axis=0)[1],
+            np.std(fit_data["bootfit3"], axis=0)[1],
+        )
+
+        fitBS3 = np.array(
+            [fitfunction(all_data["lambdas3"], *bf) for bf in fit_data["bootfit3"]]
+        )
+
+        print(all_data["lambdas3"][lmb_range])
+        fitBS3_ = np.array(
+            [fitfunction(all_data["lambdas3"][lmb_range], *bf) for bf in fit_data["bootfit3"]]
+        )
+        plt.errorbar(all_data["lambdas3"][lmb_range], np.average(fitBS3_, axis=0),np.std(fitBS3_, axis=0),
+                     capsize=4,
+                     elinewidth=1,
+                     color=_colors[2],
+                     fmt="s",
+                     markerfacecolor="none",
+        )
+        
+        plt.plot(
+            all_data["lambdas3"],
+            np.average(fitBS3, axis=0),
+            label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_3}$",
+            color=_colors[3],
+            linewidth=1,
+            linestyle="--",
+            alpha=0.9,
+        )
+        plt.fill_between(
+            all_data["lambdas3"],
+            np.average(fitBS3, axis=0) - np.std(fitBS3, axis=0),
+            np.average(fitBS3, axis=0) + np.std(fitBS3, axis=0),
+            label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_3}$",
+            color=_colors[4],
+            linewidth=1,
+            linestyle="--",
+            alpha=0.1,
+        )
+
+        plt.legend(fontsize="x-small", loc="upper left")
+        plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+        plt.ylim(0, xdata[-1] * 1.2)
+        plt.tight_layout()
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_4_sq.pdf"), metadata=_metadata)
+        plt.ylim(0, 0.007)
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4_sq.pdf"), metadata=_metadata)
+
+    plt.close()
+    return
 
 def main():
     mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
@@ -511,30 +613,21 @@ def main():
     fitlists = [fitlist0, fitlist1, fitlist2, fitlist3]
 
     lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
-    fitfunc5 = Fitfunction5()
+    fitfunc1 = Fitfunction1()
+    fitfunc2 = Fitfunction2()
     fitfunc4 = Fitfunction_order4()
     fitfunc6 = Fitfunction6()
 
-    # Fit to the lambda dependence for each order
-    fit_data = {"lmb_range": lmb_range}
-    for order in np.arange(4):
-        lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
-        print(f"\n==========\nOrder: {order}")
-        print(f"lmb_range = {lmb_range}")
+    with open(datadir / (f"matrix_elements_loop_3pts_sq_fn2.pkl"), "rb") as file_in:
+        data_3pts_sq = pickle.load(file_in)
+    chisq_values = np.array([elem["redchisq3"] for elem in data_3pts_sq])
+    print("\n3 points")
+    for i, elem in enumerate(data_3pts_sq):
+        print(elem["lmb_range"], "\t\t", elem["redchisq3"])
+    chosen_fit = [ i for i in data_3pts_sq if i["lmb_range"][0] == 0 and i["lmb_range"][-1] == 12][0]
+    print(chosen_fit["redchisq3"])
+    print(chosen_fit["lmb_range"])
 
-        p0 = fitfunc5.initpar
-        bounds = fitfunc5.bounds
-        lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
-            fitlists[order], order, lmb_range, fitfunc5.eval, p0, bounds
-        )
-        fit_data[f"lmb_range{order}"] = lmb_range
-        fit_data[f"bootfit{order}"] = bootfit
-        fit_data[f"redchisq{order}"] = redchisq_fit
-
-    with open(datadir / (f"matrix_element.pkl"), "wb") as file_out:
-        pickle.dump(fit_data, file_out)
-
-    # ------------------------------------------------------------
     # Plot the fit to the lambda-dependence
     all_data = {
         "lambdas0": np.array([fit[f"lambdas"] for fit in fitlist0]),
@@ -551,22 +644,60 @@ def main():
         all_data[f"redchisq{order}"] = np.array(
             [fit[f"red_chisq{order}"] for fit in fitlists[order]]
         )
+    plot_lmb_dep4_sq(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc2.eval)
+    # plot_lmb_dep4(all_data, plotdir, fit_data)
 
-    plot_lmb_depR(all_data, plotdir, fit_data)
-    plot_lmb_dep4(all_data, plotdir, fit_data)
+    # # Fit to the lambda dependence for each order
+    # fit_data = {"lmb_range": lmb_range}
+    # for order in np.arange(4):
+    #     lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
+    #     print(f"\n==========\nOrder: {order}")
+    #     print(f"lmb_range = {lmb_range}")
 
-    # ------------------------------------------------------------
-    # Fit with a one-parameter function
-    delta_E_fix = np.average(data[0]["weighted_energy_nucldivsigma"])
-    # print('\n\n',delta_E_fix)
-    fit_data = {"lmb_range": lmb_range}
-    p0 = fitfunc6.initpar
-    bootfit, redchisq = fit_lambda_dep_2(
-        fitlist3, delta_E_fix, order, lmb_range, fitfunction6, p0
-    )
-    fit_data[f"bootfit3"] = bootfit
-    fit_data[f"redchisq3"] = redchisq
-    plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix)
+    #     p0 = fitfunc1.initpar
+    #     bounds = fitfunc1.bounds
+    #     lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep(
+    #         fitlists[order], order, lmb_range, fitfunc1.eval, p0, bounds
+    #     )
+    #     fit_data[f"lmb_range{order}"] = lmb_range
+    #     fit_data[f"bootfit{order}"] = bootfit
+    #     fit_data[f"redchisq{order}"] = redchisq_fit
+
+    # with open(datadir / (f"matrix_element.pkl"), "wb") as file_out:
+    #     pickle.dump(fit_data, file_out)
+    # # ------------------------------------------------------------
+    # # Plot the fit to the lambda-dependence
+    # all_data = {
+    #     "lambdas0": np.array([fit[f"lambdas"] for fit in fitlist0]),
+    #     "lambdas1": np.array([fit[f"lambdas"] for fit in fitlist1]),
+    #     "lambdas2": np.array([fit[f"lambdas"] for fit in fitlist2]),
+    #     "lambdas3": np.array([fit[f"lambdas"] for fit in fitlist3]),
+    #     "time_choice": data[0]["time_choice"],
+    #     "delta_t": data[0]["delta_t"],
+    # }
+    # for order in np.arange(4):
+    #     all_data[f"order{order}_fit"] = np.array(
+    #         [fit[f"order{order}_fit"][:, 1] for fit in fitlists[order]]
+    #     )
+    #     all_data[f"redchisq{order}"] = np.array(
+    #         [fit[f"red_chisq{order}"] for fit in fitlists[order]]
+    #     )
+
+    # plot_lmb_depR(all_data, plotdir, fit_data)
+    # plot_lmb_dep4(all_data, plotdir, fit_data)
+
+    # # ------------------------------------------------------------
+    # # Fit with a one-parameter function
+    # delta_E_fix = np.average(data[0]["weighted_energy_nucldivsigma"])
+    # # print('\n\n',delta_E_fix)
+    # fit_data = {"lmb_range": lmb_range}
+    # p0 = fitfunc6.initpar
+    # bootfit, redchisq = fit_lambda_dep_2(
+    #     fitlist3, delta_E_fix, order, lmb_range, fitfunction6, p0
+    # )
+    # fit_data[f"bootfit3"] = bootfit
+    # fit_data[f"redchisq3"] = redchisq
+    # plot_lmb_dep4_1par(all_data, plotdir, fit_data, delta_E_fix)
 
 
 if __name__ == "__main__":
