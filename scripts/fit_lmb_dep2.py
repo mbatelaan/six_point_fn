@@ -57,15 +57,15 @@ def plot_lmb_dep4_sq(all_data, plotdir, fit_data=None, fitfunction=None):
     xerr = np.std(deltaEsquared, axis=1)
 
     plt.figure(figsize=(9, 6))
-    # plt.fill_between(
-    #     all_data["lambdas3"],
-    #     xdata - xerr,
-    #     xdata + xerr,
-    #     label=r"$\mathcal{O}(\lambda^4)$",
-    #     color=_colors[3],
-    #     linewidth=0,
-    #     alpha=0.3,
-    # )
+    plt.fill_between(
+        all_data["lambdas3"],
+        xdata - xerr,
+        xdata + xerr,
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
+    )
 
     plt.legend(fontsize="x-small", loc="upper left")
     plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)

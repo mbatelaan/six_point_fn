@@ -70,6 +70,23 @@ class Fitfunction2:
         return deltaE
 
 
+class Fitfunction3:
+    """The function to fit to the square of Delta E
+    The function has one parameter, the matrix element.
+    The energy gap at lambda=0 is fixed.
+    """
+
+    def __init__(self):
+        self.npar = 1
+        self.label = r"fn3"
+        self.initpar = np.array([1.0])
+        self.bounds = ([0], [np.inf])
+
+    def eval(self, lmb, matrix_element, Delta_E_fix):
+        deltaE = Delta_E_fix ** 2 + 4 * lmb ** 2 * matrix_element ** 2
+        return deltaE
+
+
 class Fitfunction6:
     """A function to fit to Delta E
     The function has one parameter, the matrix element.
@@ -180,10 +197,6 @@ def fit_lambda_dep(fitlist, order, lmb_range, fitfunction, p0, bounds):
 def fit_lambda_dep_2(fit_data, lambdas, order, lmb_range, fitfunction, p0, bounds):
     """Fit the lambda dependence of the energy shift"""
     # Check if we haven't excluded some of the chosen fit range
-    if lmb_range[-1] >= len(lambdas):
-        lmb_range = np.arange(min(len(lambdas) - 5, lmb_range[0]), len(lambdas))
-    else:
-        lmb_range = lmb_range
     bootfit, redchisq_fit, chisq_fit = fit_lmb(
         fit_data[lmb_range],
         fitfunction,
@@ -191,9 +204,6 @@ def fit_lambda_dep_2(fit_data, lambdas, order, lmb_range, fitfunction, p0, bound
         p0=p0,
         bounds=bounds,
     )
-    print(f"redchisq order {order}:", redchisq_fit)
-    print(f"chisq order {order}:", chisq_fit)
-    print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
     return lmb_range, bootfit, redchisq_fit, chisq_fit
 
 
@@ -400,6 +410,90 @@ def lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunction):
 
     with open(
         datadir / (f"matrix_elements_loop_4pts_sq_{fitfunction.label}.pkl"), "wb"
+    ) as file_out:
+        pickle.dump(fit_data_list, file_out)
+    return fit_data_list
+
+def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction):
+    p0 = fitfunction.initpar
+    bounds = fitfunction.bounds
+    fit_data_list = []
+    min_len = len(lambdas3)
+    for lmb_initial in np.arange(0, 4):
+        for lmb_step in np.arange(1, min_len / 2 - 1):
+            lmb_range = np.array(
+                [
+                    int(lmb_initial + lmb_step),
+                    int(lmb_initial + lmb_step * 2),
+                ]
+            )
+            if lmb_range[-1] >= min_len:
+                continue
+            print(f"lmb_range = {lmb_range}")
+            try:
+                if lmb_range[-1] < len(lambdas3):
+                    order = 3
+                    fit_data = np.array(
+                        [fit[f"order{order}_fit"][:, 1] ** 2 for fit in fitlists[order]]
+                    )
+                    lambdas = np.array([fit[f"lambdas"] for fit in fitlists[order]])
+
+                    bootfit, redchisq_fit, chisq_fit = fit_lmb(
+                        fit_data[lmb_range],
+                        fitfunction.eval,
+                        lambdas[lmb_range],
+                        p0=p0,
+                        bounds=bounds,
+                    )
+
+                    # resavg = syopt.minimize(
+                    #     ff.chisqfn4,
+                    #     p0_1,
+                    #     args=(fitfunction6, xdata, ydata_avg, (delta_E_fix,), invcovmat),
+                    #     method="Nelder-Mead",
+                    #     options={"disp": False},
+                    # )
+                    
+                    # bootfit = []
+                    # chisq_vals = []
+                    # for iboot, values in enumerate(ydata):
+                    #     resavg = syopt.minimize(
+                    #         ff.chisqfn4,
+                    #         p0_1,
+                    #         args=(fitfunction6, xdata, values, (delta_E_fix,), diag_sigma),
+                    #         method="Nelder-Mead",
+                    #         options={"disp": False},
+                    #     )
+                    #     bootfit.append(resavg.x)
+                    #     chisq_vals.append(resavg.fun)
+                    # bootfit = np.array(bootfit)
+                    # chisq_vals = np.array(chisq_vals)
+                    # bootfit_avg = np.average(bootfit, axis=0)
+                    # chisq = ff.chisqfn4(
+                    #     bootfit_avg, fitfunction6, xdata, ydata_avg, (delta_E_fix,), invcovmat
+                    # )
+                    # dof = len(xdata) - len(p0_1)
+                    # redchisq = chisq / dof
+
+
+                fit_data = {
+                    "lmb_range": lmb_range,
+                    "bootfit3": bootfit,
+                    "lambdas3": lambdas3[lmb_range],
+                    "chisq3": chisq_fit,
+                    "redchisq3": redchisq_fit,
+                }
+                fit_data_list.append(fit_data)
+            except RuntimeError as e:
+                print(
+                    "====================\nFitting Failed\n",
+                    e,
+                    "\n====================",
+                )
+                fit_data = None
+
+    with open(
+        datadir / (f"matrix_elements_loop_2pts_sq_{fitfunction.label}.pkl"), "wb"
     ) as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
