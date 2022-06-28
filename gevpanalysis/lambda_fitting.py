@@ -50,7 +50,7 @@ class Fitfunction1:
         self.bounds = ([0, 0], [np.inf, np.inf])
 
     def eval(self, lmb, Delta_E, matrix_element):
-        deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * matrix_element**2)
+        deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
         return deltaE
 
 
@@ -66,7 +66,7 @@ class Fitfunction2:
         self.bounds = ([0, 0], [np.inf, np.inf])
 
     def eval(self, lmb, Delta_E, matrix_element):
-        deltaE = Delta_E**2 + 4 * lmb**2 * matrix_element**2
+        deltaE = Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2
         return deltaE
 
 
@@ -83,7 +83,7 @@ class Fitfunction6:
         self.bounds = ([0], [np.inf])
 
     def eval(self, lmb, matrix_element, delta_E_fix):
-        deltaE = np.sqrt(delta_E_fix**2 + 4 * lmb**2 * matrix_element**2)
+        deltaE = np.sqrt(delta_E_fix ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
         return deltaE
 
 
@@ -100,7 +100,7 @@ class Fitfunction_order4:
 
     def eval(self, lmb, Delta_E, A, B):
         """The fit function Ross proposed to capture the compton amplitude"""
-        deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * A**2 + lmb**4 * B**2)
+        deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * A ** 2 + lmb ** 4 * B ** 2)
         return deltaE
 
 
@@ -175,6 +175,7 @@ def fit_lambda_dep(fitlist, order, lmb_range, fitfunction, p0, bounds):
     print(f"chisq order {order}:", chisq_fit)
     print(f"fit order {order}:", np.average(bootfit, axis=0), "\n")
     return lmb_range, bootfit, redchisq_fit, chisq_fit
+
 
 def fit_lambda_dep_2(fit_data, lambdas, order, lmb_range, fitfunction, p0, bounds):
     """Fit the lambda dependence of the energy shift"""
@@ -311,10 +312,18 @@ def lambdafit_3pt_squared(lambdas3, fitlists, datadir, fitfunction):
             try:
                 if lmb_range[-1] < len(lambdas3):
                     order = 3
-                    fit_data = np.array([fit[f"order{order}_fit"][:, 1]**2 for fit in fitlists[order]])
+                    fit_data = np.array(
+                        [fit[f"order{order}_fit"][:, 1] ** 2 for fit in fitlists[order]]
+                    )
                     lambdas = np.array([fit[f"lambdas"] for fit in fitlists[order]])
                     lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep_2(
-                        fit_data, lambdas, order, lmb_range, fitfunction.eval, p0, bounds
+                        fit_data,
+                        lambdas,
+                        order,
+                        lmb_range,
+                        fitfunction.eval,
+                        p0,
+                        bounds,
                     )
                 fit_data = {
                     "lmb_range": lmb_range,
@@ -338,6 +347,7 @@ def lambdafit_3pt_squared(lambdas3, fitlists, datadir, fitfunction):
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
 
+
 def lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunction):
     p0 = fitfunction.initpar
     bounds = fitfunction.bounds
@@ -359,10 +369,18 @@ def lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunction):
             try:
                 if lmb_range[-1] < len(lambdas3):
                     order = 3
-                    fit_data = np.array([fit[f"order{order}_fit"][:, 1]**2 for fit in fitlists[order]])
+                    fit_data = np.array(
+                        [fit[f"order{order}_fit"][:, 1] ** 2 for fit in fitlists[order]]
+                    )
                     lambdas = np.array([fit[f"lambdas"] for fit in fitlists[order]])
                     lmb_range, bootfit, redchisq_fit, chisq_fit = fit_lambda_dep_2(
-                        fit_data, lambdas, order, lmb_range, fitfunction.eval, p0, bounds
+                        fit_data,
+                        lambdas,
+                        order,
+                        lmb_range,
+                        fitfunction.eval,
+                        p0,
+                        bounds,
                     )
                 fit_data = {
                     "lmb_range": lmb_range,
@@ -385,7 +403,6 @@ def lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunction):
     ) as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
-
 
 
 def lambdafit_allpt(lambdas3, fitlists, datadir, fitfunction):

@@ -24,6 +24,7 @@ from gevpanalysis.lambda_fitting import Fitfunction1
 from gevpanalysis.lambda_fitting import Fitfunction2
 from gevpanalysis.lambda_fitting import Fitfunction6
 from gevpanalysis.lambda_fitting import Fitfunction_order4
+
 # from gevpanalysis.lambda_fitting import fit_lmb
 from gevpanalysis.lambda_fitting import fit_lambda_dep
 
@@ -45,25 +46,26 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
+
 def plot_lmb_dep4_sq(all_data, plotdir, fit_data=None, fitfunction=None):
     """Make a plot of the lambda dependence of the energy shift
     Where the plot uses colored bands to show the dependence
     """
-    
-    deltaEsquared = np.array(all_data["order3_fit"])**2
+
+    deltaEsquared = np.array(all_data["order3_fit"]) ** 2
     xdata = np.average(deltaEsquared, axis=1)
     xerr = np.std(deltaEsquared, axis=1)
-    
+
     plt.figure(figsize=(9, 6))
-    plt.fill_between(
-        all_data["lambdas3"],
-        xdata - xerr,
-        xdata + xerr,
-        label=r"$\mathcal{O}(\lambda^4)$",
-        color=_colors[3],
-        linewidth=0,
-        alpha=0.3,
-    )
+    # plt.fill_between(
+    #     all_data["lambdas3"],
+    #     xdata - xerr,
+    #     xdata + xerr,
+    #     label=r"$\mathcal{O}(\lambda^4)$",
+    #     color=_colors[3],
+    #     linewidth=0,
+    #     alpha=0.3,
+    # )
 
     plt.legend(fontsize="x-small", loc="upper left")
     plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
@@ -77,14 +79,17 @@ def plot_lmb_dep4_sq(all_data, plotdir, fit_data=None, fitfunction=None):
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
-        plt.errorbar(all_data["lambdas3"][lmb_range], xdata[lmb_range], xerr[lmb_range],
-                 capsize=4,
-                 elinewidth=1,
-                 color=_colors[2],
-                 fmt="s",
-                 markerfacecolor="none",
-             )
-    
+        plt.errorbar(
+            all_data["lambdas3"][lmb_range],
+            xdata[lmb_range],
+            xerr[lmb_range],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[2],
+            fmt="s",
+            markerfacecolor="none",
+        )
+
         m_e_3 = err_brackets(
             np.average(fit_data["bootfit3"], axis=0)[1],
             np.std(fit_data["bootfit3"], axis=0)[1],
@@ -96,7 +101,10 @@ def plot_lmb_dep4_sq(all_data, plotdir, fit_data=None, fitfunction=None):
 
         print(all_data["lambdas3"][lmb_range])
         fitBS3_ = np.array(
-            [fitfunction(all_data["lambdas3"][lmb_range], *bf) for bf in fit_data["bootfit3"]]
+            [
+                fitfunction(all_data["lambdas3"][lmb_range], *bf)
+                for bf in fit_data["bootfit3"]
+            ]
         )
         # plt.errorbar(all_data["lambdas3"][lmb_range], np.average(fitBS3_, axis=0),np.std(fitBS3_, axis=0),
         #              capsize=4,
@@ -105,7 +113,7 @@ def plot_lmb_dep4_sq(all_data, plotdir, fit_data=None, fitfunction=None):
         #              fmt="s",
         #              markerfacecolor="none",
         # )
-        
+
         plt.plot(
             all_data["lambdas3"],
             np.average(fitBS3, axis=0),
@@ -136,10 +144,13 @@ def plot_lmb_dep4_sq(all_data, plotdir, fit_data=None, fitfunction=None):
         plt.tight_layout()
         plt.savefig(plotdir / ("lambda_dep_bands_fit_4_sq.pdf"), metadata=_metadata)
         plt.ylim(0, 0.007)
-        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4_sq.pdf"), metadata=_metadata)
+        plt.savefig(
+            plotdir / ("lambda_dep_bands_fit_ylim_4_sq.pdf"), metadata=_metadata
+        )
 
     plt.close()
     return
+
 
 def main():
     mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
@@ -196,10 +207,8 @@ def main():
     fitlists = [fitlist0, fitlist1, fitlist2, fitlist3]
 
     lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
-    fitfunc1 = Fitfunction1()
+
     fitfunc2 = Fitfunction2()
-    fitfunc4 = Fitfunction_order4()
-    fitfunc6 = Fitfunction6()
 
     with open(datadir / (f"matrix_elements_loop_3pts_sq_fn2.pkl"), "rb") as file_in:
         data_3pts_sq = pickle.load(file_in)
@@ -207,7 +216,9 @@ def main():
     print("\n3 points")
     for i, elem in enumerate(data_3pts_sq):
         print(elem["lmb_range"], "\t\t", elem["redchisq3"])
-    chosen_fit = [ i for i in data_3pts_sq if i["lmb_range"][0] == 0 and i["lmb_range"][-1] == 12][0]
+    chosen_fit = [
+        i for i in data_3pts_sq if i["lmb_range"][0] == 0 and i["lmb_range"][-1] == 12
+    ][0]
     print(chosen_fit["redchisq3"])
     print(chosen_fit["lmb_range"])
 
@@ -228,6 +239,7 @@ def main():
             [fit[f"red_chisq{order}"] for fit in fitlists[order]]
         )
     plot_lmb_dep4_sq(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc2.eval)
+
 
 if __name__ == "__main__":
     main()
