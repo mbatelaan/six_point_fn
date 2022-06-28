@@ -22,8 +22,10 @@ from gevpanalysis.params import params
 
 from gevpanalysis.lambda_fitting import Fitfunction1
 from gevpanalysis.lambda_fitting import Fitfunction2
+from gevpanalysis.lambda_fitting import Fitfunction3
 from gevpanalysis.lambda_fitting import Fitfunction6
 from gevpanalysis.lambda_fitting import Fitfunction_order4
+
 # from gevpanalysis.lambda_fitting import fit_lmb
 # from gevpanalysis.lambda_fitting import fit_lambda_dep
 from gevpanalysis.lambda_fitting import lambdafit_3pt
@@ -107,6 +109,7 @@ def main():
 
     fitfunc1 = Fitfunction1()
     fitfunc2 = Fitfunction2()
+    fitfunc3 = Fitfunction3()
     fitfunc4 = Fitfunction_order4()
 
     # lambdafit_3pt(lambdas3, fitlists, datadir, fitfunc1)
@@ -116,8 +119,12 @@ def main():
     # lambdafit_4pt(lambdas3, fitlists, datadir, fitfunc4)
     # # lambdafit_allpt(lambdas3, fitlists, datadir, fitfunc4)
 
-    lambdafit_3pt_squared(lambdas3, fitlists, datadir, fitfunc2)
-    lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunc2)
+    # lambdafit_3pt_squared(lambdas3, fitlists, datadir, fitfunc2)
+    # lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunc2)
+
+    delta_E_fix = data[0]["chosen_nucldivsigma_fit"][:, 1]
+    print(f"delta_E_fix = {delta_E_fix}")
+    lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunc3, delta_E_fix)
 
 
 if __name__ == "__main__":

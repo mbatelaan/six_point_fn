@@ -50,7 +50,7 @@ class Fitfunction1:
         self.bounds = ([0, 0], [np.inf, np.inf])
 
     def eval(self, lmb, Delta_E, matrix_element):
-        deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
+        deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * matrix_element**2)
         return deltaE
 
 
@@ -66,7 +66,7 @@ class Fitfunction2:
         self.bounds = ([0, 0], [np.inf, np.inf])
 
     def eval(self, lmb, Delta_E, matrix_element):
-        deltaE = Delta_E ** 2 + 4 * lmb ** 2 * matrix_element ** 2
+        deltaE = Delta_E**2 + 4 * lmb**2 * matrix_element**2
         return deltaE
 
 
@@ -83,7 +83,7 @@ class Fitfunction3:
         self.bounds = ([0], [np.inf])
 
     def eval(self, lmb, matrix_element, Delta_E_fix):
-        deltaE = Delta_E_fix ** 2 + 4 * lmb ** 2 * matrix_element ** 2
+        deltaE = Delta_E_fix**2 + 4 * lmb**2 * matrix_element**2
         return deltaE
 
 
@@ -100,7 +100,7 @@ class Fitfunction6:
         self.bounds = ([0], [np.inf])
 
     def eval(self, lmb, matrix_element, delta_E_fix):
-        deltaE = np.sqrt(delta_E_fix ** 2 + 4 * lmb ** 2 * matrix_element ** 2)
+        deltaE = np.sqrt(delta_E_fix**2 + 4 * lmb**2 * matrix_element**2)
         return deltaE
 
 
@@ -117,7 +117,7 @@ class Fitfunction_order4:
 
     def eval(self, lmb, Delta_E, A, B):
         """The fit function Ross proposed to capture the compton amplitude"""
-        deltaE = np.sqrt(Delta_E ** 2 + 4 * lmb ** 2 * A ** 2 + lmb ** 4 * B ** 2)
+        deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * A**2 + lmb**4 * B**2)
         return deltaE
 
 
@@ -414,7 +414,8 @@ def lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunction):
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
 
-def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction):
+
+def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_E_fix):
     p0 = fitfunction.initpar
     bounds = fitfunction.bounds
     fit_data_list = []
@@ -437,44 +438,15 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction):
                         [fit[f"order{order}_fit"][:, 1] ** 2 for fit in fitlists[order]]
                     )
                     lambdas = np.array([fit[f"lambdas"] for fit in fitlists[order]])
-
-                    bootfit, redchisq_fit, chisq_fit = fit_lmb(
-                        fit_data[lmb_range],
-                        fitfunction.eval,
-                        lambdas[lmb_range],
-                        p0=p0,
-                        bounds=bounds,
+                    # ============================================================
+                    bootfit, redchisq_fit, chisq_fit = fit_lmb_fixed(
+                        lambdas,
+                        fit_data,
+                        fitfunction,
+                        delta_E_fix,
+                        p0,
+                        bounds,
                     )
-
-                    # resavg = syopt.minimize(
-                    #     ff.chisqfn4,
-                    #     p0_1,
-                    #     args=(fitfunction6, xdata, ydata_avg, (delta_E_fix,), invcovmat),
-                    #     method="Nelder-Mead",
-                    #     options={"disp": False},
-                    # )
-                    
-                    # bootfit = []
-                    # chisq_vals = []
-                    # for iboot, values in enumerate(ydata):
-                    #     resavg = syopt.minimize(
-                    #         ff.chisqfn4,
-                    #         p0_1,
-                    #         args=(fitfunction6, xdata, values, (delta_E_fix,), diag_sigma),
-                    #         method="Nelder-Mead",
-                    #         options={"disp": False},
-                    #     )
-                    #     bootfit.append(resavg.x)
-                    #     chisq_vals.append(resavg.fun)
-                    # bootfit = np.array(bootfit)
-                    # chisq_vals = np.array(chisq_vals)
-                    # bootfit_avg = np.average(bootfit, axis=0)
-                    # chisq = ff.chisqfn4(
-                    #     bootfit_avg, fitfunction6, xdata, ydata_avg, (delta_E_fix,), invcovmat
-                    # )
-                    # dof = len(xdata) - len(p0_1)
-                    # redchisq = chisq / dof
-
 
                 fit_data = {
                     "lmb_range": lmb_range,
@@ -497,6 +469,50 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction):
     ) as file_out:
         pickle.dump(fit_data_list, file_out)
     return fit_data_list
+
+
+def fit_lmb_fixed(xdata, ydata, function, delta_E_fix, p0=None, bounds=None):
+    """Fit to the ydata over xdata using function as the fit function. The fitfunction takes delta_E_fix as a fixed parameter, where the value of this parameter is defined on each bootstrap"""
+    ydata_avg = np.average(ydata)
+    covmat = np.cov(ydata.T)
+    covmat_inverse = linalg.pinv(covmat)
+    diag_sigma = np.diag(np.std(ydata, axis=0) ** 2)
+    delta_E_fix_avg = np.average(delta_E_fix)
+    resavg = syopt.minimize(
+        ff.chisqfn4,
+        p0,
+        args=(
+            function,
+            xdata,
+            ydata_avg,
+            (delta_E_fix_avg,),
+            invcovmat,
+        ),
+        method="Nelder-Mead",
+        options={"disp": False},
+    )
+
+    bootfit = []
+    chisq_vals = []
+    for iboot, values in enumerate(ydata):
+        resavg = syopt.minimize(
+            ff.chisqfn4,
+            p0,
+            args=(function, xdata, values, (delta_E_fix[iboot],), diag_sigma),
+            method="Nelder-Mead",
+            options={"disp": False},
+        )
+        bootfit.append(resavg.x)
+        chisq_vals.append(resavg.fun)
+    bootfit = np.array(bootfit)
+    chisq_vals = np.array(chisq_vals)
+    bootfit_avg = np.average(bootfit, axis=0)
+    chisq = ff.chisqfn4(
+        bootfit_avg, function, xdata, ydata_avg, (delta_E_fix_avg,), covmat_inverse
+    )
+    dof = len(xdata) - len(p0)
+    redchisq = chisq / dof
+    return bootfit, redchisq, chisq
 
 
 def lambdafit_allpt(lambdas3, fitlists, datadir, fitfunction):
