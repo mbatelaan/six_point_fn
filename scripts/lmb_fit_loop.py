@@ -134,8 +134,8 @@ def main():
     )
     print(f"delta_E_0 = {np.average(delta_E_0)}")
     
-    lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunc3, delta_E_fix)
-    lambdafit_3pt_squared_fixed(lambdas3, fitlists, datadir, fitfunc3, delta_E_fix)
+    lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunc3, delta_E_0)
+    lambdafit_3pt_squared_fixed(lambdas3, fitlists, datadir, fitfunc3, delta_E_0)
 
 
 if __name__ == "__main__":
