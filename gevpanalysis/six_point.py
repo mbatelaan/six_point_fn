@@ -685,7 +685,7 @@ def fit_loop_weighted(
         for i in fitlist_nucldivsigma_1exp
         if i["x"][0] == config["tmin_ratio"] and i["x"][-1] == config["tmax_ratio"]
     ][0]
-    ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"] + 1)
+    # ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"] + 1)
 
     return (
         weighted_energy_nucl,

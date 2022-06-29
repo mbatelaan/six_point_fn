@@ -420,7 +420,7 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_
     bounds = fitfunction.bounds
     fit_data_list = []
     max_lmb_index = len(lambdas3)
-    for lmb_initial in np.arange(1, 6):
+    for lmb_initial in np.arange(1, 5):
         for lmb_step in np.arange(1, max_lmb_index - 1):
             lmb_range = np.array(
                 [
@@ -430,14 +430,14 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_
             )
             if lmb_range[-1] >= max_lmb_index:
                 continue
-            print(f"lmb_range = {lmb_range}")
+            print(f"\nlmb_range = {lmb_range}")
             try:
                 if lmb_range[-1] < len(lambdas3):
                     order = 3
                     fit_data = np.array(
                         [fit[f"order{order}_fit"][:, 1] ** 2 for fit in fitlists[order]]
-                    )
-                    lambdas = np.array([fit[f"lambdas"] for fit in fitlists[order]])
+                    )[lmb_range]
+                    lambdas = np.array([fit[f"lambdas"] for fit in fitlists[order]])[lmb_range]
                     # ============================================================
                     bootfit, redchisq_fit, chisq_fit = fit_lmb_fixed(
                         lambdas,
@@ -447,7 +447,6 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_
                         p0,
                         bounds,
                     )
-
                 fit_data = {
                     "lmb_range": lmb_range,
                     "bootfit3": bootfit,
@@ -456,6 +455,8 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_
                     "redchisq3": redchisq_fit,
                 }
                 fit_data_list.append(fit_data)
+                print(f"redchisq order {order}:", redchisq_fit)
+                print(f"chisq order {order}:", chisq_fit)
             except RuntimeError as e:
                 print(
                     "====================\nFitting Failed\n",
@@ -471,6 +472,64 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_
     return fit_data_list
 
 
+def lambdafit_3pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_E_fix):
+    p0 = fitfunction.initpar
+    bounds = fitfunction.bounds
+    fit_data_list = []
+    max_lmb_index = len(lambdas3)
+    for lmb_initial in np.arange(1, 5):
+        for lmb_step in np.arange(1, max_lmb_index/2 - 1):
+            lmb_range = np.array(
+                [
+                    int(lmb_initial),
+                    int(lmb_initial + lmb_step),
+                    int(lmb_initial + lmb_step * 2),
+                ]
+            )
+            if lmb_range[-1] >= max_lmb_index:
+                continue
+            print(f"\nlmb_range = {lmb_range}")
+            try:
+                if lmb_range[-1] < len(lambdas3):
+                    order = 3
+                    fit_data = np.array(
+                        [fit[f"order{order}_fit"][:, 1] ** 2 for fit in fitlists[order]]
+                    )[lmb_range]
+                    lambdas = np.array([fit[f"lambdas"] for fit in fitlists[order]])[lmb_range]
+                    # ============================================================
+                    bootfit, redchisq_fit, chisq_fit = fit_lmb_fixed(
+                        lambdas,
+                        fit_data,
+                        fitfunction.eval,
+                        delta_E_fix,
+                        p0,
+                        bounds,
+                    )
+                fit_data = {
+                    "lmb_range": lmb_range,
+                    "bootfit3": bootfit,
+                    "lambdas3": lambdas3[lmb_range],
+                    "chisq3": chisq_fit,
+                    "redchisq3": redchisq_fit,
+                }
+                fit_data_list.append(fit_data)
+                print(f"redchisq order {order}:", redchisq_fit)
+                print(f"chisq order {order}:", chisq_fit)
+            except RuntimeError as e:
+                print(
+                    "====================\nFitting Failed\n",
+                    e,
+                    "\n====================",
+                )
+                fit_data = None
+
+    with open(
+        datadir / (f"matrix_elements_loop_3pts_sq_{fitfunction.label}.pkl"), "wb"
+    ) as file_out:
+        pickle.dump(fit_data_list, file_out)
+    return fit_data_list
+
+
 def fit_lmb_fixed(xdata, ydata, function, delta_E_fix, p0=None, bounds=None):
     """Fit to the ydata over xdata using function as the fit function. The fitfunction takes delta_E_fix as a fixed parameter, where the value of this parameter is defined on each bootstrap"""
     ydata = ydata.T
@@ -481,7 +540,6 @@ def fit_lmb_fixed(xdata, ydata, function, delta_E_fix, p0=None, bounds=None):
     delta_E_fix_avg = np.average(delta_E_fix)
     # print(np.shape(ydata))
     # print(np.shape(covmat))
-    # print(xdata, ydata_avg, delta_E_fix_avg)
     resavg = syopt.minimize(
         ff.chisqfn4,
         p0,
