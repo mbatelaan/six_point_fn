@@ -126,7 +126,7 @@ def plot_fits(data_, name, plotdir):
     return
 
 
-def plot_fits_comb(data_, name, plotdir):
+def plot_fits_comb(data_, name, plotdir, param_index = 1):
     lmbmin0_fits_ = [i for i in data_ if i["lmb_range"][0] == 0]
     lmbmin1_fits_ = [i for i in data_ if i["lmb_range"][0] == 1]
     lmbmin2_fits_ = [i for i in data_ if i["lmb_range"][0] == 2]
@@ -139,9 +139,93 @@ def plot_fits_comb(data_, name, plotdir):
     lmbmin0_redchisq = [i["redchisq3"] for i in lmbmin0_fits_]
     lmbmin1_redchisq = [i["redchisq3"] for i in lmbmin1_fits_]
     lmbmin2_redchisq = [i["redchisq3"] for i in lmbmin2_fits_]
-    lmbmin0_me = [i["bootfit3"][:, 1] for i in lmbmin0_fits_]
-    lmbmin1_me = [i["bootfit3"][:, 1] for i in lmbmin1_fits_]
-    lmbmin2_me = [i["bootfit3"][:, 1] for i in lmbmin2_fits_]
+    lmbmin0_me = [i["bootfit3"][:, param_index] for i in lmbmin0_fits_]
+    lmbmin1_me = [i["bootfit3"][:, param_index] for i in lmbmin1_fits_]
+    lmbmin2_me = [i["bootfit3"][:, param_index] for i in lmbmin2_fits_]
+
+    fig, ax1 = plt.subplots(figsize=(7, 5))
+    ax1.plot(
+        lmbmin0_lmbmax_,
+        lmbmin0_redchisq,
+        color=_colors[0],
+        # label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin0_fits_[0]['lambdas3'][0]:.3f}$",
+    )
+    ax1.plot(
+        lmbmin1_lmbmax_,
+        lmbmin1_redchisq,
+        color=_colors[1],
+        # label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin1_fits_[0]['lambdas3'][0]:.3f}$",
+    )
+    ax1.plot(
+        lmbmin2_lmbmax_,
+        lmbmin2_redchisq,
+        color=_colors[2],
+        # label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin2_fits_[0]['lambdas3'][0]:.3f}$",
+    )
+    ax1.set_ylabel(r"$\chi^2_{\textrm{red.}}$")
+    ax1.set_ylim(0, 6)
+    ax1.grid(True, alpha=0.3)
+    # ax1.set_xticks(np.arange(2,15))
+    ax1.set_xlabel(r"$\lambda_{\textrm{max}}$")
+
+    ax2 = ax1.twinx()
+    ax2.errorbar(
+        lmbmin0_lmbmax_,
+        np.average(lmbmin0_me, axis=1),
+        np.std(lmbmin0_me, axis=1),
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        fmt=_markers[0],
+        label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin0_fits_[0]['lambdas3'][0]:.3f}$",
+    )
+    ax2.errorbar(
+        lmbmin1_lmbmax_,
+        np.average(lmbmin1_me, axis=1),
+        np.std(lmbmin1_me, axis=1),
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        fmt=_markers[1],
+        label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin1_fits_[0]['lambdas3'][0]:.3f}$",
+    )
+    ax2.errorbar(
+        lmbmin2_lmbmax_,
+        np.average(lmbmin2_me, axis=1),
+        np.std(lmbmin2_me, axis=1),
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        fmt=_markers[2],
+        label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin2_fits_[0]['lambdas3'][0]:.3f}$",
+    )
+    ax2.set_ylabel(r"Matrix element")
+
+    # ax1.legend(fontsize="small")
+    ax2.legend(fontsize="small")
+    # fig.legend(fontsize="small", loc='lower left', framealpha = 0.9)
+
+    plt.savefig(plotdir / (f"lambda_fit_" + name + "_comb.pdf"))
+    plt.close()
+
+    return
+
+def plot_fits_comb_2(data_, name, plotdir, param_index = 1):
+    # lmbmin0_fits_ = [i for i in data_ if i["lmb_range"][0] == 0]
+    # lmbmin1_fits_ = [i for i in data_ if i["lmb_range"][0] == 1]
+    # lmbmin2_fits_ = [i for i in data_ if i["lmb_range"][0] == 2]
+    lmbmin0_lmbmax = [i["lmb_range"][-1] for i in lmbmin0_fits_]
+    lmbmin1_lmbmax = [i["lmb_range"][-1] for i in lmbmin1_fits_]
+    lmbmin2_lmbmax = [i["lmb_range"][-1] for i in lmbmin2_fits_]
+    lmbmin0_lmbmax_ = [i["lambdas3"][-1] for i in lmbmin0_fits_]
+    lmbmin1_lmbmax_ = [i["lambdas3"][-1] for i in lmbmin1_fits_]
+    lmbmin2_lmbmax_ = [i["lambdas3"][-1] for i in lmbmin2_fits_]
+    lmbmin0_redchisq = [i["redchisq3"] for i in lmbmin0_fits_]
+    lmbmin1_redchisq = [i["redchisq3"] for i in lmbmin1_fits_]
+    lmbmin2_redchisq = [i["redchisq3"] for i in lmbmin2_fits_]
+    lmbmin0_me = [i["bootfit3"][:, param_index] for i in lmbmin0_fits_]
+    lmbmin1_me = [i["bootfit3"][:, param_index] for i in lmbmin1_fits_]
+    lmbmin2_me = [i["bootfit3"][:, param_index] for i in lmbmin2_fits_]
 
     fig, ax1 = plt.subplots(figsize=(7, 5))
     ax1.plot(
@@ -252,6 +336,8 @@ def main():
         data_3pts_sq = pickle.load(file_in)
     with open(datadir / (f"matrix_elements_loop_4pts_sq_fn2.pkl"), "rb") as file_in:
         data_4pts_sq = pickle.load(file_in)
+    with open(datadir / (f"matrix_elements_loop_2pts_sq_fn3.pkl"), "rb") as file_in:
+        data_2pts_sq_fix = pickle.load(file_in)
 
     print("\n3 points")
     for i, elem in enumerate(data_3pts):
@@ -271,6 +357,7 @@ def main():
     plot_fits_comb(data_4pts_fn4, "4points_fn4", plotdir)
     plot_fits_comb(data_3pts_sq, "3points_sq", plotdir)
     plot_fits_comb(data_4pts_sq, "4points_sq", plotdir)
+    plot_fits_comb(data_2pts_sq_fix, "2points_sq_fix", plotdir, param_index=0)
 
     print("\n3 points")
     for i, elem in enumerate(data_3pts_sq):

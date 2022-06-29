@@ -33,6 +33,7 @@ from gevpanalysis.lambda_fitting import lambdafit_4pt
 from gevpanalysis.lambda_fitting import lambdafit_allpt
 from gevpanalysis.lambda_fitting import lambdafit_3pt_squared
 from gevpanalysis.lambda_fitting import lambdafit_4pt_squared
+from gevpanalysis.lambda_fitting import lambdafit_2pt_squared_fixed
 
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
 _colors = [
@@ -122,8 +123,11 @@ def main():
     # lambdafit_3pt_squared(lambdas3, fitlists, datadir, fitfunc2)
     # lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunc2)
 
-    delta_E_fix = data[0]["chosen_nucldivsigma_fit"][:, 1]
-    print(f"delta_E_fix = {delta_E_fix}")
+    # delta_E_fix = data[0]["chosen_nucldivsigma_fit"]["bootfit3"]
+    delta_E_fix = data[0]["chosen_nucldivsigma_fit"]["param"][:,1]
+    # print([key for key in delta_E_fix])
+    print(f"delta_E_fix = {np.shape(delta_E_fix)}")
+    # print(f"delta_E_fix = {delta_E_fix}")
     lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunc3, delta_E_fix)
 
 

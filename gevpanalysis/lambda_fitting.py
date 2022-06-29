@@ -419,16 +419,16 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_
     p0 = fitfunction.initpar
     bounds = fitfunction.bounds
     fit_data_list = []
-    min_len = len(lambdas3)
-    for lmb_initial in np.arange(0, 4):
-        for lmb_step in np.arange(1, min_len / 2 - 1):
+    max_lmb_index = len(lambdas3)
+    for lmb_initial in np.arange(1, 6):
+        for lmb_step in np.arange(1, max_lmb_index - 1):
             lmb_range = np.array(
                 [
+                    int(lmb_initial),
                     int(lmb_initial + lmb_step),
-                    int(lmb_initial + lmb_step * 2),
                 ]
             )
-            if lmb_range[-1] >= min_len:
+            if lmb_range[-1] >= max_lmb_index:
                 continue
             print(f"lmb_range = {lmb_range}")
             try:
@@ -442,7 +442,7 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_
                     bootfit, redchisq_fit, chisq_fit = fit_lmb_fixed(
                         lambdas,
                         fit_data,
-                        fitfunction,
+                        fitfunction.eval,
                         delta_E_fix,
                         p0,
                         bounds,
@@ -473,11 +473,15 @@ def lambdafit_2pt_squared_fixed(lambdas3, fitlists, datadir, fitfunction, delta_
 
 def fit_lmb_fixed(xdata, ydata, function, delta_E_fix, p0=None, bounds=None):
     """Fit to the ydata over xdata using function as the fit function. The fitfunction takes delta_E_fix as a fixed parameter, where the value of this parameter is defined on each bootstrap"""
-    ydata_avg = np.average(ydata)
+    ydata = ydata.T
+    ydata_avg = np.average(ydata, axis=0)
     covmat = np.cov(ydata.T)
     covmat_inverse = linalg.pinv(covmat)
     diag_sigma = np.diag(np.std(ydata, axis=0) ** 2)
     delta_E_fix_avg = np.average(delta_E_fix)
+    # print(np.shape(ydata))
+    # print(np.shape(covmat))
+    # print(xdata, ydata_avg, delta_E_fix_avg)
     resavg = syopt.minimize(
         ff.chisqfn4,
         p0,
@@ -486,7 +490,7 @@ def fit_lmb_fixed(xdata, ydata, function, delta_E_fix, p0=None, bounds=None):
             xdata,
             ydata_avg,
             (delta_E_fix_avg,),
-            invcovmat,
+            covmat_inverse,
         ),
         method="Nelder-Mead",
         options={"disp": False},
