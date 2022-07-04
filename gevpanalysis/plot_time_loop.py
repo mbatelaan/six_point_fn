@@ -136,25 +136,27 @@ def main():
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
 
-    with open(datadir / (f"time_window_loop_nucl_1exp.pkl"), "rb") as file_in:
+    # filename = f"time_window_loop_" + data_label + "_" + function.label + ".pkl"
+    # with open(datadir / filename, "rb") as file_in:
+    with open(datadir / (f"time_window_loop_nucl_Aexp.pkl"), "rb") as file_in:
         fitlist_nucl_1exp = pickle.load(file_in)
-    with open(datadir / (f"time_window_loop_nucl_2exp.pkl"), "rb") as file_in:
+    with open(datadir / (f"time_window_loop_nucl_Twoexp.pkl"), "rb") as file_in:
         fitlist_nucl_2exp = pickle.load(file_in)
 
     with open(
-        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_1exp.pkl",
+        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Aexp.pkl",
         "rb",
     ) as file_in:
         fitlist_sigma_1exp = pickle.load(file_in)
     with open(
-        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_2exp.pkl",
+        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Twoexp.pkl",
         "rb",
     ) as file_in:
         fitlist_sigma_2exp = pickle.load(file_in)
 
-    with open(datadir / (f"time_window_loop_nucldivsigma_1exp.pkl"), "rb") as file_in:
+    with open(datadir / (f"time_window_loop_nucldivsigma_Aexp.pkl"), "rb") as file_in:
         fitlist_nucldivsigma_1exp = pickle.load(file_in)
-    with open(datadir / (f"time_window_loop_nucldivsigma_2exp.pkl"), "rb") as file_in:
+    with open(datadir / (f"time_window_loop_nucldivsigma_Twoexp.pkl"), "rb") as file_in:
         fitlist_nucldivsigma_2exp = pickle.load(file_in)
 
     with open(datadir / (f"time_window_loop_lambda_small.pkl"), "rb") as file_in:

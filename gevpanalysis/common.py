@@ -5,7 +5,7 @@ import yaml
 import sys
 import scipy.optimize as syopt
 from scipy.optimize import curve_fit
-import matplotlib.pyplot as pypl
+import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 from analysis import stats
@@ -63,11 +63,11 @@ def fit_value(diffG, t_range):
     diag = np.diagonal(covmat)
     norms = np.einsum("i,j->ij", diag, diag) ** 0.5
     covmat_norm = covmat / norms
-    # pypl.figure(figsize=(11, 11))
-    # pypl.figure(figsize=(11, 11))
-    # mat = pypl.matshow(np.linalg.inv(covmat))
-    # pypl.colorbar(mat, shrink=0.5)
-    # pypl.savefig("cov_matrix_corr.pdf")
+    # plt.figure(figsize=(11, 11))
+    # plt.figure(figsize=(11, 11))
+    # mat = plt.matshow(np.linalg.inv(covmat))
+    # plt.colorbar(mat, shrink=0.5)
+    # plt.savefig("cov_matrix_corr.pdf")
 
     diag_sigma = np.diag(np.std(data_set, axis=0) ** 2)
     popt_avg, pcov_avg = curve_fit(ff.constant, t_range, diffG_avg, sigma=covmat)
@@ -1525,6 +1525,7 @@ def weighted_avg(
         ax1.set_xlabel(r"$t_{\textrm{min}}$")
         ax1.set_ylabel(r"$E$")
         ax1.set_xlim(0, tmin_[-1] + 1)
+        ax1.set_xticks(np.arange(np.max(tmin_)+1))
 
         ax2 = ax1.twinx()
         ax2.bar(tmin_, weights_, color=_colors[0], alpha=0.3)
