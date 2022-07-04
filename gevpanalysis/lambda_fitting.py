@@ -83,8 +83,8 @@ class Fitfunction3:
         self.bounds = ([0], [np.inf])
 
     def eval(self, lmb, matrix_element, Delta_E_fix):
-        deltaE = Delta_E_fix**2 + 4 * lmb**2 * matrix_element**2
-        return deltaE
+        deltaE_sq = Delta_E_fix**2 + 4 * lmb**2 * matrix_element**2
+        return deltaE_sq
 
 
 class Fitfunction6:

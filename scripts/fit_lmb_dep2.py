@@ -239,6 +239,7 @@ def plot_lmb_dep4_sq_fix(all_data, plotdir, fit_data=None, fitfunction=None, del
 def plot_lmb_dep4_sq_fix_2(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fix=None):
     """Make a plot of the lambda dependence of the energy shift
     Where the plot uses colored bands to show the dependence
+    Only plot errorbar points for the points included in the fit, the only band is the fit result now.
     """
 
     deltaEsquared = np.array(all_data["order3_fit"]) ** 2
@@ -264,7 +265,6 @@ def plot_lmb_dep4_sq_fix_2(all_data, plotdir, fit_data=None, fitfunction=None, d
     plt.ylabel("$(\Delta E)^2$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.tight_layout()
-    # plt.savefig(plotdir / ("lambda_dep_bands_4_sq_fix.pdf"), metadata=_metadata)
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
@@ -314,6 +314,99 @@ def plot_lmb_dep4_sq_fix_2(all_data, plotdir, fit_data=None, fitfunction=None, d
         plt.ylim(0, 0.012)
         plt.savefig(
             plotdir / ("lambda_dep_bands_fit_fn3_ylim.pdf"), metadata=_metadata
+        )
+
+    plt.close()
+    return
+
+def plot_lmb_dep_fix(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fix=None):
+    """Make a plot of the lambda dependence of the energy shift
+    Where the plot uses colored bands to show the dependence
+    Only plot errorbar points for the points included in the fit, the only band is the fit result now.
+    Plotting Delta E in the way Ross outlined in the meeting
+    """
+
+    deltaE = np.array(all_data["order3_fit"])
+    # DeltaE_new = DeltaE + np.sqrt(DeltaE**2+ 4*)
+    xdata = np.average(deltaE, axis=1)
+    xerr = np.std(deltaE, axis=1)
+
+    plt.figure(figsize=(9, 6))
+    plt.fill_between(
+        all_data["lambdas3"],
+        xdata - xerr,
+        xdata + xerr,
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
+    )
+
+    plt.legend(fontsize="x-small", loc="upper left")
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.ylim(0, xdata[-1] * 1.2)
+
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$(\Delta E)^2$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+
+    if fit_data:
+        lmb_range = fit_data["lmb_range"]
+        plt.errorbar(
+            all_data["lambdas3"][lmb_range],
+            xdata[lmb_range],
+            xerr[lmb_range],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[3],
+            fmt="s",
+            markerfacecolor="none",
+            label=r"$\mathcal{O}(\lambda^4)$",
+        )
+        m_e_3 = err_brackets(
+            np.average(fit_data["bootfit3"], axis=0)[0],
+            np.std(fit_data["bootfit3"], axis=0)[0],
+        )
+
+        # fitBS3 = np.array(
+        #     [fitfunction(all_data["lambdas3"], *bf, delta_E_fix[ibf]) for ibf, bf in enumerate(fit_data["bootfit3"])]
+        # )
+
+        delta_E0 = delta_E_fix
+        lambdas_ = all_data["lambdas3"]
+        fitME = fit_data["bootfit3"]
+        fitBS3 = np.array( [delta_E0[ibf] + np.sqrt(delta_E0[ibf]**2 + 4*lambdas_**2*matrix_element**2) - np.abs(delta_E0[ibf]) for ibf, matrix_element in enumerate(fitME)])
+        print(np.shape(fitBS3))
+        print(fitBS3)
+
+        plt.plot(
+            all_data["lambdas3"],
+            np.average(fitBS3, axis=0),
+            color=_colors[4],
+            linewidth=1,
+            linestyle="--",
+            alpha=0.9,
+        )
+        newline='\n'
+        plt.fill_between(
+            all_data["lambdas3"],
+            np.average(fitBS3, axis=0) - np.std(fitBS3, axis=0),
+            np.average(fitBS3, axis=0) + np.std(fitBS3, axis=0),
+            label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}${newline}$\textrm{{M.E.}}={m_e_3}$",
+            color=_colors[4],
+            linewidth=0,
+            alpha=0.3,
+        )
+
+        plt.legend(fontsize="x-small", loc="upper left")
+        plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+        plt.ylim(0, xdata[-1] * 1.2)
+        plt.tight_layout()
+        # plt.savefig(plotdir / ("lambda_dep_bands_fit_4_sq_fix.pdf"), metadata=_metadata)
+        plt.ylim(-0.02, 0.15)
+        plt.savefig(
+            plotdir / ("lambda_dep_bands_fit_fn3_Ross_ylim.pdf"), metadata=_metadata
         )
 
     plt.close()
@@ -413,6 +506,7 @@ def main():
     with open(datadir / (f"matrix_elements_loop_3pts_sq_fn3.pkl"), "rb") as file_in:
         data_3pts_sq_fix = pickle.load(file_in)
     chisq_values = np.array([elem["redchisq3"] for elem in data_3pts_sq_fix])
+
     print("\n3 points")
     for i, elem in enumerate(data_3pts_sq_fix):
         print(elem["lmb_range"], "\t\t", elem["redchisq3"])
@@ -441,7 +535,7 @@ def main():
     )
     plot_lmb_dep4_sq_fix(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     plot_lmb_dep4_sq_fix_2(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
-
+    plot_lmb_dep_fix(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
 
 if __name__ == "__main__":
     main()
