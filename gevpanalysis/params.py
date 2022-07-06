@@ -33,18 +33,18 @@ class params:
         for key, value in defaults.items():
             config.setdefault(key, value)
 
-        # Cast things as arrays that need to be
-        array_variables = ["bounds2pt", "boundsratio", "norma"]
-        for var in array_variables:
-            array = config[var]
-            array = recursive_cast(array, float)
-            config[var] = np.array(array)
+        # # Cast things as arrays that need to be
+        # array_variables = ["bounds2pt", "boundsratio", "norma"]
+        # for var in array_variables:
+        #     array = config[var]
+        #     array = recursive_cast(array, float)
+        #     config[var] = np.array(array)
 
-        # Cast things as arrays that need to be (integer)
-        array_variables = ["qval"]
-        for var in array_variables:
-            array = config[var]
-            config[var] = np.array(array)
+        # # Cast things as arrays that need to be (integer)
+        # array_variables = ["qval"]
+        # for var in array_variables:
+        #     array = config[var]
+        #     config[var] = np.array(array)
 
         # config["operators2"][2] = np.array(config["operators2"][2])
         # config["operators2"][8] = np.array(config["operators2"][8])
@@ -57,12 +57,12 @@ class params:
         #     array = recursive_cast(array, float)
         #     config[var] = np.array(array)
 
-        # Cast things as arrays that need to be (Fractions)
-        for var in config["baryons"]:
-            array = var["charge"]
-            array = recursive_cast(array, Fraction)
-            array = recursive_cast(array, float)
-            var["charge"] = np.array(array)
+        # # Cast things as arrays that need to be (Fractions)
+        # for var in config["baryons"]:
+        #     array = var["charge"]
+        #     array = recursive_cast(array, Fraction)
+        #     array = recursive_cast(array, float)
+        #     var["charge"] = np.array(array)
 
         config["geom"] = str(config["L"]) + "x" + str(config["T"])
 

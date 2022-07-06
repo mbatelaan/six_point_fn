@@ -140,10 +140,13 @@ def plotting_script_all(
     plt.legend(fontsize="x-small")
     # plt.ylabel(r"$G_{nn}(t;\vec{p}=(1,0,0))$")
     # plt.title("$\lambda=0.04$")
-    plt.title("$\lambda=" + str(lmb_val) + "$")
+    # plt.title("$\lambda=" + str(lmb_val) + "$")
     # plt.xlabel(r"$\textrm{t/a}$")
-    plt.xlabel(r"$t/a$")
-    plt.savefig(plotdir / ("comp_plot_all_SS_" + name + ".pdf"), metadata=_metadata)
+    plt.xlabel(r"$t$")
+    plt.ylim(1e-5,3e2)
+    metadata_ = _metadata
+    # metadata_["Keywords"] = f"lmb={lmb_val}"
+    plt.savefig(plotdir / ("comp_plot_all_SS_" + name + ".pdf"), metadata=metadata_)
     if show:
         plt.show()
     plt.close()
@@ -234,12 +237,11 @@ def plotting_script_all_N(
 
     plt.semilogy()
     plt.legend(fontsize="x-small")
-    # plt.ylabel(r"$G_{nn}(t;\vec{p}=(1,0,0))$")
-    # plt.title("$\lambda=0.04$")
-    plt.title("$\lambda=" + str(lmb_val) + "$")
-    # plt.xlabel(r"$\textrm{t/a}$")
-    plt.xlabel(r"$t/a$")
-    plt.savefig(plotdir / ("comp_plot_all_NN_" + name + ".pdf"), metadata=_metadata)
+    plt.xlabel(r"$t$")
+    plt.ylim(1e-5,3e2)
+    metadata_ = _metadata
+    # metadata_["lambda"] = lmb_val
+    plt.savefig(plotdir / ("comp_plot_all_NN_" + name + ".pdf"), metadata=metadata_)
     if show:
         plt.show()
     plt.close()
@@ -708,6 +710,7 @@ def main():
 
     # Get the parameters for this lattice ensemble (kp121040kp120620)
     pars = params(0)
+    _metadata["Keywords"] = f"{pars.__dict__}"
 
     # Read in the analysis data from the yaml file if one is given
     qmax_config = read_config("qmax")
@@ -725,8 +728,6 @@ def main():
     # Set the directories for reading data, saving data and saving plots
     pickledir_k1 = Path(config["pickle_dir1"])
     pickledir_k2 = Path(config["pickle_dir2"])
-    # plotdir = Path(config["analysis_dir"]) / Path("plots")
-    # datadir = Path(config["analysis_dir"]) / Path("data")
     plotdir = PROJECT_BASE_DIRECTORY / Path("data/plots") / Path(config["name"])
     datadir = PROJECT_BASE_DIRECTORY / Path("data/pickles") / Path(config["name"])
     plotdir.mkdir(parents=True, exist_ok=True)
@@ -1041,20 +1042,20 @@ def main():
         print("plotting")
         if plotting:
             plotting_script_all(
-                matrix_1 / 1e39,
-                matrix_2 / 1e39,
-                matrix_3 / 1e39,
-                matrix_4 / 1e39,
+                matrix_1,
+                matrix_2,
+                matrix_3,
+                matrix_4,
                 lmb_val,
                 plotdir,
                 name="_l" + str(lmb_val),
                 show=False,
             )
             plotting_script_all_N(
-                matrix_1 / 1e39,
-                matrix_2 / 1e39,
-                matrix_3 / 1e39,
-                matrix_4 / 1e39,
+                matrix_1,
+                matrix_2,
+                matrix_3,
+                matrix_4,
                 lmb_val,
                 plotdir,
                 name="_l" + str(lmb_val),
@@ -1081,6 +1082,7 @@ def main():
         "wb",
     ) as file_out:
         pickle.dump(fitlist, file_out)
+    print(_metadata)
 
 
 if __name__ == "__main__":
