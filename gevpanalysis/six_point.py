@@ -17,23 +17,23 @@ from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
 from analysis import fitfunc as ff
 
-from common import read_pickle
-from common import fit_value
-from common import fit_value3
-from common import read_correlators
-from common import read_correlators2
-from common import read_correlators3
-from common import read_correlators4
-from common import read_correlators5_complex
-from common import read_correlators6
-from common import make_matrices
-from common import normalize_matrices
-from common import gevp
-from common import gevp_bootstrap
-from common import weighted_avg_1_2_exp
-from common import weighted_avg
+from gevpanalysis.common import read_pickle
+from gevpanalysis.common import fit_value
+from gevpanalysis.common import fit_value3
+from gevpanalysis.common import read_correlators
+from gevpanalysis.common import read_correlators2
+from gevpanalysis.common import read_correlators3
+from gevpanalysis.common import read_correlators4
+from gevpanalysis.common import read_correlators5_complex
+from gevpanalysis.common import read_correlators6
+from gevpanalysis.common import make_matrices
+from gevpanalysis.common import normalize_matrices
+from gevpanalysis.common import gevp
+from gevpanalysis.common import gevp_bootstrap
+from gevpanalysis.common import weighted_avg_1_2_exp
+from gevpanalysis.common import weighted_avg
 
-from params import params
+from gevpanalysis.params import params
 
 
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
@@ -355,9 +355,9 @@ def plotting_script_diff_2(
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
     plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.25))
     plt.ylabel(r"$\Delta E_{\textrm{eff}}$")
-    plt.xlabel("$t/a$")
+    plt.xlabel("$t$")
     plt.legend(fontsize="x-small")
-    plt.title("$\lambda=" + str(lmb_val) + "$")
+    # plt.title("$\lambda=" + str(lmb_val) + "$")
     plt.savefig(plotdir / ("diff_G" + name + ".pdf"), metadata=_metadata)
     if show:
         plt.show()

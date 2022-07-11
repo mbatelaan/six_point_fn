@@ -237,11 +237,6 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     Where the plot uses colored bands to show the dependence
     """
 
-    # print(all_data["lambdas0"])
-    # print(
-    #     np.average(all_data["order0_fit"], axis=1)
-    #     - np.std(all_data["order0_fit"], axis=1)
-    # )
     plt.figure(figsize=(9, 6))
     plt.fill_between(
         all_data["lambdas0"],
@@ -304,6 +299,9 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.tight_layout()
     plt.savefig(plotdir / ("lambda_dep_bands.pdf"), metadata=_metadata)
+    plt.ylim(-0.015, 0.15)
+    plt.savefig(plotdir / ("lambda_dep_bands_ylim.pdf"), metadata=_metadata)
+
 
     if fit_data:
         lmb_range = fit_data["lmb_range"]
@@ -418,6 +416,76 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim.pdf"), metadata=_metadata)
 
     plt.close()
+    return
+
+def plot_lmb_dep_abs(all_data, plotdir, fit_data=None):
+    """Make a plot of the lambda dependence of the energy shift
+    Where the plot uses colored bands to show the dependence
+    Take the absolute value of the energy shift
+    """
+
+    order0_delta_e = abs(all_data["order0_fit"])
+    order1_delta_e = abs(all_data["order1_fit"])
+    order2_delta_e = abs(all_data["order2_fit"])
+    order3_delta_e = abs(all_data["order3_fit"])
+
+
+    plt.figure(figsize=(9, 6))
+    plt.fill_between(
+        all_data["lambdas0"],
+        np.average(order0_delta_e, axis=1)
+        - np.std(order0_delta_e, axis=1),
+        np.average(order0_delta_e, axis=1)
+        + np.std(order0_delta_e, axis=1),
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas1"],
+        np.average(order1_delta_e, axis=1)
+        - np.std(order1_delta_e, axis=1),
+        np.average(order1_delta_e, axis=1)
+        + np.std(order1_delta_e, axis=1),
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas2"],
+        np.average(order2_delta_e, axis=1)
+        - np.std(order2_delta_e, axis=1),
+        np.average(order2_delta_e, axis=1)
+        + np.std(order2_delta_e, axis=1),
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas3"],
+        np.average(order3_delta_e, axis=1)
+        - np.std(order3_delta_e, axis=1),
+        np.average(order3_delta_e, axis=1)
+        + np.std(order3_delta_e, axis=1),
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.legend(fontsize="x-small", loc="upper left")
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$|\Delta E|$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    # plt.savefig(plotdir / ("lambda_dep_bands.pdf"), metadata=_metadata)
+    plt.ylim(-0.015, 0.15)
+    plt.savefig(plotdir / ("lambda_dep_bands_ylim_abs.pdf"), metadata=_metadata)
     return
 
 
@@ -660,8 +728,8 @@ def main():
         fit_data[f"redchisq{order}"] = redchisq_fit
 
     # print([key for key in fit_data])
-    with open(datadir / (f"matrix_element.pkl"), "wb") as file_out:
-        pickle.dump(fit_data, file_out)
+    # with open(datadir / (f"matrix_element.pkl"), "wb") as file_out:
+    #     pickle.dump(fit_data, file_out)
 
     all_data = {
         "lambdas0": np.array([fit[f"lambdas"] for fit in fitlist0]),
@@ -680,6 +748,7 @@ def main():
         )
 
     plot_lmb_depR(all_data, plotdir, fit_data)
+    plot_lmb_dep_abs(all_data, plotdir, fit_data)
     plot_lmb_dep4(all_data, plotdir, fit_data)
 
     delta_E_fix = np.average(data[0]["weighted_energy_nucldivsigma"])

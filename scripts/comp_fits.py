@@ -73,7 +73,7 @@ def plot_fits(data_, name, plotdir):
     plt.legend(fontsize="small")
     plt.xticks(np.arange(2, 15))
     plt.xlabel(r"$\lambda_{\textrm{max}}$")
-    plt.ylabel(r"$\chi^2_{\textrm{red.}}$")
+    plt.ylabel(r"$\chi^2_{\textrm{dof}}$")
     plt.grid(True, alpha=0.3)
     plt.ylim(0, 5)
     plt.savefig(plotdir / (f"lambda_fit_{name}.pdf"))
@@ -159,7 +159,7 @@ def plot_fits_comb(data_, name, plotdir, param_index = 1, tmin_range=[0,1,2]):
         lmbmin2_redchisq,
         color=_colors[2],
     )
-    ax1.set_ylabel(r"$\chi^2_{\textrm{red.}}$")
+    ax1.set_ylabel(r"$\chi^2_{\textrm{dof}}$")
     ax1.set_ylim(0, 6)
     ax1.grid(True, alpha=0.3)
     # ax1.set_xticks(np.arange(2,15))
@@ -243,7 +243,7 @@ def plot_fits_comb_2(data_, name, plotdir, param_index = 1):
         color=_colors[2],
         # label=rf"$\lambda_{{\textrm{{min}}}}={lmbmin2_fits_[0]['lambdas3'][0]:.3f}$",
     )
-    ax1.set_ylabel(r"$\chi^2_{\textrm{red.}}$")
+    ax1.set_ylabel(r"$\chi^2_{\textrm{dof}}$")
     ax1.set_ylim(0, 6)
     ax1.grid(True, alpha=0.3)
     # ax1.set_xticks(np.arange(2,15))

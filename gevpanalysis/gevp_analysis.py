@@ -10,24 +10,27 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 from gevpanalysis.definitions import PROJECT_BASE_DIRECTORY
+from gevpanalysis.util import find_file
+from gevpanalysis.util import read_config
+from gevpanalysis.util import save_plot
 
 from analysis import stats
 from analysis.bootstrap import bootstrap
 from analysis.formatting import err_brackets
 from analysis import fitfunc as ff
 
-from common import read_pickle
-from common import fit_value3
-from common import read_correlators
-from common import read_correlators2
-from common import read_correlators4
-from common import read_correlators5_complex
-from common import make_matrices
-from common import normalize_matrices
-from common import gevp
-from common import gevp_bootstrap
+from gevpanalysis.common import read_pickle
+from gevpanalysis.common import fit_value3
+from gevpanalysis.common import read_correlators
+from gevpanalysis.common import read_correlators2
+from gevpanalysis.common import read_correlators4
+from gevpanalysis.common import read_correlators5_complex
+from gevpanalysis.common import make_matrices
+from gevpanalysis.common import normalize_matrices
+from gevpanalysis.common import gevp
+from gevpanalysis.common import gevp_bootstrap
 
-from params import params
+from gevpanalysis.params import params
 
 
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
@@ -64,34 +67,37 @@ def plot_matrix(fitlist, plotdir, name):
     matrix = np.full((len(unique_x), len(unique_y)), np.nan)
     for i, x in enumerate(t_0):
         matrix[x - min_x, delta_t[i] - min_y] = np.average(fitlist[i]["order3_fit"][:,1])
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     mat = plt.pcolormesh(plot_x, plot_y, matrix.T, cmap="RdBu") #, vmin=0.0, vmax=2)
     plt.colorbar(mat, label=r"$\textrm{Energy}$")
     plt.xlabel(r"$t_{0}$")
     plt.ylabel(r"$\Delta t$")
-    plt.savefig(plotdir / (f"energy_matrix_gevp_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"energy_matrix_gevp_" + name + ".pdf"))
+    save_plot(fig, f"energy_matrix_gevp_{name}.pdf", subdir = plotdir, )
     plt.close()
 
     matrix = np.full((len(unique_x), len(unique_y)), np.nan)
     for i, x in enumerate(t_0):
         matrix[x - min_x, delta_t[i] - min_y] = - np.log(fitlist[i]["order3_eval_left"][0])/delta_t[i]
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     mat = plt.pcolormesh(plot_x, plot_y, matrix.T, cmap="RdBu") #, vmin=0.0, vmax=2)
     plt.colorbar(mat, label=r"$\textrm{Energy}$")
     plt.xlabel(r"$t_{0}$")
     plt.ylabel(r"$\Delta t$")
-    plt.savefig(plotdir / (f"eval1_matrix_gevp_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"eval1_matrix_gevp_" + name + ".pdf"))
+    save_plot(fig, f"eval1_matrix_gevp_{name}.pdf", subdir = plotdir, )
     plt.close()
 
     matrix = np.full((len(unique_x), len(unique_y)), np.nan)
     for i, x in enumerate(t_0):
         matrix[x - min_x, delta_t[i] - min_y] = - np.log(fitlist[i]["order3_eval_left"][1])/delta_t[i]
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     mat = plt.pcolormesh(plot_x, plot_y, matrix.T, cmap="RdBu") #, vmin=0.0, vmax=2)
     plt.colorbar(mat, label=r"$\textrm{Energy}$")
     plt.xlabel(r"$t_{0}$")
     plt.ylabel(r"$\Delta t$")
-    plt.savefig(plotdir / (f"eval2_matrix_gevp_" + name +".pdf"))
+    # plt.savefig(plotdir / (f"eval2_matrix_gevp_" + name +".pdf"))
+    save_plot(fig, f"eval2_matrix_gevp_{name}.pdf", subdir = plotdir)
     plt.close()
     return
 
@@ -112,34 +118,37 @@ def plot_matrix_bs(fitlist, plotdir, name):
     matrix = np.full((len(unique_x), len(unique_y)), np.nan)
     for i, x in enumerate(t_0):
         matrix[x - min_x, delta_t[i] - min_y] = np.average(fitlist[i]["order3_fit"][:,1])
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     mat = plt.pcolormesh(plot_x, plot_y, matrix.T, cmap="RdBu") #, vmin=0.0, vmax=2)
     plt.colorbar(mat, label=r"$\textrm{Energy}$")
     plt.xlabel(r"$t_{0}$")
     plt.ylabel(r"$\Delta t$")
-    plt.savefig(plotdir / (f"energy_matrix_gevp_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"energy_matrix_gevp_" + name + ".pdf"))
+    save_plot(fig, f"energy_matrix_gevp_{name}.pdf", subdir = plotdir)
     plt.close()
 
     matrix = np.full((len(unique_x), len(unique_y)), np.nan)
     for i, x in enumerate(t_0):
         matrix[x - min_x, delta_t[i] - min_y] = fitlist[i]["order3_eval_left"][0]
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     mat = plt.pcolormesh(plot_x, plot_y, matrix.T, cmap="RdBu") #, vmin=0.0, vmax=2)
     plt.colorbar(mat, label=r"$\textrm{Energy}$")
     plt.xlabel(r"$t_{0}$")
     plt.ylabel(r"$\Delta t$")
-    plt.savefig(plotdir / (f"eval1_matrix_gevp_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"eval1_matrix_gevp_" + name + ".pdf"))
+    save_plot(fig, f"eval1_matrix_gevp_{name}.pdf", subdir = plotdir)
     plt.close()
 
     matrix = np.full((len(unique_x), len(unique_y)), np.nan)
     for i, x in enumerate(t_0):
         matrix[x - min_x, delta_t[i] - min_y] = fitlist[i]["order3_eval_left"][1]
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     mat = plt.pcolormesh(plot_x, plot_y, matrix.T, cmap="RdBu") #, vmin=0.0, vmax=2)
     plt.colorbar(mat, label=r"$\textrm{Energy}$")
     plt.xlabel(r"$t_{0}$")
     plt.ylabel(r"$\Delta t$")
-    plt.savefig(plotdir / (f"eval2_matrix_gevp_" + name +".pdf"))
+    # plt.savefig(plotdir / (f"eval2_matrix_gevp_" + name +".pdf"))
+    save_plot(fig, f"eval2_matrix_gevp_{name}.pdf", subdir = plotdir)
     plt.close()
     return
 
@@ -210,7 +219,7 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     print(len(x))
 
     # plt.figure(figsize=(5, 4))
-    plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=(9, 6))
     plt.errorbar(
         x,
         np.average(energy_shifts0_bs, axis=1),
@@ -262,11 +271,12 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.xlabel(r"$t_{0}$")
     plt.ylabel(r"$\textrm{Energy}$")
     plt.legend(fontsize='xx-small', framealpha=0.3)
-    plt.savefig(plotdir / (f"delta_t{delta_t_fix}_energyshift_bs_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"delta_t{delta_t_fix}_energyshift_bs_" + name + ".pdf"))
+    save_plot(fig, f"delta_t{delta_t_fix}_energyshift_bs_{name}.pdf", subdir = plotdir)
     plt.close()
 
     # plt.figure(figsize=(5, 4))
-    plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=(9, 6))
     plt.errorbar(
         x,
         np.average(energy_shifts0, axis=1),
@@ -318,7 +328,8 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.xlabel(r"$t_{0}$")
     plt.ylabel(r"$\textrm{Energy}$")
     plt.legend(fontsize='xx-small', framealpha=0.3)
-    plt.savefig(plotdir / (f"delta_t{delta_t_fix}_energyshift_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"delta_t{delta_t_fix}_energyshift_" + name + ".pdf"))
+    save_plot(fig, f"delta_t{delta_t_fix}_energyshift_{name}.pdf", subdir = plotdir)
     plt.close()
 
     fig = plt.figure(figsize=(9, 6))
@@ -335,7 +346,8 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     fig.legend(fontsize='xx-small', framealpha=0.3)
     plt.ylim(0,1)
     plt.xticks(x)
-    plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_" + name + ".pdf"))
+    save_plot(fig, f"delta_t{delta_t_fix}_evec_vals_{name}.pdf", subdir = plotdir)
     plt.close()
 
     fig = plt.figure(figsize=(9, 6))
@@ -352,7 +364,8 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     fig.legend(fontsize='xx-small', framealpha=0.3)
     plt.ylim(0,2)
     plt.xticks(x)
-    plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_summed" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_summed" + name + ".pdf"))
+    save_plot(fig, f"delta_t{delta_t_fix}_evec_vals_summed_{name}.pdf", subdir = plotdir)
     plt.close()
 
     fig = plt.figure(figsize=(9, 6))
@@ -365,7 +378,8 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     fig.legend(fontsize='xx-small', framealpha=0.3)
     plt.ylim(0.3,1)
     plt.xticks(x)
-    plt.savefig(plotdir / (f"delta_t{delta_t_fix}_eval_energy_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"delta_t{delta_t_fix}_eval_energy_" + name + ".pdf"))
+    save_plot(fig, f"delta_t{delta_t_fix}_eval_energy_{name}.pdf", subdir = plotdir)
     plt.close()
 
     fig = plt.figure(figsize=(9, 6))
@@ -378,10 +392,11 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.ylim(0.3,1)
     plt.xticks(x)
     fig.legend(fontsize='xx-small', framealpha=0.3)
-    plt.savefig(plotdir / (f"delta_t{delta_t_fix}_eval_energy_bs" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"delta_t{delta_t_fix}_eval_energy_bs" + name + ".pdf"))
+    save_plot(fig, f"delta_t{delta_t_fix}_eval_energy_bs{name}.pdf", subdir = plotdir)
     plt.close()
 
-    plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=(9, 6))
     plt.errorbar(x, np.average(evec_val1_bs, axis=1), np.std(evec_val1_bs, axis=1), color=_colors[0], fmt="s--", capsize=4, elinewidth=1, markerfacecolor="none",label='left evec 1 first element')
     plt.errorbar(x, np.average(evec_val2_bs, axis=1), np.std(evec_val2_bs, axis=1), color=_colors[0], fmt="^-", capsize=4, elinewidth=1, markerfacecolor="none",label='left evec 1 second element')
     plt.errorbar(x+0.08, np.average(evec_val1_2bs, axis=1), np.std(evec_val1_2bs, axis=1), color=_colors[1], fmt="s--", capsize=4, elinewidth=1, markerfacecolor="none",label='left evec 2 first element')
@@ -391,7 +406,8 @@ def delta_t_slice(fitlist, delta_t_fix, plotdir, name):
     plt.legend(fontsize='xx-small', framealpha=0.3)
     plt.ylim(0,1)
     plt.xticks(x)
-    plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_bs" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"delta_t{delta_t_fix}_evec_vals_bs" + name + ".pdf"))
+    save_plot(fig, f"delta_t{delta_t_fix}_evec_vals_bs{name}.pdf", subdir = plotdir)
     plt.close()
 
     return
@@ -414,7 +430,7 @@ def t_0_slice(fitlist, t_0_fix, plotdir, name):
     energy_shifts3 = np.array([ fit["order3_fit"][:,1] for fit in fitlist ])[indices]
 
 
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     plt.errorbar(
         x,
         np.average(energy_shifts0_bs, axis=1),
@@ -578,7 +594,8 @@ def gevp_slice(fitlist, t_0_range, delta_t_range, plotdir, name):
     plt.ylim(0.02,0.075)
     plt.xlabel(r"$\Delta t$")
     plt.ylabel(r"$\Delta E$")
-    plt.savefig(plotdir / (f"gevp_slice_energyshift_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"gevp_slice_energyshift_" + name + ".pdf"))
+    save_plot(fig, f"gevp_slice_energyshift_{name}.pdf", subdir = plotdir)
     plt.close()
 
     # ==================================================
@@ -652,12 +669,13 @@ def gevp_slice(fitlist, t_0_range, delta_t_range, plotdir, name):
     # plt.ylim(0.3,1)
     plt.xlabel(r"$\Delta t$")
     plt.ylabel(r"$\Delta E(c^+, c^-)$")
-    plt.savefig(plotdir / (f"gevp_slice_eval_energyshift_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"gevp_slice_eval_energyshift_" + name + ".pdf"))
+    save_plot(fig, f"gevp_slice_eval_energyshift_{name}.pdf", subdir = plotdir)
     plt.close()
 
     # ==================================================
     # Difference in energies
-    fig, ax = plt.subplots(figsize=(7, 5))
+    fig, ax = plt.subplots(figsize=(9, 5))
     for delta_t_ in delta_t_range:
         indices = np.where(delta_t == delta_t_)
         indices = np.where([delta_t[i] == delta_t_ and t_0[i] in t_0_range for i,j in enumerate(delta_t)])
@@ -709,7 +727,8 @@ def gevp_slice(fitlist, t_0_range, delta_t_range, plotdir, name):
     # plt.ylim(0.3,1)
     plt.xlabel(r"$\Delta t$")
     plt.ylabel(r"$\Delta E - \Delta E(c^+, c^-)$")
-    plt.savefig(plotdir / (f"gevp_slice_energydiff_eval_fit_" + name + ".pdf"))
+    # plt.savefig(plotdir / (f"gevp_slice_energydiff_eval_fit_" + name + ".pdf"))
+    save_plot(fig, f"gevp_slice_energydiff_eval_fit_{name}.pdf", subdir = plotdir)
     plt.close()
 
     return
@@ -1009,42 +1028,26 @@ def gevp_loop(G2_nucl, G2_sigm, lmb_val, datadir):
 
 
 if __name__ == "__main__":
-    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    # plt.rc("font", size=18, **{"family": "Roboto Condensed"})
-    # plt.rc("font", size=18)
-    # plt.rc("text", usetex=True)
-    # rcParams.update({"figure.autolayout": True})
-    # rcParams.update({"xtick.": True})
-
-    # p = plt.rcParams
-    # # p["xtick.top"] = True
-    # p["xtick.bottom"] = True
-    # p["xtick.direction"] = "in"
-    # p["ytick.direction"] = "in"
-    # p["figure.autolayout"] = True
+    # Load the style file for matplotlib
     mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
     plt.style.use(mystyle.as_posix())
 
     pars = params(0)
     # Read in the directory data from the yaml file
-    if len(sys.argv) > 1:
-        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
+    if len(sys.argv) >= 2:
+        config = read_config(sys.argv[1])
     else:
-        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
-    print(f"Reading directories from: {config_file}\n")
-    with open(config_file) as f:
-        config = yaml.safe_load(f)
+        config = read_config("qmax")
 
     # Set parameters to defaults defined in another YAML file
-    with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
-        defaults = yaml.safe_load(f)
+    defaults = read_config("defaults")
     for key, value in defaults.items():
         config.setdefault(key, value)
 
     pickledir = Path(config["pickle_dir1"])
     pickledir2 = Path(config["pickle_dir2"])
-    plotdir = Path(config["analysis_dir"]) / Path("plots")
-    datadir = Path(config["analysis_dir"]) / Path("data")
+    plotdir = PROJECT_BASE_DIRECTORY / Path("data/plots") / Path(config["name"])
+    datadir = PROJECT_BASE_DIRECTORY / Path("data/pickles") / Path(config["name"])
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
     lmb_val = config["lmb_val"]
@@ -1078,15 +1081,14 @@ if __name__ == "__main__":
         fitlist = gevp_loop(G2_nucl, G2_sigm, lmb_val, datadir)
 
     # plot_matrix(fitlist, plotdir, name)
-    delta_t_slice(fitlist, 1, plotdir, name)
-    delta_t_slice(fitlist, 2, plotdir, name)
-    delta_t_slice(fitlist, 3, plotdir, name)
-    delta_t_slice(fitlist, 4, plotdir, name)
-    delta_t_slice(fitlist, 5, plotdir, name)
-    delta_t_slice(fitlist, 6, plotdir, name)
-    t_0_slice(fitlist, 3, plotdir, name)
-    t_0_slice(fitlist, 4, plotdir, name)
-    t_0_slice(fitlist, 5, plotdir, name)
-    t_0_slice(fitlist, 6, plotdir, name)
-    # plot_matrix(fitlist, plotdir, name, bs="_bs")
+    # delta_t_slice(fitlist, 1, plotdir, name)
+    # delta_t_slice(fitlist, 2, plotdir, name)
+    # delta_t_slice(fitlist, 3, plotdir, name)
+    # delta_t_slice(fitlist, 4, plotdir, name)
+    # delta_t_slice(fitlist, 5, plotdir, name)
+    # delta_t_slice(fitlist, 6, plotdir, name)
+    # t_0_slice(fitlist, 3, plotdir, name)
+    # t_0_slice(fitlist, 4, plotdir, name)
+    # t_0_slice(fitlist, 5, plotdir, name)
+    # t_0_slice(fitlist, 6, plotdir, name)
     gevp_slice(fitlist, np.arange(1,9), np.arange(1,7), plotdir, name)
