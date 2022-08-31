@@ -22,10 +22,12 @@ from gevpanalysis.common import fit_value
 from gevpanalysis.common import fit_value3
 from gevpanalysis.common import read_correlators
 from gevpanalysis.common import read_correlators2
-from gevpanalysis.common import read_correlators3
+
+# from gevpanalysis.common import read_correlators3
 from gevpanalysis.common import read_correlators4
 from gevpanalysis.common import read_correlators5_complex
-from gevpanalysis.common import read_correlators6
+
+# from gevpanalysis.common import read_correlators6
 from gevpanalysis.common import make_matrices
 from gevpanalysis.common import normalize_matrices
 from gevpanalysis.common import gevp
@@ -143,7 +145,7 @@ def plotting_script_all(
     # plt.title("$\lambda=" + str(lmb_val) + "$")
     # plt.xlabel(r"$\textrm{t/a}$")
     plt.xlabel(r"$t$")
-    plt.ylim(1e-5,3e2)
+    plt.ylim(1e-5, 3e2)
     metadata_ = _metadata
     # metadata_["Keywords"] = f"lmb={lmb_val}"
     plt.savefig(plotdir / ("comp_plot_all_SS_" + name + ".pdf"), metadata=metadata_)
@@ -238,7 +240,7 @@ def plotting_script_all_N(
     plt.semilogy()
     plt.legend(fontsize="x-small")
     plt.xlabel(r"$t$")
-    plt.ylim(1e-5,3e2)
+    plt.ylim(1e-5, 3e2)
     metadata_ = _metadata
     # metadata_["lambda"] = lmb_val
     plt.savefig(plotdir / ("comp_plot_all_NN_" + name + ".pdf"), metadata=metadata_)
