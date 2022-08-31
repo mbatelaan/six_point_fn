@@ -22,7 +22,6 @@ def main():
 
     # Get the parameters for this lattice ensemble (kp121040kp120620)
     pars = params(0)
-    _metadata["Keywords"] = f"{pars.__dict__}"
 
     # Read in the analysis data from the yaml file if one is given
     qmax_config = read_config("qmax")
@@ -42,15 +41,17 @@ def main():
     pickledir_k2 = Path(config["pickle_dir2"])
     plotdir = PROJECT_BASE_DIRECTORY / Path("data/plots") / Path(config["name"])
     datadir = PROJECT_BASE_DIRECTORY / Path("data/pickles") / Path(config["name"])
+    correlator_dir = datadir / Path("correlator_data")
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
+    correlator_dir.mkdir(parents=True, exist_ok=True)
 
     # Read the correlator data from the pickle files
     mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
     if "onlytwist2" in config and config["onlytwist2"]:
         transfer_pickle_data(pars, pickledir_k1, pickledir_k2, datadir)
     elif "qmax" in config and config["qmax"]:
-        transfer_pickle_data(pars, pickledir_k1, pickledir_k2, datadir)
+        transfer_pickle_data(pars, pickledir_k1, pickledir_k2, datadir, qmax=True)
 
 
 if __name__ == "__main__":

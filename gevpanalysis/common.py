@@ -149,7 +149,7 @@ def fit_value3(diffG, t_range, function, norm=1):
     return bootfit, redchisq
 
 
-def transfer_pickle_data(pars, pickledir, pickledir2, datadir):
+def transfer_pickle_data(pars, pickledir, pickledir2, datadir, qmax=False):
     """Read the correlator data from the pickle files, then save it in the data directory.
     The data will be placed in the following tree structure:
     datadir
@@ -201,16 +201,29 @@ def transfer_pickle_data(pars, pickledir, pickledir2, datadir):
 
     # We now have the names of the files with the correct number of configurations in the name
 
-    ### ----------------------------------------------------------------------
-    G2_nucl = []
-    G2_sigm = []
+    dirpart_u = "unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/"
+    dirpart_s = "unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/"
+    if qmax:
+        dirpart_nucl = "unpreconditioned_slrc/kp121040kp121040/"
+        unpertfile_nucleon = pickledir2 / Path(
+            f"baryon_qcdsf/barspec/32x64/{dirpart_nucl}sh_gij_p21_90-sh_gij_p21_90/"
+            + mom_strings[1]
+            + barspec_nameS
+        )
+    else:
+        unpertfile_nucleon = pickledir / Path(
+            f"baryon_qcdsf_TBC/barspec/32x64/{dirpart_u}sh_gij_p21_90-sh_gij_p21_90/"
+            + mom_strings[1]
+            + barspec_nameU
+        )
+
     ### ----------------------------------------------------------------------
     ### Unperturbed correlators
-    unpertfile_nucleon = pickledir / Path(
-        "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
-        + mom_strings[1]
-        + barspec_nameU
-    )
+    # unpertfile_nucleon = nucleon_pickledir / Path(
+    #     f"baryon_qcdsf_TBC/barspec/32x64/{dirpart_u}sh_gij_p21_90-sh_gij_p21_90/"
+    #     + mom_strings[1]
+    #     + nucleon_name
+    # )
     unpertfile_sigma = pickledir2 / Path(
         "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
@@ -218,8 +231,8 @@ def transfer_pickle_data(pars, pickledir, pickledir2, datadir):
     )
 
     # Define the destination file names
-    write_file_nucleon_lmb0 = datadir / Path("correlators_unperturbed/corr_UU_lmb0.pkl")
-    write_file_sigma_lmb0 = datadir / Path("correlators_unperturbed/corr_SS_lmb0.pkl")
+    write_file_nucleon_lmb0 = datadir / Path(f"correlator_data/corr_UU_lmb0_{mom_strings[1]}.pkl")
+    write_file_sigma_lmb0 = datadir / Path(f"correlator_data/corr_SS_lmb0_{mom_strings[1]}.pkl")
 
     # Copy the pickle files to the new locations in the data directory
     shutil.copyfile(unpertfile_nucleon, write_file_nucleon_lmb0)
@@ -228,34 +241,33 @@ def transfer_pickle_data(pars, pickledir, pickledir2, datadir):
     ### ----------------------------------------------------------------------
     ### SU & SS
     filelist_SU1 = pickledir2 / Path(
-        "baryon-3pt_SU_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        f"baryon-3pt_SU_lmb_TBC/barspec/32x64/{dirpart_u}sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameS
     )
     filelist_SU3 = pickledir2 / Path(
-        "baryon-3pt_SU_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        f"baryon-3pt_SU_lmb3_TBC/barspec/32x64/{dirpart_u}sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameS
     )
     filelist_SS2 = pickledir2 / Path(
-        "baryon-3pt_SS_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        f"baryon-3pt_SS_lmb2_TBC/barspec/32x64/{dirpart_s}sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameS
     )
     filelist_SS4 = pickledir2 / Path(
-        "baryon-3pt_SS_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        f"baryon-3pt_SS_lmb4_TBC/barspec/32x64/{dirpart_s}sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameS
     )
 
     # Define the destination file names
-    write_file_sigma_lmb1 = datadir / Path("correlators_unperturbed/corr_SU_lmb1.pkl")
-    write_file_sigma_lmb3 = datadir / Path("correlators_unperturbed/corr_SU_lmb3.pkl")
-    write_file_sigma_lmb2 = datadir / Path("correlators_unperturbed/corr_SS_lmb2.pkl")
-    write_file_sigma_lmb4 = datadir / Path("correlators_unperturbed/corr_SS_lmb4.pkl")
+    write_file_sigma_lmb1 = datadir / Path(f"correlator_data/corr_SU_lmb1_{mom_strings[1]}.pkl")
+    write_file_sigma_lmb3 = datadir / Path(f"correlator_data/corr_SU_lmb3_{mom_strings[1]}.pkl")
+    write_file_sigma_lmb2 = datadir / Path(f"correlator_data/corr_SS_lmb2_{mom_strings[1]}.pkl")
+    write_file_sigma_lmb4 = datadir / Path(f"correlator_data/corr_SS_lmb4_{mom_strings[1]}.pkl")
 
     # Copy the pickle files to the new locations in the data directory
-    shutil.copyfile(unpertfile_nucleon, write_file_nucleon_lmb0)
     shutil.copyfile(filelist_SU1, write_file_sigma_lmb1)
     shutil.copyfile(filelist_SU3, write_file_sigma_lmb3)
     shutil.copyfile(filelist_SS2, write_file_sigma_lmb2)
@@ -264,31 +276,31 @@ def transfer_pickle_data(pars, pickledir, pickledir2, datadir):
     ### ----------------------------------------------------------------------
     ### US & UU
     filelist_US1 = pickledir / Path(
-        "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        f"baryon-3pt_US_lmb_TBC/barspec/32x64/{dirpart_s}sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameU
     )
     filelist_UU2 = pickledir / Path(
-        "baryon-3pt_UU_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        f"baryon-3pt_UU_lmb2_TBC/barspec/32x64/{dirpart_u}sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameU
     )
     filelist_US3 = pickledir / Path(
-        "baryon-3pt_US_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        f"baryon-3pt_US_lmb3_TBC/barspec/32x64/{dirpart_s}sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameU
     )
     filelist_UU4 = pickledir / Path(
-        "baryon-3pt_UU_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        f"baryon-3pt_UU_lmb4_TBC/barspec/32x64/{dirpart_u}sh_gij_p21_90-sh_gij_p21_90/"
         + mom_strings[1]
         + barspec_nameU
     )
 
     # Define the destination file names
-    write_file_nucleon_lmb1 = datadir / Path("correlators_unperturbed/corr_US_lmb1.pkl")
-    write_file_nucleon_lmb3 = datadir / Path("correlators_unperturbed/corr_US_lmb3.pkl")
-    write_file_nucleon_lmb2 = datadir / Path("correlators_unperturbed/corr_UU_lmb2.pkl")
-    write_file_nucleon_lmb4 = datadir / Path("correlators_unperturbed/corr_UU_lmb4.pkl")
+    write_file_nucleon_lmb1 = datadir / Path(f"correlator_data/corr_US_lmb1_{mom_strings[1]}.pkl")
+    write_file_nucleon_lmb3 = datadir / Path(f"correlator_data/corr_US_lmb3_{mom_strings[1]}.pkl")
+    write_file_nucleon_lmb2 = datadir / Path(f"correlator_data/corr_UU_lmb2_{mom_strings[1]}.pkl")
+    write_file_nucleon_lmb4 = datadir / Path(f"correlator_data/corr_UU_lmb4_{mom_strings[1]}.pkl")
 
     # Copy the pickle files to the new locations in the data directory
     shutil.copyfile(filelist_US1, write_file_nucleon_lmb1)
