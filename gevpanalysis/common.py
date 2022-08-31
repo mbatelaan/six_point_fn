@@ -2,7 +2,8 @@ import numpy as np
 from pathlib import Path
 import pickle
 import yaml
-import sys
+import shutil
+import os
 import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
@@ -146,6 +147,155 @@ def fit_value3(diffG, t_range, function, norm=1):
         bootfit.append(popt)
     bootfit = np.array(bootfit)
     return bootfit, redchisq
+
+
+def transfer_pickle_data(pars, pickledir, pickledir2, datadir):
+    """Read the correlator data from the pickle files, then save it in the data directory.
+    The data will be placed in the following tree structure:
+    datadir
+        |- correlators_unperturbed
+        |   |- corr_UU_lmb0
+        |   |- corr_SS_lmb0
+        |- correlators_lmb1
+        |   |- corr_US_lmb1
+        |   |- corr_SU_lmb1
+        |- correlators_lmb2
+        |   |- corr_UU_lmb2
+        |   |- corr_SS_lmb2
+        |- correlators_lmb3
+        |   |- corr_US_lmb3
+        |   |- corr_SU_lmb3
+        |- correlators_lmb4
+            |- corr_UU_lmb4
+            |- corr_SS_lmb4
+    """
+    mom_strings = ["p-1+0+0", "p+0+0+0", "p+1+0+0"]
+
+    ### find the highest number of configurations available
+    ### Unperturbed correlators
+    fileup = (
+        pickledir
+        / Path(
+            "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+            + mom_strings[1]
+        )
+    ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
+    conf_num_list_u = np.array(
+        [int("".join(filter(str.isdigit, l.name))) for l in list(fileup)]
+    )
+    conf_num_u = conf_num_list_u[np.argmax(conf_num_list_u)]
+    barspec_nameU = "/barspec_nucleon_rel_" + str(conf_num_u) + "cfgs.pickle"
+
+    filestrange = (
+        pickledir2
+        / Path(
+            "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+            + mom_strings[1]
+        )
+    ).glob("barspec_nucleon_rel_[0-9]*cfgs.pickle")
+    conf_num_list_s = np.array(
+        [int("".join(filter(str.isdigit, l.name))) for l in list(filestrange)]
+    )
+    conf_num_s = conf_num_list_s[np.argmax(conf_num_list_s)]
+    barspec_nameS = "/barspec_nucleon_rel_" + str(conf_num_s) + "cfgs.pickle"
+
+    # We now have the names of the files with the correct number of configurations in the name
+
+    ### ----------------------------------------------------------------------
+    G2_nucl = []
+    G2_sigm = []
+    ### ----------------------------------------------------------------------
+    ### Unperturbed correlators
+    unpertfile_nucleon = pickledir / Path(
+        "baryon_qcdsf_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    unpertfile_sigma = pickledir2 / Path(
+        "baryon_qcdsf/barspec/32x64/unpreconditioned_slrc/kp121040kp120620/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+
+    # Define the destination file names
+    write_file_nucleon_lmb0 = datadir / Path("correlators_unperturbed/corr_UU_lmb0.pkl")
+    write_file_sigma_lmb0 = datadir / Path("correlators_unperturbed/corr_SS_lmb0.pkl")
+
+    # Copy the pickle files to the new locations in the data directory
+    shutil.copyfile(unpertfile_nucleon, write_file_nucleon_lmb0)
+    shutil.copyfile(unpertfile_sigma, write_file_sigma_lmb0)
+
+    ### ----------------------------------------------------------------------
+    ### SU & SS
+    filelist_SU1 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    filelist_SU3 = pickledir2 / Path(
+        "baryon-3pt_SU_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    filelist_SS2 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+    filelist_SS4 = pickledir2 / Path(
+        "baryon-3pt_SS_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameS
+    )
+
+    # Define the destination file names
+    write_file_sigma_lmb1 = datadir / Path("correlators_unperturbed/corr_SU_lmb1.pkl")
+    write_file_sigma_lmb3 = datadir / Path("correlators_unperturbed/corr_SU_lmb3.pkl")
+    write_file_sigma_lmb2 = datadir / Path("correlators_unperturbed/corr_SS_lmb2.pkl")
+    write_file_sigma_lmb4 = datadir / Path("correlators_unperturbed/corr_SS_lmb4.pkl")
+
+    # Copy the pickle files to the new locations in the data directory
+    shutil.copyfile(unpertfile_nucleon, write_file_nucleon_lmb0)
+    shutil.copyfile(filelist_SU1, write_file_sigma_lmb1)
+    shutil.copyfile(filelist_SU3, write_file_sigma_lmb3)
+    shutil.copyfile(filelist_SS2, write_file_sigma_lmb2)
+    shutil.copyfile(filelist_SS4, write_file_sigma_lmb4)
+
+    ### ----------------------------------------------------------------------
+    ### US & UU
+    filelist_US1 = pickledir / Path(
+        "baryon-3pt_US_lmb_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    filelist_UU2 = pickledir / Path(
+        "baryon-3pt_UU_lmb2_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    filelist_US3 = pickledir / Path(
+        "baryon-3pt_US_lmb3_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp120620/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+    filelist_UU4 = pickledir / Path(
+        "baryon-3pt_UU_lmb4_TBC/barspec/32x64/unpreconditioned_slrc_slrc/kp121040kp121040/lp0lp0__lp0lp0/sh_gij_p21_90-sh_gij_p21_90/"
+        + mom_strings[1]
+        + barspec_nameU
+    )
+
+    # Define the destination file names
+    write_file_nucleon_lmb1 = datadir / Path("correlators_unperturbed/corr_US_lmb1.pkl")
+    write_file_nucleon_lmb3 = datadir / Path("correlators_unperturbed/corr_US_lmb3.pkl")
+    write_file_nucleon_lmb2 = datadir / Path("correlators_unperturbed/corr_UU_lmb2.pkl")
+    write_file_nucleon_lmb4 = datadir / Path("correlators_unperturbed/corr_UU_lmb4.pkl")
+
+    # Copy the pickle files to the new locations in the data directory
+    shutil.copyfile(filelist_US1, write_file_nucleon_lmb1)
+    shutil.copyfile(filelist_US3, write_file_nucleon_lmb3)
+    shutil.copyfile(filelist_UU2, write_file_nucleon_lmb2)
+    shutil.copyfile(filelist_UU4, write_file_nucleon_lmb4)
+    return
 
 
 def read_correlators(pars, pickledir, pickledir2, mom_strings):
@@ -1110,24 +1260,24 @@ def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
     matrix_2 = np.array(
         [
             [
-                G2_nucl[0][:, :, 0] + lmb_val ** 2 * G2_nucl[2][:, :, 0],
+                G2_nucl[0][:, :, 0] + lmb_val**2 * G2_nucl[2][:, :, 0],
                 lmb_val * G2_nucl[1][:, :, 0],
             ],
             [
                 lmb_val * G2_sigm[1][:, :, 0],
-                G2_sigm[0][:, :, 0] + lmb_val ** 2 * G2_sigm[2][:, :, 0],
+                G2_sigm[0][:, :, 0] + lmb_val**2 * G2_sigm[2][:, :, 0],
             ],
         ]
     )
     matrix_3 = np.array(
         [
             [
-                G2_nucl[0][:, :, 0] + lmb_val ** 2 * G2_nucl[2][:, :, 0],
-                lmb_val * G2_nucl[1][:, :, 0] + lmb_val ** 3 * G2_nucl[3][:, :, 0],
+                G2_nucl[0][:, :, 0] + lmb_val**2 * G2_nucl[2][:, :, 0],
+                lmb_val * G2_nucl[1][:, :, 0] + lmb_val**3 * G2_nucl[3][:, :, 0],
             ],
             [
-                lmb_val * G2_sigm[1][:, :, 0] + lmb_val ** 3 * G2_sigm[3][:, :, 0],
-                G2_sigm[0][:, :, 0] + lmb_val ** 2 * G2_sigm[2][:, :, 0],
+                lmb_val * G2_sigm[1][:, :, 0] + lmb_val**3 * G2_sigm[3][:, :, 0],
+                G2_sigm[0][:, :, 0] + lmb_val**2 * G2_sigm[2][:, :, 0],
             ],
         ]
     )
@@ -1135,15 +1285,15 @@ def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
         [
             [
                 G2_nucl[0][:, :, 0]
-                + (lmb_val ** 2) * G2_nucl[2][:, :, 0]
-                + (lmb_val ** 4) * G2_nucl[4][:, :, 0],
-                lmb_val * G2_nucl[1][:, :, 0] + (lmb_val ** 3) * G2_nucl[3][:, :, 0],
+                + (lmb_val**2) * G2_nucl[2][:, :, 0]
+                + (lmb_val**4) * G2_nucl[4][:, :, 0],
+                lmb_val * G2_nucl[1][:, :, 0] + (lmb_val**3) * G2_nucl[3][:, :, 0],
             ],
             [
-                lmb_val * G2_sigm[1][:, :, 0] + (lmb_val ** 3) * G2_sigm[3][:, :, 0],
+                lmb_val * G2_sigm[1][:, :, 0] + (lmb_val**3) * G2_sigm[3][:, :, 0],
                 G2_sigm[0][:, :, 0]
-                + (lmb_val ** 2) * G2_sigm[2][:, :, 0]
-                + (lmb_val ** 4) * G2_sigm[4][:, :, 0],
+                + (lmb_val**2) * G2_sigm[2][:, :, 0]
+                + (lmb_val**4) * G2_sigm[4][:, :, 0],
             ],
         ]
     )
@@ -1163,24 +1313,24 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
     matrix_2 = np.array(
         [
             [
-                G2_nucl[0][:, :] + lmb_val ** 2 * G2_nucl[2][:, :],
+                G2_nucl[0][:, :] + lmb_val**2 * G2_nucl[2][:, :],
                 lmb_val * G2_nucl[1][:, :],
             ],
             [
                 lmb_val * G2_sigm[1][:, :],
-                G2_sigm[0][:, :] + lmb_val ** 2 * G2_sigm[2][:, :],
+                G2_sigm[0][:, :] + lmb_val**2 * G2_sigm[2][:, :],
             ],
         ]
     )
     matrix_3 = np.array(
         [
             [
-                G2_nucl[0][:, :] + lmb_val ** 2 * G2_nucl[2][:, :],
-                lmb_val * G2_nucl[1][:, :] + lmb_val ** 3 * G2_nucl[3][:, :],
+                G2_nucl[0][:, :] + lmb_val**2 * G2_nucl[2][:, :],
+                lmb_val * G2_nucl[1][:, :] + lmb_val**3 * G2_nucl[3][:, :],
             ],
             [
-                lmb_val * G2_sigm[1][:, :] + lmb_val ** 3 * G2_sigm[3][:, :],
-                G2_sigm[0][:, :] + lmb_val ** 2 * G2_sigm[2][:, :],
+                lmb_val * G2_sigm[1][:, :] + lmb_val**3 * G2_sigm[3][:, :],
+                G2_sigm[0][:, :] + lmb_val**2 * G2_sigm[2][:, :],
             ],
         ]
     )
@@ -1188,15 +1338,15 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
         [
             [
                 G2_nucl[0][:, :]
-                + (lmb_val ** 2) * G2_nucl[2][:, :]
-                + (lmb_val ** 4) * G2_nucl[4][:, :],
-                lmb_val * G2_nucl[1][:, :] + (lmb_val ** 3) * G2_nucl[3][:, :],
+                + (lmb_val**2) * G2_nucl[2][:, :]
+                + (lmb_val**4) * G2_nucl[4][:, :],
+                lmb_val * G2_nucl[1][:, :] + (lmb_val**3) * G2_nucl[3][:, :],
             ],
             [
-                lmb_val * G2_sigm[1][:, :] + (lmb_val ** 3) * G2_sigm[3][:, :],
+                lmb_val * G2_sigm[1][:, :] + (lmb_val**3) * G2_sigm[3][:, :],
                 G2_sigm[0][:, :]
-                + (lmb_val ** 2) * G2_sigm[2][:, :]
-                + (lmb_val ** 4) * G2_sigm[4][:, :],
+                + (lmb_val**2) * G2_sigm[2][:, :]
+                + (lmb_val**4) * G2_sigm[4][:, :],
             ],
         ]
     )
@@ -1428,7 +1578,7 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
             np.array([(E_avg - np.average(energy)) ** 2 for energy in energies_comb]),
         )
     )
-    E_comberr = np.sqrt(E_staterr ** 2 + E_systerr ** 2)
+    E_comberr = np.sqrt(E_staterr**2 + E_systerr**2)
     for ival, value in enumerate(weighted_energy):
         weighted_energy[ival] = E_avg + (value - E_avg) * E_comberr / E_staterr
 
@@ -1533,7 +1683,7 @@ def weighted_avg(
         ax1.set_xlabel(r"$t_{\textrm{min}}$")
         ax1.set_ylabel(r"$E$")
         ax1.set_xlim(0, tmin_[-1] + 1)
-        ax1.set_xticks(np.arange(np.max(tmin_)+1))
+        ax1.set_xticks(np.arange(np.max(tmin_) + 1))
 
         ax2 = ax1.twinx()
         ax2.bar(tmin_, weights_, color=_colors[0], alpha=0.3)
