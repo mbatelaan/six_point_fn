@@ -248,6 +248,145 @@ def plotting_script_all_N(
     return
 
 
+def plot_real_imag(
+    corr_matrix3,
+    lmb_val,
+    plotdir,
+    name="",
+    show=False,
+):
+    spacing = 2
+    xlim = 25
+    time = np.arange(0, np.shape(corr_matrix3[0][0])[1])
+
+    f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
+
+    yavg = np.average(np.real(corr_matrix3[0][0]), axis=0)
+    ystd = np.std(np.real(corr_matrix3[0][0]), axis=0)
+
+    yavgi = np.average(np.imag(corr_matrix3[0][0]), axis=0)
+    ystdi = np.std(np.imag(corr_matrix3[0][0]), axis=0)
+
+    axs.errorbar(
+        time[:xlim],
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"real $G_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
+    )
+    axs.errorbar(
+        time[:xlim],
+        yavgi[:xlim],
+        ystdi[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="o",
+        markerfacecolor="none",
+        label=r"imag $G_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
+    )
+
+    plt.semilogy()
+    plt.legend(fontsize="x-small")
+    plt.xlabel(r"$t$")
+    plt.ylim(1e-5,3e2)
+    metadata_ = _metadata
+    # metadata_["lambda"] = lmb_val
+    plt.savefig(plotdir / ("comp_real_imag_" + name + ".pdf"), metadata=metadata_)
+    if show:
+        plt.show()
+    plt.close()
+    return
+
+def plot_real_imag_gevp(
+    corr1,
+    corr2,
+    lmb_val,
+    plotdir,
+    name="",
+    show=False,
+):
+    spacing = 2
+    xlim = 25
+    time = np.arange(0, np.shape(corr1)[1])
+    efftime = time[:-spacing] + 0.5
+    # effmass_corr1 = stats.bs_effmass(np.real(corr1), time_axis=1, spacing=1)
+    # effmass_corr2 = stats.bs_effmass(np.real(corr2), time_axis=1, spacing=1)
+    # effmass_corr1i = stats.bs_effmass(np.imag(corr1), time_axis=1, spacing=1)
+    # effmass_corr2i = stats.bs_effmass(np.imag(corr2), time_axis=1, spacing=1)
+    yeffavg_1 = np.average(np.real(corr1), axis=0)
+    yeffstd_1 = np.std(np.real(corr1), axis=0)
+    yeffavg_1i = np.average(np.imag(corr1), axis=0)
+    yeffstd_1i = np.std(np.imag(corr1), axis=0)
+    yeffavg_2 = np.average(np.real(corr2), axis=0)
+    yeffstd_2 = np.std(np.real(corr2), axis=0)
+    yeffavg_2i = np.average(np.imag(corr2), axis=0)
+    yeffstd_2i = np.std(np.imag(corr2), axis=0)
+
+    f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
+    axs.errorbar(
+        time[:xlim],
+        yeffavg_1[:xlim],
+        yeffstd_1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"real corr1"
+    )
+    axs.errorbar(
+        time[:xlim],
+        yeffavg_1i[:xlim],
+        yeffstd_1i[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="o",
+        markerfacecolor="none",
+        label=r"imag corr1"
+    )
+
+    axs.errorbar(
+        time[:xlim],
+        yeffavg_2[:xlim],
+        yeffstd_2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt="x",
+        markerfacecolor="none",
+        label=r"real corr2"
+    )
+    axs.errorbar(
+        time[:xlim],
+        yeffavg_2i[:xlim],
+        yeffstd_2i[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[3],
+        fmt="^",
+        markerfacecolor="none",
+        label=r"imag corr2"
+    )
+
+    plt.semilogy()
+    plt.legend(fontsize="x-small")
+    plt.xlabel(r"$t$")
+    plt.ylim(1e-10,3e2)
+    metadata_ = _metadata
+    # metadata_["lambda"] = lmb_val
+    plt.savefig(plotdir / ("comp_real_imag_gevp_" + name + ".pdf"), metadata=metadata_)
+    if show:
+        plt.show()
+    plt.close()
+    return
+
+
 def plotting_script_diff_2(
     diffG1,
     diffG2,
@@ -261,7 +400,7 @@ def plotting_script_diff_2(
     show=False,
 ):
     spacing = 2
-    xlim = 25
+    xlim = 20
     time = np.arange(0, np.shape(diffG1)[1])
     efftime = time[:-spacing] + 0.5
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
@@ -354,11 +493,91 @@ def plotting_script_diff_2(
     axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
     plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.25))
-    plt.ylabel(r"$\Delta E_{\textrm{eff}}$")
+    # plt.ylabel(r"$\Delta E_{\textrm{eff}}$")
+    # plt.ylabel(r"$(R_{\lambda}(t,\vec{q}))_{\textrm{eff}}$")
+    plt.ylabel(r"$\textrm{eff. energy}\left[(R_{\lambda}(t,\vec{q})\right]$")
     plt.xlabel("$t$")
     plt.legend(fontsize="x-small")
     # plt.title("$\lambda=" + str(lmb_val) + "$")
     plt.savefig(plotdir / ("diff_G" + name + ".pdf"), metadata=_metadata)
+    if show:
+        plt.show()
+    plt.close()
+    return
+
+def plotting_script_gevp_corr(
+    corr1,
+    corr2,
+    fit1,
+    fit2,
+    redchisq1,
+    redchisq2,
+    t_range,
+    lmb_val,
+    plotdir,
+    name="",
+    show=False,
+):
+    spacing = 2
+    xlim = 20
+    time = np.arange(0, np.shape(corr1)[1])
+    efftime = time[:-spacing] + 0.5
+    f, axs = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+
+    effmass_corr1 = stats.bs_effmass(corr1, time_axis=1, spacing=1)
+    effmass_corr2 = stats.bs_effmass(corr2, time_axis=1, spacing=1)
+    yeffavg_1 = np.average(effmass_corr1, axis=0)
+    yeffstd_1 = np.std(effmass_corr1, axis=0)
+    axs.errorbar(
+        efftime[:xlim],
+        yeffavg_1[:xlim],
+        yeffstd_1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$\mathcal{O}(\lambda^4)$, state 1",
+    )
+    axs.plot(t_range, len(t_range) * [np.average(fit1[:,1])], color=_colors[0], label=rf"$\chi^2_{{\textrm{{dof}}}} = {redchisq1:.2f}$")
+    axs.fill_between(
+        t_range,
+        np.average(fit1[:,1]) - np.std(fit1[:,1]),
+        np.average(fit1[:,1]) + np.std(fit1[:,1]),
+        alpha=0.3,
+        color=_colors[0],
+    )
+    yeffavg_2 = np.average(effmass_corr2, axis=0)
+    yeffstd_2 = np.std(effmass_corr2, axis=0)
+    axs.errorbar(
+        efftime[:xlim] + 0.2,
+        yeffavg_2[:xlim],
+        yeffstd_2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$\mathcal{O}(\lambda^4)$, state 2",
+    )
+    axs.plot(t_range, len(t_range) * [np.average(fit2[:,1])], color=_colors[1], label=rf"$\chi^2_{{\textrm{{dof}}}} = {redchisq2:.2f}$")
+    axs.fill_between(
+        t_range,
+        np.average(fit2[:,1]) - np.std(fit2[:,1]),
+        np.average(fit2[:,1]) + np.std(fit2[:,1]),
+        alpha=0.3,
+        color=_colors[1],
+    )
+
+    axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.setp(axs, xlim=(0, xlim), ylim=(0, 1))
+    # plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.25))
+    plt.ylabel(r"$E_{\textrm{eff}}$")
+    plt.xlabel("$t$")
+    plt.legend(fontsize="x-small")
+    # plt.title("$\lambda=" + str(lmb_val) + "$")
+    plt.grid(True, alpha=0.3)
+    plt.savefig(plotdir / ("gevp_corr_" + name + ".pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -754,7 +973,8 @@ def main():
         )
 
     # Set the analysis parameters that will be used (from the yaml file)
-    lambdas = np.linspace(config["lmb_i"], config["lmb_f"], 15)
+    # lambdas = np.linspace(config["lmb_i"], config["lmb_f"], 15)
+    lambdas = np.linspace(config["lmb_i"], config["lmb_f"], config["lmb_num"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
     plotting = config["plotting"]
@@ -811,19 +1031,6 @@ def main():
     # Fit to the energy of the Nucleon and Sigma
     # Then fit to the ratio of those correlators to get the energy gap
 
-    # bootfit_unpert_nucl, redchisq1 = fit_value3(
-    #     np.abs(G2_nucl[0]), nucl_t_range, aexp_function, norm=1
-    # )
-    # bootfit_unpert_sigma, redchisq2 = fit_value3(
-    #     np.abs(G2_sigm[0]), sigma_t_range, aexp_function, norm=1
-    # )
-
-    # ratio_unpert = np.abs(G2_nucl[0] / G2_sigm[0])
-    # bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, ratio_t_range)
-    # bootfit_effratio, redchisq_effratio = fit_value3(
-    #     ratio_unpert, ratio_t_range, aexp_function, norm=1
-    # )
-
     # # ==================================================
     # # Plot the effective energy of the unperturbed correlators
     # # Pick out the fit determined by tmin and tmax set in the parameters file
@@ -848,22 +1055,35 @@ def main():
     # ][0]
     ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"] + 1)
 
-    # plotting_script_unpert(
-    #     np.abs(G2_nucl[0]),
-    #     np.abs(G2_sigm[0]),
-    #     ratio_unpert,
-    #     chosen_nucl_fit,
-    #     chosen_sigma_fit,
-    #     bootfit_ratio[:, 0],
-    #     weighted_energy_nucldivsigma,
-    #     nucl_t_range,
-    #     sigma_t_range,
-    #     ratio_t_range,
-    #     plotdir,
-    #     [redchisq1, redchisq2, redchisq_ratio],
-    #     name="_unpert_ratio",
-    #     show=False,
+    bootfit_unpert_nucl, redchisq1 = fit_value3(
+        np.abs(G2_nucl[0]), nucl_t_range, aexp_function, norm=1
+    )
+    bootfit_unpert_sigma, redchisq2 = fit_value3(
+        np.abs(G2_sigm[0]), sigma_t_range, aexp_function, norm=1
+    )
+
+    ratio_unpert = np.abs(G2_nucl[0] / G2_sigm[0])
+    bootfit_ratio, redchisq_ratio = fit_value(ratio_unpert, ratio_t_range)
+    # bootfit_effratio, redchisq_effratio = fit_value3(
+    #     ratio_unpert, ratio_t_range, aexp_function, norm=1
     # )
+
+    plotting_script_unpert(
+        np.abs(G2_nucl[0]),
+        np.abs(G2_sigm[0]),
+        ratio_unpert,
+        chosen_nucl_fit,
+        chosen_sigma_fit,
+        bootfit_ratio[:, 0],
+        weighted_energy_nucldivsigma,
+        nucl_t_range,
+        sigma_t_range,
+        ratio_t_range,
+        plotdir,
+        [redchisq1, redchisq2, redchisq_ratio],
+        name="_unpert_ratio",
+        show=False,
+    )
 
     fitlist = []
     for i, lmb_val in enumerate(lambdas):
@@ -890,13 +1110,13 @@ def main():
         print("\n evec shape = ", np.shape(evec_left0))
         print("\n evec left avg = \n", np.average(evec_left0, axis=0))
         print("\n evec right avg = \n", np.average(evec_right0, axis=0))
-        ratio0 = Gt1_0 / Gt2_0
+        ratio0 = np.abs(Gt1_0 / Gt2_0)
         effmass_ratio0 = stats.bs_effmass(ratio0, time_axis=1, spacing=1)
         bootfit_state1_0, redchisq1_0 = fit_value3(
-            Gt1_0, ratio_t_range, aexp_function, norm=1
+            np.abs(Gt1_0), ratio_t_range, aexp_function, norm=1
         )
         bootfit_state2_0, redchisq2_0 = fit_value3(
-            Gt2_0, ratio_t_range, aexp_function, norm=1
+            np.abs(Gt2_0), ratio_t_range, aexp_function, norm=1
         )
         bootfit0, redchisq0 = fit_value3(ratio0, ratio_t_range, aexp_function, norm=1)
         print(redchisq0)
@@ -910,13 +1130,13 @@ def main():
         ) = gevp_bootstrap(matrix_2, time_choice, delta_t, name="_test", show=False)
         # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 0], matrix_2, evec_right1[:, :, 0])
         # Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 1], matrix_2, evec_right1[:, :, 1])
-        ratio1 = Gt1_1 / Gt2_1
+        ratio1 = np.abs(Gt1_1 / Gt2_1)
         effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
         bootfit_state1_1, redchisq1_1 = fit_value3(
-            Gt1_1, ratio_t_range, aexp_function, norm=1
+            np.abs(Gt1_1), ratio_t_range, aexp_function, norm=1
         )
         bootfit_state2_1, redchisq2_1 = fit_value3(
-            Gt2_1, ratio_t_range, aexp_function, norm=1
+            np.abs(Gt2_1), ratio_t_range, aexp_function, norm=1
         )
         bootfit1, redchisq1 = fit_value3(ratio1, ratio_t_range, aexp_function, norm=1)
         print(redchisq1)
@@ -930,13 +1150,13 @@ def main():
         ) = gevp_bootstrap(matrix_3, time_choice, delta_t, name="_test", show=False)
         # Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 0], matrix_3, evec_right2[:, :, 0])
         # Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 1], matrix_3, evec_right2[:, :, 1])
-        ratio2 = Gt1_2 / Gt2_2
+        ratio2 = np.abs(Gt1_2 / Gt2_2)
         effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
         bootfit_state1_2, redchisq1_2 = fit_value3(
-            Gt1_2, ratio_t_range, aexp_function, norm=1
+            np.abs(Gt1_2), ratio_t_range, aexp_function, norm=1
         )
         bootfit_state2_2, redchisq2_2 = fit_value3(
-            Gt2_2, ratio_t_range, aexp_function, norm=1
+            np.abs(Gt2_2), ratio_t_range, aexp_function, norm=1
         )
         bootfit2, redchisq2 = fit_value3(ratio2, ratio_t_range, aexp_function, norm=1)
         print(redchisq2)
@@ -950,13 +1170,13 @@ def main():
         ) = gevp_bootstrap(matrix_4, time_choice, delta_t, name="_test", show=False)
         # Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 0], matrix_4, evec_right3[:, :, 0])
         # Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 1], matrix_4, evec_right3[:, :, 1])
-        ratio3 = Gt1_3 / Gt2_3
+        ratio3 = np.abs(Gt1_3 / Gt2_3)
         effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
         bootfit_state1_3, redchisq1_3 = fit_value3(
-            Gt1_3, ratio_t_range, aexp_function, norm=1
+            np.abs(Gt1_3), ratio_t_range, aexp_function, norm=1
         )
-        bootfit_state2_3, redchisq1_3 = fit_value3(
-            Gt2_3, ratio_t_range, aexp_function, norm=1
+        bootfit_state2_3, redchisq2_3 = fit_value3(
+            np.abs(Gt2_3), ratio_t_range, aexp_function, norm=1
         )
         bootfit3, redchisq3 = fit_value3(ratio3, ratio_t_range, aexp_function, norm=1)
         print(redchisq3)
@@ -1061,6 +1281,13 @@ def main():
                 name="_l" + str(lmb_val),
                 show=False,
             )
+            plot_real_imag(
+                matrix_4,
+                lmb_val,
+                plotdir,
+                name="_l" + str(lmb_val),
+                show=False,
+            )
             plotting_script_diff_2(
                 effmass_ratio0,
                 effmass_ratio1,
@@ -1071,6 +1298,28 @@ def main():
                 lmb_val,
                 plotdir,
                 name="_l" + str(lmb_val) + "_all",
+                show=False,
+            )
+
+            plotting_script_gevp_corr(
+                Gt1_3,
+                Gt2_3,
+                bootfit_state1_3,
+                bootfit_state2_3,
+                redchisq1_3,
+                redchisq2_3,
+                ratio_t_range,
+                lmb_val,
+                plotdir,
+                name="_l" + str(lmb_val) + "_all",
+                show=False,
+            )
+            plot_real_imag_gevp(
+                Gt1_3,
+                Gt2_3,
+                lmb_val,
+                plotdir,
+                name="_l" + str(lmb_val),
                 show=False,
             )
         print("plotted")

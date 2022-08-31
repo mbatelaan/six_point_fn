@@ -282,7 +282,7 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         linewidth=0,
         alpha=0.3,
     )
-    plt.legend(fontsize="x-small", loc="upper left")
+    plt.legend(fontsize="small", loc="upper left")
     # plt.ylim(0, 0.2)
     # plt.ylim(-0.003, 0.035)
     # plt.xlim(-0.01, 0.22)
@@ -294,7 +294,7 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
     plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
 
     plt.xlabel("$\lambda$")
-    plt.ylabel("$\Delta E$")
+    plt.ylabel("$\Delta E_{\lambda}$")
     # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.tight_layout()
@@ -415,6 +415,149 @@ def plot_lmb_depR(all_data, plotdir, fit_data=None):
         plt.ylim(0, 0.15)
         plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim.pdf"), metadata=_metadata)
 
+    plt.close()
+    return
+
+def plot_lmb_dep_bw(all_data, plotdir):
+    """Make a plot of the lambda dependence of the energy shift
+    Where the plot uses colored bands to show the dependence
+    """
+
+    plt.figure(figsize=(9, 6))
+    plt.fill_between(
+        all_data["lambdas0"],
+        np.average(all_data["order0_fit"], axis=1)
+        - np.std(all_data["order0_fit"], axis=1),
+        np.average(all_data["order0_fit"], axis=1)
+        + np.std(all_data["order0_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        linewidth=1.5,
+        linestyle='solid',
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas1"],
+        np.average(all_data["order1_fit"], axis=1)
+        - np.std(all_data["order1_fit"], axis=1),
+        np.average(all_data["order1_fit"], axis=1)
+        + np.std(all_data["order1_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        linewidth=1.5,
+        linestyle='dashed',
+        # linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas2"],
+        np.average(all_data["order2_fit"], axis=1)
+        - np.std(all_data["order2_fit"], axis=1),
+        np.average(all_data["order2_fit"], axis=1)
+        + np.std(all_data["order2_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        linewidth=1.5,
+        linestyle='dotted',
+        # linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas3"],
+        np.average(all_data["order3_fit"], axis=1)
+        - np.std(all_data["order3_fit"], axis=1),
+        np.average(all_data["order3_fit"], axis=1)
+        + np.std(all_data["order3_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=1.5,
+        linestyle='dashdot',
+        # linewidth=0,
+        alpha=0.3,
+    )
+    plt.legend(fontsize="small", loc="upper left")
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$\Delta E_{\lambda}$")
+    # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(plotdir / ("lambda_dep_bands_bw.pdf"), metadata=_metadata)
+    plt.ylim(-0.015, 0.1)
+    plt.savefig(plotdir / ("lambda_dep_bands_bw_ylim.pdf"), metadata=_metadata)
+    plt.close()
+    return
+def plot_lmb_dep_bw_pres(all_data, plotdir):
+    """Make a plot of the lambda dependence of the energy shift
+    Where the plot uses colored bands to show the dependence
+    """
+
+    plt.figure(figsize=(6, 5))
+    plt.fill_between(
+        all_data["lambdas0"],
+        np.average(all_data["order0_fit"], axis=1)
+        - np.std(all_data["order0_fit"], axis=1),
+        np.average(all_data["order0_fit"], axis=1)
+        + np.std(all_data["order0_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^1)$",
+        color=_colors[0],
+        linewidth=1.5,
+        linestyle='solid',
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas1"],
+        np.average(all_data["order1_fit"], axis=1)
+        - np.std(all_data["order1_fit"], axis=1),
+        np.average(all_data["order1_fit"], axis=1)
+        + np.std(all_data["order1_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^2)$",
+        color=_colors[1],
+        linewidth=1.5,
+        linestyle='dashed',
+        # linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas2"],
+        np.average(all_data["order2_fit"], axis=1)
+        - np.std(all_data["order2_fit"], axis=1),
+        np.average(all_data["order2_fit"], axis=1)
+        + np.std(all_data["order2_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^3)$",
+        color=_colors[2],
+        linewidth=1.5,
+        linestyle='dotted',
+        # linewidth=0,
+        alpha=0.3,
+    )
+    plt.fill_between(
+        all_data["lambdas3"],
+        np.average(all_data["order3_fit"], axis=1)
+        - np.std(all_data["order3_fit"], axis=1),
+        np.average(all_data["order3_fit"], axis=1)
+        + np.std(all_data["order3_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=1.5,
+        linestyle='dashdot',
+        # linewidth=0,
+        alpha=0.3,
+    )
+    plt.legend(fontsize="small", loc="upper left")
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    # plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$\Delta E_{\lambda}$")
+    # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    plt.ylim(-0.015, 0.15)
+    plt.savefig(plotdir / ("lambda_dep_bands_bw_ylim_pres.pdf"), metadata=_metadata)
+    plt.savefig(plotdir / ("lambda_dep_bands_bw_ylim_pres.png"), dpi=500, metadata=_metadata)
     plt.close()
     return
 
@@ -748,6 +891,8 @@ def main():
         )
 
     plot_lmb_depR(all_data, plotdir, fit_data)
+    plot_lmb_dep_bw(all_data, plotdir)
+    plot_lmb_dep_bw_pres(all_data, plotdir)
     plot_lmb_dep_abs(all_data, plotdir, fit_data)
     plot_lmb_dep4(all_data, plotdir, fit_data)
 

@@ -1336,16 +1336,24 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     #     eval_right_list = [evalu[::-1] for evalu in eval_right_list]
     #     evec_right_list = [evec[:,::-1] for evec in evec_right_list]
 
-    Gt1 = np.abs(
-        np.einsum(
+    # Gt1 = np.abs(
+    #     np.einsum(
+    #         "i,ijkl,j->kl", evec_left_avg[:, 0], corr_matrix, evec_right_avg[:, 0]
+    #     )
+    # )
+    # Gt2 = np.abs(
+    #     np.einsum(
+    #         "i,ijkl,j->kl", evec_left_avg[:, 1], corr_matrix, evec_right_avg[:, 1]
+    #     )
+    # )
+
+    # Complex corelators
+    Gt1 = np.einsum(
             "i,ijkl,j->kl", evec_left_avg[:, 0], corr_matrix, evec_right_avg[:, 0]
         )
-    )
-    Gt2 = np.abs(
-        np.einsum(
+    Gt2 = np.einsum(
             "i,ijkl,j->kl", evec_left_avg[:, 1], corr_matrix, evec_right_avg[:, 1]
         )
-    )
 
     if show:
         stats.ploteffmass(Gt1, "eig_1" + name, plotdir, show=True)

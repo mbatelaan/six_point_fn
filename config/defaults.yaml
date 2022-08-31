@@ -12,3 +12,4 @@ tmax_ratio : 24
 lmb_val : 0.025
 plotting : False
 time_loop : False
+lmb_num : 15
