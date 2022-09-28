@@ -1,8 +1,22 @@
 import numpy as np
 from pathlib import Path
-
 import matplotlib.pyplot as plt
 
+from analysis import stats
+
+_metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
+_colors = [
+    "#377eb8",
+    "#4daf4a",
+    "#f781bf",
+    "#a65628",
+    "#ff7f00",
+    "#984ea3",
+    "#999999",
+    "#e41a1c",
+    "#dede00",
+]
+_markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 
 def plotting_script_all(
     corr_matrix,

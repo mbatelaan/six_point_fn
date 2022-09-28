@@ -33,7 +33,7 @@ from gevpanalysis.common import weighted_avg
 
 from gevpanalysis.params import params
 
-from gevpanalysis.scripts import plotting_scripts as plots
+import gevpanalysis.plotting_scripts as plots
 
 
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
@@ -49,10 +49,6 @@ _colors = [
     "#dede00",
 ]
 _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
-# From the theta tuning:
-m_N = 0.4179255
-m_S = 0.4641829
-
 
 def plotting_script_all(
     corr_matrix,
