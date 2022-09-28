@@ -485,7 +485,7 @@ def plot_lmb_dep_bw(all_data, plotdir):
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.tight_layout()
     plt.savefig(plotdir / ("lambda_dep_bands_bw.pdf"), metadata=_metadata)
-    plt.ylim(-0.015, 0.1)
+    plt.ylim(-0.015, 0.15)
     plt.savefig(plotdir / ("lambda_dep_bands_bw_ylim.pdf"), metadata=_metadata)
     plt.close()
     return

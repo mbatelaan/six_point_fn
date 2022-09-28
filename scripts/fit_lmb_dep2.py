@@ -362,15 +362,16 @@ def plot_lmb_dep4_sqsq_fix_2(all_data, plotdir, fit_data=None, fitfunction=None,
             all_data["lambdas3"]**2,
             np.average(fitBS3, axis=0) - np.std(fitBS3, axis=0),
             np.average(fitBS3, axis=0) + np.std(fitBS3, axis=0),
-            label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}${newline}$\textrm{{M.E.}}={m_e_3}$",
+            # label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}${newline}$\textrm{{M.E.}}={m_e_3}$",
+            label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$",
             color=_colors[4],
             linewidth=0,
             alpha=0.3,
         )
-        plt.legend(fontsize="x-small", loc="upper left")
+        plt.legend(fontsize="small", loc="upper left")
         # plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
         plt.xlim(0, 0.0024)
-        plt.ylim(-0.0002, 0.015)
+        plt.ylim(-0.0002, 0.011)
         # plt.savefig(
         #     plotdir / ("lambda_dep_bands_fit_fn3_ylim_lmbsq.pdf"), metadata=_metadata
         # )
