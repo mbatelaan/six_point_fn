@@ -251,6 +251,27 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
     sigma_t_range = np.arange(config["tmin_sigma"], config["tmax_sigma"] + 1)
     ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"] + 1)
 
+    # ============================================================
+    time_limits_nucl = np.array([[10, 15], [4, 4]])
+    time_limits_sigma = np.array([[10, 15], [4, 4]])
+    time_limits_nucldivsigma = np.array([[1, 15], [2, 2]])
+    (
+        weighted_energy_nucl,
+        weighted_energy_sigma,
+        weighted_energy_nucldivsigma,
+        chosen_nucl_fit,
+        chosen_sigma_fit,
+        chosen_nucldivsigma_fit,
+    ) = fit_loop_weighted(
+        datadir,
+        plotdir,
+        config,
+        time_limits_nucl,
+        time_limits_sigma,
+        time_limits_nucldivsigma,
+    )
+    # ============================================================
+
     fitlist = []
     for i, lmb_val in enumerate(lambdas):
         print(f"\n====================\nLambda = {lmb_val}\n====================")
