@@ -54,6 +54,7 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 
 def fit_loop_weighted(
     datadir,
+    datadir_qmax,
     plotdir,
     config,
     time_limits_nucl,
@@ -75,12 +76,12 @@ def fit_loop_weighted(
     # filename_1 = "time_window_loop_sigma_Aexp.pkl"
     # with open(datadir / filename_1, "rb") as file_in:
     with open(
-        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Aexp.pkl",
+        datadir_qmax / "time_window_loop_sigma_Aexp.pkl",
         "rb",
     ) as file_in:
         fitlist_sigma_1exp = pickle.load(file_in)
     with open(
-        "/scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_qmax/analysis/data/time_window_loop_sigma_Twoexp.pkl",
+        datadir_qmax / "time_window_loop_sigma_Twoexp.pkl",
         "rb",
     ) as file_in:
         fitlist_sigma_2exp = pickle.load(file_in)
@@ -220,6 +221,26 @@ def main():
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
 
+    # ============================================================
+    time_limits_nucl = np.array([[10, 15], [4, 4]])
+    time_limits_sigma = np.array([[10, 15], [4, 4]])
+    time_limits_nucldivsigma = np.array([[1, 15], [2, 2]])
+    (
+        weighted_energy_nucl,
+        weighted_energy_sigma,
+        weighted_energy_nucldivsigma,
+        chosen_nucl_fit,
+        chosen_sigma_fit,
+        chosen_nucldivsigma_fit,
+    ) = fit_loop_weighted(
+        datadir,
+        qmax_datadir,
+        plotdir,
+        config,
+        time_limits_nucl,
+        time_limits_sigma,
+        time_limits_nucldivsigma,
+    )
     # ======================================================================
     # This function will loop over the values of lambda specified in the config file and do the GEVP analysis for each value of lambda
     gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars)
@@ -251,25 +272,6 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
     sigma_t_range = np.arange(config["tmin_sigma"], config["tmax_sigma"] + 1)
     ratio_t_range = np.arange(config["tmin_ratio"], config["tmax_ratio"] + 1)
 
-    # ============================================================
-    time_limits_nucl = np.array([[10, 15], [4, 4]])
-    time_limits_sigma = np.array([[10, 15], [4, 4]])
-    time_limits_nucldivsigma = np.array([[1, 15], [2, 2]])
-    (
-        weighted_energy_nucl,
-        weighted_energy_sigma,
-        weighted_energy_nucldivsigma,
-        chosen_nucl_fit,
-        chosen_sigma_fit,
-        chosen_nucldivsigma_fit,
-    ) = fit_loop_weighted(
-        datadir,
-        plotdir,
-        config,
-        time_limits_nucl,
-        time_limits_sigma,
-        time_limits_nucldivsigma,
-    )
     # ============================================================
 
     fitlist = []
