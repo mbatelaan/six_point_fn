@@ -244,6 +244,7 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
         print(f"\n====================\nLambda = {lmb_val}\n====================")
 
         # Construct a correlation matrix for each order in lambda(skipping order 0)
+        # print(np.shape(G2_nucl[0]))
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
         )
@@ -254,14 +255,19 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
 
         # ==================================================
         # Fit to each of the correlators in the correlation matrix.
+        if lmb_val==0:
+            diag=True
+        else:
+            diag=False
         bootfit_list, redchisq_list = fit_correlation_matrix(
-            matrix_4, ratio_t_range, aexp_function
+            matrix_4, ratio_t_range, aexp_function, diag
         )
 
         # ==================================================
         # TODO: Use one evec for all bootstraps to get Gt1_0, Gt2_0 or 500 evecs?
         # ==================================================
         # O(lambda^0) fit
+        print("\nO(lambda^0) fit")
         (
             Gt1_0,
             Gt2_0,
@@ -269,9 +275,9 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
         ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
         # Gt1_0 = np.einsum("ki,ijkl,kj->kl", evec_left0[:, :, 0], matrix_1, evec_right0[:, :, 0])
         # Gt2_0 = np.einsum("ki,ijkl,kj->kl", evec_left0[:, :, 1], matrix_1, evec_right0[:, :, 1])
-        print("\n evec shape = ", np.shape(evec_left0))
-        print("\n evec left avg = \n", np.average(evec_left0, axis=0))
-        print("\n evec right avg = \n", np.average(evec_right0, axis=0))
+        # print("\n evec shape = ", np.shape(evec_left0))
+        # print("\n evec left avg = \n", np.average(evec_left0, axis=0))
+        # print("\n evec right avg = \n", np.average(evec_right0, axis=0))
 
         # Construct the ratio of the two projected correlators
         ratio0 = np.abs(Gt1_0 / Gt2_0)
@@ -282,10 +288,12 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
             np.abs(Gt2_0), ratio_t_range, aexp_function, norm=1
         )
         bootfit0, redchisq0 = fit_value3(ratio0, ratio_t_range, aexp_function, norm=1)
-        print(redchisq0)
+        print(f"reduced chi-squared = {redchisq0}")
+        # print(redchisq0)
 
         # ==================================================
         # O(lambda^1) fit
+        print("\nO(lambda^1) fit")
         (
             Gt1_1,
             Gt2_1,
@@ -303,10 +311,11 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
             np.abs(Gt2_1), ratio_t_range, aexp_function, norm=1
         )
         bootfit1, redchisq1 = fit_value3(ratio1, ratio_t_range, aexp_function, norm=1)
-        print(redchisq1)
+        print(f"reduced chi-squared = {redchisq1}")
 
         # ==================================================
         # O(lambda^2) fit
+        print("\nO(lambda^2) fit")
         (
             Gt1_2,
             Gt2_2,
@@ -324,10 +333,11 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
             np.abs(Gt2_2), ratio_t_range, aexp_function, norm=1
         )
         bootfit2, redchisq2 = fit_value3(ratio2, ratio_t_range, aexp_function, norm=1)
-        print(redchisq2)
+        print(f"reduced chi-squared = {redchisq2}")
 
         # ==================================================
         # O(lambda^3) fit
+        print("\nO(lambda^3) fit")
         (
             Gt1_3,
             Gt2_3,
@@ -345,7 +355,7 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
             np.abs(Gt2_3), ratio_t_range, aexp_function, norm=1
         )
         bootfit3, redchisq3 = fit_value3(ratio3, ratio_t_range, aexp_function, norm=1)
-        print(redchisq3)
+        print(f"reduced chi-squared = {redchisq3}")
 
         # ==================================================
         # Divide the nucleon correlator by the Sigma correlator and fit this ratio to get the energy shift.
@@ -368,14 +378,13 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
                 [bootfit_state1_divsigma, bootfit_state2_divsigma]
             )
 
-        print(redchisq0)
-        print(redchisq1)
-        print(redchisq2)
-        print(redchisq3)
+        # print(redchisq0)
+        # print(redchisq1)
+        # print(redchisq2)
+        # print(redchisq3)
 
         # ==================================================
         # Save the data
-        print("Save the data")
         fitparams = {
             "lambdas": lmb_val,
             "time_choice": time_choice,
@@ -423,11 +432,11 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
             # "chosen_nucldivsigma_fit": chosen_nucldivsigma_fit,
         }
         fitlist.append(fitparams)
-        print("Saved the data")
+        print("Fitlist appended")
 
         # ==================================================
-        print("plotting")
         if plotting:
+            print("plotting")
             plots.plotting_script_all(
                 matrix_1,
                 matrix_2,
@@ -493,7 +502,7 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
                 name="_l" + str(lmb_val),
                 show=False,
             )
-        print("plotted")
+            print("plotted")
 
     # ----------------------------------------------------------------------
     # Save the fit data to a pickle file
@@ -502,6 +511,7 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
         "wb",
     ) as file_out:
         pickle.dump(fitlist, file_out)
+    print("Saved the data")
     print(_metadata)
     return
 

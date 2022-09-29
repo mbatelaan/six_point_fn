@@ -1334,7 +1334,10 @@ def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
 
 
 def make_matrices(G2_nucl, G2_sigm, lmb_val):
-    """Construct the matrices for the GEVP"""
+    """Construct the matrices for the GEVP
+    
+    The 2pt functions have a real and imag dimension.
+    """
 
     matrix_1 = np.array(
         [
@@ -1386,15 +1389,27 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
     return matrix_1, matrix_2, matrix_3, matrix_4
 
 
-def fit_correlation_matrix(matrix, t_range, function):
+def fit_correlation_matrix(matrix, t_range, function, diag=False):
+    """
+    Fit to the correlators in the 2x2 matrix with function.
+    If diag is true, then it will skip the off-diagonal elements of the matrix
+
+    Returns a list in the same shape as the matrix with the fit results.
+    """
     bootfit_list = [[[], []], [[], []]]
     redchisq_list = [[[], []], [[], []]]
+    # print(np.shape(matrix))
     for i, icorr in enumerate(matrix):
-        for j, jcorr in enumerate(matrix):
-            bootfit_, redchisq = fit_value3(jcorr, t_range, function, norm=1)
-            bootfit_list[i][j] = bootfit_
-            redchisq_list[i][j] = redchisq
-
+        for j, jcorr in enumerate(icorr):
+            if (diag and ((i==0 and j==1) or (i==1 and j==0))):
+                continue
+            else:
+                # print(np.shape(np.abs(jcorr)))
+                # print(jcorr[1])
+                bootfit_, redchisq = fit_value3(np.abs(jcorr), t_range, function, norm=1)
+                bootfit_list[i][j] = bootfit_
+                redchisq_list[i][j] = redchisq
+                
     return bootfit_list, redchisq_list
 
 

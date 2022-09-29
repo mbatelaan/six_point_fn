@@ -13,4 +13,3 @@ tmin_nucl : 10
 tmax_nucl : 21
 tmin_ratio : 8
 tmax_ratio : 17
-plotting : True
