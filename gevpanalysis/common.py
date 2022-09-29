@@ -88,7 +88,7 @@ def fit_value(diffG, t_range):
 def fit_value2(diffG, t_range, function):
     """Fit a function to the diffG correlator
 
-    diffG is a correlator with tht bootstraps on the first index and the time on the second
+    diffG is a correlator with the bootstraps on the first index and the time on the second
     t_range is an array of time values to fit over
     the function will return an array of fit parameters for each bootstrap
     """
@@ -231,8 +231,12 @@ def transfer_pickle_data(pars, pickledir, pickledir2, datadir, qmax=False):
     )
 
     # Define the destination file names
-    write_file_nucleon_lmb0 = datadir / Path(f"correlator_data/corr_UU_lmb0_{mom_strings[1]}.pkl")
-    write_file_sigma_lmb0 = datadir / Path(f"correlator_data/corr_SS_lmb0_{mom_strings[1]}.pkl")
+    write_file_nucleon_lmb0 = datadir / Path(
+        f"correlator_data/corr_UU_lmb0_{mom_strings[1]}.pkl"
+    )
+    write_file_sigma_lmb0 = datadir / Path(
+        f"correlator_data/corr_SS_lmb0_{mom_strings[1]}.pkl"
+    )
 
     # Copy the pickle files to the new locations in the data directory
     shutil.copyfile(unpertfile_nucleon, write_file_nucleon_lmb0)
@@ -262,10 +266,18 @@ def transfer_pickle_data(pars, pickledir, pickledir2, datadir, qmax=False):
     )
 
     # Define the destination file names
-    write_file_sigma_lmb1 = datadir / Path(f"correlator_data/corr_SU_lmb1_{mom_strings[1]}.pkl")
-    write_file_sigma_lmb3 = datadir / Path(f"correlator_data/corr_SU_lmb3_{mom_strings[1]}.pkl")
-    write_file_sigma_lmb2 = datadir / Path(f"correlator_data/corr_SS_lmb2_{mom_strings[1]}.pkl")
-    write_file_sigma_lmb4 = datadir / Path(f"correlator_data/corr_SS_lmb4_{mom_strings[1]}.pkl")
+    write_file_sigma_lmb1 = datadir / Path(
+        f"correlator_data/corr_SU_lmb1_{mom_strings[1]}.pkl"
+    )
+    write_file_sigma_lmb3 = datadir / Path(
+        f"correlator_data/corr_SU_lmb3_{mom_strings[1]}.pkl"
+    )
+    write_file_sigma_lmb2 = datadir / Path(
+        f"correlator_data/corr_SS_lmb2_{mom_strings[1]}.pkl"
+    )
+    write_file_sigma_lmb4 = datadir / Path(
+        f"correlator_data/corr_SS_lmb4_{mom_strings[1]}.pkl"
+    )
 
     # Copy the pickle files to the new locations in the data directory
     shutil.copyfile(filelist_SU1, write_file_sigma_lmb1)
@@ -297,10 +309,18 @@ def transfer_pickle_data(pars, pickledir, pickledir2, datadir, qmax=False):
     )
 
     # Define the destination file names
-    write_file_nucleon_lmb1 = datadir / Path(f"correlator_data/corr_US_lmb1_{mom_strings[1]}.pkl")
-    write_file_nucleon_lmb3 = datadir / Path(f"correlator_data/corr_US_lmb3_{mom_strings[1]}.pkl")
-    write_file_nucleon_lmb2 = datadir / Path(f"correlator_data/corr_UU_lmb2_{mom_strings[1]}.pkl")
-    write_file_nucleon_lmb4 = datadir / Path(f"correlator_data/corr_UU_lmb4_{mom_strings[1]}.pkl")
+    write_file_nucleon_lmb1 = datadir / Path(
+        f"correlator_data/corr_US_lmb1_{mom_strings[1]}.pkl"
+    )
+    write_file_nucleon_lmb3 = datadir / Path(
+        f"correlator_data/corr_US_lmb3_{mom_strings[1]}.pkl"
+    )
+    write_file_nucleon_lmb2 = datadir / Path(
+        f"correlator_data/corr_UU_lmb2_{mom_strings[1]}.pkl"
+    )
+    write_file_nucleon_lmb4 = datadir / Path(
+        f"correlator_data/corr_UU_lmb4_{mom_strings[1]}.pkl"
+    )
 
     # Copy the pickle files to the new locations in the data directory
     shutil.copyfile(filelist_US1, write_file_nucleon_lmb1)
@@ -1366,6 +1386,18 @@ def make_matrices(G2_nucl, G2_sigm, lmb_val):
     return matrix_1, matrix_2, matrix_3, matrix_4
 
 
+def fit_correlation_matrix(matrix, t_range, function):
+    bootfit_list = [[[], []], [[], []]]
+    redchisq_list = [[[], []], [[], []]]
+    for i, icorr in enumerate(matrix):
+        for j, jcorr in enumerate(matrix):
+            bootfit_, redchisq = fit_value3(jcorr, t_range, function, norm=1)
+            bootfit_list[i][j] = bootfit_
+            redchisq_list[i][j] = redchisq
+
+    return bootfit_list, redchisq_list
+
+
 def gevp(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     """Solve the GEVP for a given correlation matrix
 
@@ -1511,11 +1543,11 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
 
     # Complex corelators
     Gt1 = np.einsum(
-            "i,ijkl,j->kl", evec_left_avg[:, 0], corr_matrix, evec_right_avg[:, 0]
-        )
+        "i,ijkl,j->kl", evec_left_avg[:, 0], corr_matrix, evec_right_avg[:, 0]
+    )
     Gt2 = np.einsum(
-            "i,ijkl,j->kl", evec_left_avg[:, 1], corr_matrix, evec_right_avg[:, 1]
-        )
+        "i,ijkl,j->kl", evec_left_avg[:, 1], corr_matrix, evec_right_avg[:, 1]
+    )
 
     if show:
         stats.ploteffmass(Gt1, "eig_1" + name, plotdir, show=True)

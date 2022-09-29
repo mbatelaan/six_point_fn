@@ -30,6 +30,7 @@ from gevpanalysis.common import gevp
 from gevpanalysis.common import gevp_bootstrap
 from gevpanalysis.common import weighted_avg_1_2_exp
 from gevpanalysis.common import weighted_avg
+from gevpanalysis.common import fit_correlation_matrix
 
 from gevpanalysis.params import params
 
@@ -170,6 +171,7 @@ def main():
     _metadata["Keywords"] = f"{pars.__dict__}"
 
     # Read in the analysis data from the yaml file if one is given
+    # This config file contains all of the details on the specific dataset.
     qmax_config = read_config("qmax")
     qmax_datadir = Path(qmax_config["analysis_dir"]) / Path("data")
     if len(sys.argv) == 2:
@@ -207,15 +209,25 @@ def main():
         )
 
     # ======================================================================
+    # This function will loop over the values of lambda specified in the config file and do the GEVP analysis for each value of lambda
     gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars)
     # ======================================================================
+
     return
 
 
 def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
     """
     Loop over the values of lambda, and for each value construct the correlator matrix, solve the GEVP and fit to the ratio of correlators to extract the energy shift.
+
+    G2_nucl: array which contains all of the 2point functions which begin with a Nucleon
+    G2_sigm: array which contains all of the 2point functions which begin with a sigma baryon
+    config: A dictionary with details about the dataset used
+    pars: Object with details on the lattice ensemble.
+    datadir: Path object of the directory where the data files are saved
+    plotdir: Path object of the directory where the plots are saved
     """
+    # Get variables from the config file
     lambdas = np.linspace(config["lmb_i"], config["lmb_f"], config["lmb_num"])
     time_choice = config["time_choice"]
     delta_t = config["delta_t"]
@@ -235,11 +247,19 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
         matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
             G2_nucl, G2_sigm, lmb_val
         )
+        # # Normalise the matrix values
+        # [matrix_1, matrix_2, matrix_3, matrix_4] = normalize_matrices(
+        #     [matrix_1, matrix_2, matrix_3, matrix_4], time_choice=6
+        # )
 
-        [matrix_1, matrix_2, matrix_3, matrix_4] = normalize_matrices(
-            [matrix_1, matrix_2, matrix_3, matrix_4], time_choice=6
+        # ==================================================
+        # Fit to each of the correlators in the correlation matrix.
+        bootfit_list, redchisq_list = fit_correlation_matrix(
+            matrix_4, ratio_t_range, aexp_function
         )
 
+        # ==================================================
+        # TODO: Use one evec for all bootstraps to get Gt1_0, Gt2_0 or 500 evecs?
         # ==================================================
         # O(lambda^0) fit
         (
@@ -394,6 +414,7 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
             "order3_evec_right": evec_right3,
             "red_chisq3": redchisq3,
             "order3_states_fit_divsigma": order3_states_fit_divsigma,
+            "order3_perturbed_corr_fits": bootfit_list,
             # "weighted_energy_nucl": weighted_energy_nucl,
             # "weighted_energy_nucldivsigma": weighted_energy_nucldivsigma,
             # "weighted_energy_sigma": weighted_energy_sigma,
