@@ -161,7 +161,19 @@ def fit_loop_weighted(
 
 
 def main():
-    """Diagonalise correlation matrices to calculate an energy shift for various lambda values"""
+    """
+    Diagonalise correlation matrices to calculate an energy shift for various lambda values
+
+    Run this file for each of the following arguments:
+    qmax
+    theta3
+    theta4
+    theta5
+    theta7
+    theta8
+
+    This will run the GEVP analysis for the lamdba values specified in each of the yaml configuration file in the config/ directory with the above names.
+    """
     # Plotting setup
     mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
     plt.style.use(mystyle.as_posix())
@@ -255,10 +267,10 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
 
         # ==================================================
         # Fit to each of the correlators in the correlation matrix.
-        if lmb_val==0:
-            diag=True
+        if lmb_val == 0:
+            diag = True
         else:
-            diag=False
+            diag = False
         bootfit_list, redchisq_list = fit_correlation_matrix(
             matrix_4, ratio_t_range, aexp_function, diag
         )

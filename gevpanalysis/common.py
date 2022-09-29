@@ -1335,7 +1335,7 @@ def make_matrices_real(G2_nucl, G2_sigm, lmb_val):
 
 def make_matrices(G2_nucl, G2_sigm, lmb_val):
     """Construct the matrices for the GEVP
-    
+
     The 2pt functions have a real and imag dimension.
     """
 
@@ -1401,15 +1401,38 @@ def fit_correlation_matrix(matrix, t_range, function, diag=False):
     # print(np.shape(matrix))
     for i, icorr in enumerate(matrix):
         for j, jcorr in enumerate(icorr):
-            if (diag and ((i==0 and j==1) or (i==1 and j==0))):
+            if diag and ((i == 0 and j == 1) or (i == 1 and j == 0)):
                 continue
             else:
                 # print(np.shape(np.abs(jcorr)))
                 # print(jcorr[1])
-                bootfit_, redchisq = fit_value3(np.abs(jcorr), t_range, function, norm=1)
+                bootfit_, redchisq = fit_value3(
+                    np.abs(jcorr), t_range, function, norm=1
+                )
+
+                # amp0 = effamp(data, plot=False)
+                # mass0 = bs_effmass(data, plot=False)
+
+                # # Set the initial values for the parameters
+                # fitfnc.initparfnc(data)
+
+                # fit_bootstrap(
+                #     fitfnc, p0, x, data, bounds=None, time=False, fullcov=False
+                # )
+
+                # fitlist_2pt = stats.fit_loop_bayes(
+                #     twopoint_fn_real,
+                #     fitfunction,
+                #     time_limits[imom],
+                #     plot=False,
+                #     disp=True,
+                #     time=False,
+                #     weights_=True,
+                # )
+
                 bootfit_list[i][j] = bootfit_
                 redchisq_list[i][j] = redchisq
-                
+
     return bootfit_list, redchisq_list
 
 
