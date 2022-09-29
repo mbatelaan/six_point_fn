@@ -241,6 +241,16 @@ def main():
         time_limits_sigma,
         time_limits_nucldivsigma,
     )
+    twopoint_fits = {
+        "chosen_nucl_fit": chosen_nucl_fit,
+        "chosen_sigma_fit": chosen_sigma_fit,
+        "chosen_nucldivsigma_fit": chosen_nucldivsigma_fit,
+    }
+
+    # Save the fit data to a pickle file
+    with open(datadir / (f"two_point_fits.pkl"), "wb") as file_out:
+        pickle.dump(twopoint_fits, file_out)
+
     # ======================================================================
     # This function will loop over the values of lambda specified in the config file and do the GEVP analysis for each value of lambda
     gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars)
