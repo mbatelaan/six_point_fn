@@ -252,8 +252,9 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
         print("\n evec shape = ", np.shape(evec_left0))
         print("\n evec left avg = \n", np.average(evec_left0, axis=0))
         print("\n evec right avg = \n", np.average(evec_right0, axis=0))
+
+        # Construct the ratio of the two projected correlators
         ratio0 = np.abs(Gt1_0 / Gt2_0)
-        effmass_ratio0 = stats.bs_effmass(ratio0, time_axis=1, spacing=1)
         bootfit_state1_0, redchisq1_0 = fit_value3(
             np.abs(Gt1_0), ratio_t_range, aexp_function, norm=1
         )
@@ -272,8 +273,9 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
         ) = gevp_bootstrap(matrix_2, time_choice, delta_t, name="_test", show=False)
         # Gt1_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 0], matrix_2, evec_right1[:, :, 0])
         # Gt2_1 = np.einsum("ki,ijkl,kj->kl", evec_left1[:, :, 1], matrix_2, evec_right1[:, :, 1])
+
+        # Construct the ratio of the two projected correlators
         ratio1 = np.abs(Gt1_1 / Gt2_1)
-        effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
         bootfit_state1_1, redchisq1_1 = fit_value3(
             np.abs(Gt1_1), ratio_t_range, aexp_function, norm=1
         )
@@ -292,8 +294,9 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
         ) = gevp_bootstrap(matrix_3, time_choice, delta_t, name="_test", show=False)
         # Gt1_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 0], matrix_3, evec_right2[:, :, 0])
         # Gt2_2 = np.einsum("ki,ijkl,kj->kl", evec_left2[:, :, 1], matrix_3, evec_right2[:, :, 1])
+
+        # Construct the ratio of the two projected correlators
         ratio2 = np.abs(Gt1_2 / Gt2_2)
-        effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
         bootfit_state1_2, redchisq1_2 = fit_value3(
             np.abs(Gt1_2), ratio_t_range, aexp_function, norm=1
         )
@@ -312,8 +315,9 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
         ) = gevp_bootstrap(matrix_4, time_choice, delta_t, name="_test", show=False)
         # Gt1_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 0], matrix_4, evec_right3[:, :, 0])
         # Gt2_3 = np.einsum("ki,ijkl,kj->kl", evec_left3[:, :, 1], matrix_4, evec_right3[:, :, 1])
+
+        # Construct the ratio of the two projected correlators
         ratio3 = np.abs(Gt1_3 / Gt2_3)
-        effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
         bootfit_state1_3, redchisq1_3 = fit_value3(
             np.abs(Gt1_3), ratio_t_range, aexp_function, norm=1
         )
@@ -430,6 +434,10 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
                 name="_l" + str(lmb_val),
                 show=False,
             )
+            effmass_ratio0 = stats.bs_effmass(ratio0, time_axis=1, spacing=1)
+            effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
+            effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
+            effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
             plots.plotting_script_diff_2(
                 effmass_ratio0,
                 effmass_ratio1,
