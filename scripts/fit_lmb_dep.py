@@ -424,6 +424,7 @@ def plot_lmb_dep_bw(all_data, plotdir):
     """
 
     plt.figure(figsize=(9, 6))
+    # plt.figure(figsize=(6, 5))
     plt.fill_between(
         all_data["lambdas0"],
         np.average(all_data["order0_fit"], axis=1)
@@ -642,7 +643,7 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None):
     #     np.average(all_data["order0_fit"], axis=1)
     #     - np.std(all_data["order0_fit"], axis=1)
     # )
-    plt.figure(figsize=(9, 6))
+    plt.figure(figsize=(6, 5))
     plt.fill_between(
         all_data["lambdas3"],
         np.average(all_data["order3_fit"], axis=1)
@@ -668,19 +669,19 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None):
         lmb_range = fit_data["lmb_range"]
         lmb_range3 = fit_data["lmb_range3"]
 
-        plt.fill_between(
-            np.array(
-                [
-                    all_data["lambdas3"][lmb_range3[0]],
-                    all_data["lambdas3"][lmb_range3[-1]],
-                ]
-            ),
-            np.array([-10, -10]),
-            np.array([10, 10]),
-            color=_colors[3],
-            alpha=0.1,
-            linewidth=0,
-        )
+        # plt.fill_between(
+        #     np.array(
+        #         [
+        #             all_data["lambdas3"][lmb_range3[0]],
+        #             all_data["lambdas3"][lmb_range3[-1]],
+        #         ]
+        #     ),
+        #     np.array([-10, -10]),
+        #     np.array([10, 10]),
+        #     color=_colors[3],
+        #     alpha=0.1,
+        #     linewidth=0,
+        # )
         m_e_3 = err_brackets(
             np.average(fit_data["bootfit3"], axis=0)[1],
             np.std(fit_data["bootfit3"], axis=0)[1],
@@ -696,6 +697,9 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None):
             label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
             + "\n"
             + rf"$\textrm{{M.E.}}={m_e_3}$",
+            # label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
+            # + "\n"
+            # + rf"$\textrm{{M.E.}}={m_e_3}$",
             color=_colors[3],
             linewidth=1,
             linestyle="--",

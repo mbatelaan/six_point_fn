@@ -305,7 +305,7 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
         else:
             diag = False
         bootfit_list, redchisq_list = fit_correlation_matrix(
-            matrix_4, ratio_t_range, aexp_function, diag
+            matrix_4, [nucl_t_range, sigma_t_range, ratio_t_range], aexp_function, diag
         )
 
         # ==================================================

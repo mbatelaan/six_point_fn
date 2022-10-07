@@ -1404,10 +1404,15 @@ def fit_correlation_matrix(matrix, t_range, function, diag=False):
             if diag and ((i == 0 and j == 1) or (i == 1 and j == 0)):
                 continue
             else:
-                # print(np.shape(np.abs(jcorr)))
-                # print(jcorr[1])
+                if i==0 and j==0:
+                    time_range = t_range[0]
+                elif i==1 and j==1:
+                    time_range = t_range[1]
+                else:
+                    time_range = t_range[2]
+
                 bootfit_, redchisq = fit_value3(
-                    np.abs(jcorr), t_range, function, norm=1
+                    np.abs(jcorr), time_range, function, norm=1
                 )
 
                 # amp0 = effamp(data, plot=False)

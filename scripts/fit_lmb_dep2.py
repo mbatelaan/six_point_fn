@@ -320,6 +320,7 @@ def plot_lmb_dep4_sqsq_fix_2(all_data, plotdir, fit_data=None, fitfunction=None,
     xdata = np.average(deltaEsquared, axis=1)
     xerr = np.std(deltaEsquared, axis=1)
 
+    # fig = plt.figure(figsize=(9, 6))
     fig = plt.figure(figsize=(9, 6))
     plt.legend(fontsize="x-small", loc="upper left")
 
@@ -549,6 +550,87 @@ def plot_lmb_dep_fix(all_data, plotdir, fit_data=None, fitfunction=None, delta_E
     plt.close()
     return
 
+def plot_lmb_dep4(all_data, plotdir, fit_data=None):
+    """Make a plot of the lambda dependence of the energy shift
+    Where the plot uses colored bands to show the dependence
+    """
+
+    # print(all_data["lambdas0"])
+    # print(
+    #     np.average(all_data["order0_fit"], axis=1)
+    #     - np.std(all_data["order0_fit"], axis=1)
+    # )
+    plt.figure(figsize=(9, 6))
+    plt.fill_between(
+        all_data["lambdas3"],
+        np.average(all_data["order3_fit"], axis=1)
+        - np.std(all_data["order3_fit"], axis=1),
+        np.average(all_data["order3_fit"], axis=1)
+        + np.std(all_data["order3_fit"], axis=1),
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.legend(fontsize="x-small", loc="upper left")
+    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+
+    plt.xlabel("$\lambda$")
+    plt.ylabel("$\Delta E$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(plotdir / ("lambda_dep_bands_4.pdf"), metadata=_metadata)
+
+    if fit_data:
+        lmb_range = fit_data["lmb_range"]
+        lmb_range3 = fit_data["lmb_range3"]
+
+        plt.fill_between(
+            np.array(
+                [
+                    all_data["lambdas3"][lmb_range3[0]],
+                    all_data["lambdas3"][lmb_range3[-1]],
+                ]
+            ),
+            np.array([-10, -10]),
+            np.array([10, 10]),
+            color=_colors[3],
+            alpha=0.1,
+            linewidth=0,
+        )
+        m_e_3 = err_brackets(
+            np.average(fit_data["bootfit3"], axis=0)[1],
+            np.std(fit_data["bootfit3"], axis=0)[1],
+        )
+
+        fitBS3 = np.array(
+            [fitfunction5(all_data["lambdas3"], *bf) for bf in fit_data["bootfit3"]]
+        )
+
+        plt.plot(
+            all_data["lambdas3"],
+            np.average(fitBS3, axis=0),
+            label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
+            + "\n"
+            + rf"$\textrm{{M.E.}}={m_e_3}$",
+            color=_colors[3],
+            linewidth=1,
+            linestyle="--",
+            alpha=0.9,
+        )
+
+        plt.legend(fontsize="x-small", loc="upper left")
+        plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+        plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+        plt.tight_layout()
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_4.pdf"), metadata=_metadata)
+        plt.ylim(0, 0.15)
+        plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4.pdf"), metadata=_metadata)
+
+    plt.close()
+    return
+
 
 def main():
     mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
@@ -675,9 +757,13 @@ def main():
     plot_lmb_dep4_sqsq_fix_2(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     plot_lmb_dep4_sqsq_fix_2_pres(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     plot_lmb_dep_fix(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
+    # plot_lmb_dep4(all_data, plotdir, chosen_fit)
 
     with open(datadir / (f"matrix_element.pkl"), "wb") as file_out:
         pickle.dump(chosen_fit, file_out)
+
+    with open(datadir / (f"lambda_dep_plot_data.pkl"), "wb") as file_out:
+        pickle.dump(all_data, file_out)
 
 
 if __name__ == "__main__":
