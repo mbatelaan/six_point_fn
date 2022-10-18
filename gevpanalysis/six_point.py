@@ -459,7 +459,7 @@ def gevp_lambda_loop(G2_nucl, G2_sigm, config, datadir, plotdir, pars):
             "order2_evec_left": evec_left2,
             "order2_evec_right": evec_right2,
             "red_chisq2": redchisq2,
-            # "order3_corrs": np.array([Gt1_3, Gt2_3]),
+            "order3_corrs": np.array([Gt1_3, Gt2_3]),
             "order3_states_fit": np.array([bootfit_state1_3, bootfit_state2_3]),
             "order3_fit": bootfit3,
             "order3_eval_left": eval_left3,
