@@ -1507,6 +1507,7 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     eval_right_avg, evec_right_avg = np.linalg.eig(
         np.matmul(np.linalg.inv(mat_0_avg), mat_1_avg)
     )
+
     # Ordering of the eigenvalues
     if eval_left_avg[0] > eval_left_avg[1]:
         eval_left_avg = eval_left_avg[::-1]
@@ -1559,6 +1560,20 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
         evec_right_list.append(evec_right)
         eval_left_list.append(eval_left)
         eval_right_list.append(eval_right)
+
+    # # Average the bootstrap eigenvectors
+    # eval_left_avg = np.average(eval_left_list,axis=0)
+    # eval_right_avg = np.average(eval_right_list,axis=0)
+    # evec_left_avg = np.average(evec_left_list,axis=0)
+    # evec_right_avg = np.average(evec_right_list,axis=0)
+    # # Ordering of the eigenvalues
+    # if eval_left_avg[0] > eval_left_avg[1]:
+    #     eval_left_avg = eval_left_avg[::-1]
+    #     evec_left_avg = evec_left_avg[:, ::-1]
+    # if eval_right_avg[0] > eval_right_avg[1]:
+    #     eval_right_avg = eval_right_avg[::-1]
+    #     evec_right_avg = evec_right_avg[:, ::-1]
+
 
     # evec_left = np.average(evec_left_list, axis=0)
     # evec_right = np.average(evec_right_list, axis=0)
