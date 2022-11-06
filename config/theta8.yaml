@@ -4,7 +4,7 @@ analysis_dir : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_
 name : theta8
 onlytwist2 : True
 time_choice : 10
-delta_t : 5
+delta_t : 4
 t_range0 : 7
 t_range1 : 19
 lmb_init : 1
