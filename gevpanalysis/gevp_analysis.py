@@ -748,7 +748,7 @@ def gevp_slice(fitlist, t_0_range, delta_t_range, plotdir, name):
 
     # ==================================================
     # Energies from the fit
-    fig, ax = plt.subplots(figsize=(7, 5))
+    fig, ax = plt.subplots(figsize=(9, 5))
     for delta_t_ in delta_t_range:
         indices = np.where(delta_t == delta_t_)
         print(indices)
@@ -1128,9 +1128,9 @@ def plot_eigenstates(state1, state2, t_range, lmb_val, name="", show=False):
 
 
 def gevp_loop(G2_nucl, G2_sigm, lmb_val, datadir):
-    time_choice_range = np.arange(1, 10)
-    delta_t_range = np.arange(1, 7)
-    lambdas = np.linspace(0, 0.05, 30)[1:]
+    time_choice_range = np.arange(1, 13)
+    delta_t_range = np.arange(1, 8)
+    lambdas = np.linspace(0, 0.05, 15)[1:]
     t_range = np.arange(7, 18)
     aexp_function = ff.initffncs("Aexp")
     fitlist = []
@@ -1310,4 +1310,4 @@ if __name__ == "__main__":
     # t_0_slice(fitlist, 4, plotdir, name)
     # t_0_slice(fitlist, 5, plotdir, name)
     # t_0_slice(fitlist, 6, plotdir, name)
-    gevp_slice(fitlist, np.arange(1, 9), np.arange(1, 7), plotdir, name)
+    gevp_slice(fitlist, np.arange(1, 13), np.arange(1, 8), plotdir, name)
