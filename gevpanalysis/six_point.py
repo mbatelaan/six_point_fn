@@ -104,7 +104,7 @@ def fit_loop_weighted(
         tminmax_1exp=time_limits_nucl[0, 1],
         tminmin_2exp=time_limits_nucl[1, 0],
         tminmax_2exp=time_limits_nucl[1, 1],
-        plot=True,
+        plot=False,
     )
     weighted_energy_sigma, fitweights = weighted_avg(
         fitlist_sigma_1exp,
@@ -116,7 +116,7 @@ def fit_loop_weighted(
         tminmax_1exp=time_limits_sigma[0, 1],
         tminmin_2exp=time_limits_sigma[1, 0],
         tminmax_2exp=time_limits_sigma[1, 1],
-        plot=True,
+        plot=False,
     )
     weighted_energy_nucldivsigma, fitweights = weighted_avg(
         fitlist_nucldivsigma_1exp,
@@ -128,7 +128,7 @@ def fit_loop_weighted(
         tminmax_1exp=time_limits_nucldivsigma[0, 1],
         tminmin_2exp=time_limits_nucldivsigma[1, 0],
         tminmax_2exp=time_limits_nucldivsigma[1, 1],
-        plot=True,
+        plot=False,
     )
     chosen_nucl_fit = [
         i
@@ -221,35 +221,35 @@ def main():
             pars, pickledir_k1, pickledir_k2, mom_strings
         )
 
-    # ============================================================
-    time_limits_nucl = np.array([[10, 15], [4, 4]])
-    time_limits_sigma = np.array([[10, 15], [4, 4]])
-    time_limits_nucldivsigma = np.array([[1, 15], [2, 2]])
-    (
-        weighted_energy_nucl,
-        weighted_energy_sigma,
-        weighted_energy_nucldivsigma,
-        chosen_nucl_fit,
-        chosen_sigma_fit,
-        chosen_nucldivsigma_fit,
-    ) = fit_loop_weighted(
-        datadir,
-        qmax_datadir,
-        plotdir,
-        config,
-        time_limits_nucl,
-        time_limits_sigma,
-        time_limits_nucldivsigma,
-    )
-    twopoint_fits = {
-        "chosen_nucl_fit": chosen_nucl_fit,
-        "chosen_sigma_fit": chosen_sigma_fit,
-        "chosen_nucldivsigma_fit": chosen_nucldivsigma_fit,
-    }
+    # # ============================================================
+    # time_limits_nucl = np.array([[10, 15], [4, 4]])
+    # time_limits_sigma = np.array([[10, 15], [4, 4]])
+    # time_limits_nucldivsigma = np.array([[1, 15], [2, 2]])
+    # (
+    #     weighted_energy_nucl,
+    #     weighted_energy_sigma,
+    #     weighted_energy_nucldivsigma,
+    #     chosen_nucl_fit,
+    #     chosen_sigma_fit,
+    #     chosen_nucldivsigma_fit,
+    # ) = fit_loop_weighted(
+    #     datadir,
+    #     qmax_datadir,
+    #     plotdir,
+    #     config,
+    #     time_limits_nucl,
+    #     time_limits_sigma,
+    #     time_limits_nucldivsigma,
+    # )
+    # twopoint_fits = {
+    #     "chosen_nucl_fit": chosen_nucl_fit,
+    #     "chosen_sigma_fit": chosen_sigma_fit,
+    #     "chosen_nucldivsigma_fit": chosen_nucldivsigma_fit,
+    # }
 
-    # Save the fit data to a pickle file
-    with open(datadir / (f"two_point_fits.pkl"), "wb") as file_out:
-        pickle.dump(twopoint_fits, file_out)
+    # # Save the fit data to a pickle file
+    # with open(datadir / (f"two_point_fits.pkl"), "wb") as file_out:
+    #     pickle.dump(twopoint_fits, file_out)
 
     # ======================================================================
     # This function will loop over the values of lambda specified in the config file and do the GEVP analysis for each value of lambda

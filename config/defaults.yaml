@@ -1,4 +1,4 @@
-lattice: Feyn-Hell_kp21374891798173
+lattice: Feyn-Hell_kp121040kp120620
 kappa: 9
 geom: 32x32
 lmb_i : 0
@@ -10,6 +10,6 @@ tmax_sigma : 24
 tmin_ratio : 10
 tmax_ratio : 24
 lmb_val : 0.025
-plotting : True
+plotting : False
 time_loop : False
 lmb_num : 15

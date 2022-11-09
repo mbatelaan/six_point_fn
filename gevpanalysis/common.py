@@ -1638,6 +1638,9 @@ def weighted_avg_1_2_exp(fitlist_1exp, fitlist_2exp, print=False, tmax_choice=No
     #         indices_2exp = indices_2exp[0][np.where(tmin_2exp[indices_2exp] < 4)]
     #         fitlist_2exp = [fitlist_2exp[index] for index in indices_2exp]
 
+    print(fitlist_1exp)
+    print(np.shape(fitlist_1exp))
+    print(np.shape(fitlist_1exp[0]["param"]))
     dE_1exp = np.std([i["param"][:, 1] for i in fitlist_1exp], axis=1)
     dof_1exp = np.array([i["dof"] for i in fitlist_1exp])
     chisq_1exp = np.array([i["chisq"] for i in fitlist_1exp])
