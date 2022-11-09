@@ -125,7 +125,8 @@ def main():
     # lambdafit_4pt_squared(lambdas3, fitlists, datadir, fitfunc2)
 
     # delta_E_fix = data[0]["chosen_nucldivsigma_fit"]["bootfit3"]
-    delta_E_fix = data[0]["chosen_nucldivsigma_fit"]["param"][:,1]
+    # delta_E_fix = data[0]["chosen_nucldivsigma_fit"]["param"][:,1]
+    delta_E_fix = data[0]["order3_fit"][:,1]
     # print([key for key in delta_E_fix])
     print(f"delta_E_fix = {np.average(delta_E_fix)}")
     # print(f"delta_E_fix = {delta_E_fix}")

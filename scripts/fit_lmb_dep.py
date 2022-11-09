@@ -548,7 +548,8 @@ def plot_lmb_dep_bw_pres(all_data, plotdir):
         alpha=0.3,
     )
     plt.legend(fontsize="small", loc="upper left")
-    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    # plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.xlim(0,0.045)
     # plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
 
     plt.xlabel("$\lambda$")

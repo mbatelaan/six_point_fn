@@ -385,6 +385,91 @@ def plot_lmb_dep4_sqsq_fix_2(all_data, plotdir, fit_data=None, fitfunction=None,
     plt.close()
     return
 
+def plot_lmb_dep4_sqsq_fix_3(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fix=None):
+    """Make a plot of the lambda dependence of the energy shift with delta E squared and lambda squared
+    Where the plot uses colored bands to show the dependence
+    Only plot errorbar points for the points included in the fit, the only band is the fit result now.
+    """
+
+    deltaEsquared = np.array(all_data["order3_fit"]) ** 2
+    xdata = np.average(deltaEsquared, axis=1)
+    xerr = np.std(deltaEsquared, axis=1)
+
+    # fig = plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=(9, 6))
+    plt.legend(fontsize="x-small", loc="upper left")
+
+    plt.xlabel("$\lambda^2$")
+    plt.ylabel("$(\Delta E)^2$")
+    # plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+
+    if fit_data:
+        plt.fill_between(
+            all_data["lambdas3"]**2,
+            xdata - xerr,
+            xdata + xerr,
+            label=r"$\mathcal{O}(\lambda^4)$",
+            color=_colors[3],
+            linewidth=0,
+            alpha=0.3,
+        )
+        
+        lmb_range = fit_data["lmb_range"]
+        plt.errorbar(
+            all_data["lambdas3"][lmb_range]**2,
+            xdata[lmb_range],
+            xerr[lmb_range],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[3],
+            fmt="s",
+            markerfacecolor="none",
+            label=r"$\mathcal{O}(\lambda^4)$",
+        )
+        m_e_3 = err_brackets(
+            np.average(fit_data["bootfit3"], axis=0)[0],
+            np.std(fit_data["bootfit3"], axis=0)[0],
+        )
+        fitBS3 = np.array(
+            [fitfunction(all_data["lambdas3"], *bf, delta_E_fix[ibf]) for ibf, bf in enumerate(fit_data["bootfit3"])]
+        )
+
+        plt.plot(
+            all_data["lambdas3"]**2,
+            np.average(fitBS3, axis=0),
+            color=_colors[4],
+            linewidth=1,
+            linestyle="--",
+            alpha=0.9,
+        )
+        newline='\n'
+        plt.fill_between(
+            all_data["lambdas3"]**2,
+            np.average(fitBS3, axis=0) - np.std(fitBS3, axis=0),
+            np.average(fitBS3, axis=0) + np.std(fitBS3, axis=0),
+            # label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}${newline}$\textrm{{M.E.}}={m_e_3}$",
+            label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$",
+            color=_colors[4],
+            linewidth=0,
+            alpha=0.3,
+        )
+        plt.legend(fontsize="small", loc="upper left")
+        # plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+        plt.xlim(0, 0.0024)
+        plt.ylim(-0.0002, 0.011)
+        # plt.savefig(
+        #     plotdir / ("lambda_dep_bands_fit_fn3_ylim_lmbsq.pdf"), metadata=_metadata
+        # )
+        save_plot(
+            fig,
+            "DeltaE2_lambda2_fitfn3_bands.pdf",
+            subdir = plotdir,
+        )
+
+    plt.close()
+    return
+
 def plot_lmb_dep4_sqsq_fix_2_pres(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fix=None):
     """Make a plot of the lambda dependence of the energy shift with delta E squared and lambda squared
     Where the plot uses colored bands to show the dependence
@@ -696,7 +781,11 @@ def main():
     chisq_values = np.array([elem["redchisq3"] for elem in data_3pts_sq])
     print("\n3 points")
     for i, elem in enumerate(data_3pts_sq):
-        print(elem["lmb_range"], "\t\t", elem["redchisq3"])
+        m_e_3 = err_brackets(
+            np.average(elem["bootfit3"], axis=0)[0],
+            np.std(elem["bootfit3"], axis=0)[0],
+        )
+        print(elem["lmb_range"], "\t\t", elem["redchisq3"], "\t\t", m_e_3)
     chosen_fit = [
         i for i in data_3pts_sq if i["lmb_range"][0] == 0 and i["lmb_range"][-1] == 12
     ][0]
@@ -728,8 +817,12 @@ def main():
 
     print("\n3 points")
     for i, elem in enumerate(data_3pts_sq_fix):
-        print(elem["lmb_range"], "\t\t", elem["redchisq3"])
-    chosen_fit = [i for i in data_3pts_sq_fix if i["lmb_range"][0] == 1 and i["lmb_range"][-1] == 11][0]
+        m_e_3 = err_brackets(
+            np.average(elem["bootfit3"], axis=0)[0],
+            np.std(elem["bootfit3"], axis=0)[0],
+        )
+        print(elem["lmb_range"], "\t\t", elem["redchisq3"], "\t\t", m_e_3)
+    chosen_fit = [i for i in data_3pts_sq_fix if i["lmb_range"][0] == 1 and i["lmb_range"][-1] == 7][0]
     print(chosen_fit["redchisq3"])
     print(chosen_fit["lmb_range"])
     # Plot the fit to the lambda-dependence
@@ -755,6 +848,7 @@ def main():
     plot_lmb_dep4_sq_fix(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     plot_lmb_dep4_sq_fix_2(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     plot_lmb_dep4_sqsq_fix_2(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
+    plot_lmb_dep4_sqsq_fix_3(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     plot_lmb_dep4_sqsq_fix_2_pres(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     plot_lmb_dep_fix(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     # plot_lmb_dep4(all_data, plotdir, chosen_fit)

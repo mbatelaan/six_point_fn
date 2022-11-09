@@ -117,8 +117,8 @@ class Fitfunction_order4:
 
     def eval(self, lmb, Delta_E, A, B):
         """The fit function Ross proposed to capture the compton amplitude"""
-        deltaE = np.sqrt(Delta_E**2 + 4 * lmb**2 * A**2 + lmb**4 * B**2)
-        return deltaE
+        deltaE_lmb_sq = Delta_E**2 + 4 * lmb**2 * A**2 + lmb**4 * B**2
+        return deltaE_lmb_sq
 
 
 def fit_lmb(ydata, function, lambdas, p0=None, bounds=None):

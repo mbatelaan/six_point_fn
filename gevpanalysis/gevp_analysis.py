@@ -1310,4 +1310,4 @@ if __name__ == "__main__":
     # t_0_slice(fitlist, 4, plotdir, name)
     # t_0_slice(fitlist, 5, plotdir, name)
     # t_0_slice(fitlist, 6, plotdir, name)
-    gevp_slice(fitlist, np.arange(1, 13), np.arange(1, 8), plotdir, name)
+    gevp_slice(fitlist, np.arange(1, 13), np.arange(1, 6), plotdir, name)

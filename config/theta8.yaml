@@ -3,8 +3,8 @@ pickle_dir2 : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_p
 analysis_dir : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta8/analysis/
 name : theta8
 onlytwist2 : True
-time_choice : 8
-delta_t : 6
+time_choice : 6
+delta_t : 4
 t_range0 : 7
 t_range1 : 19
 lmb_init : 1
@@ -13,6 +13,3 @@ tmin_nucl : 10
 tmax_nucl : 22
 tmin_ratio : 8
 tmax_ratio : 17
-lmb_i : 0
-lmb_f : 0.05
-lmb_num : 20
