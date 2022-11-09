@@ -490,6 +490,7 @@ def plot_lmb_dep_bw(all_data, plotdir):
     plt.savefig(plotdir / ("lambda_dep_bands_bw_ylim.pdf"), metadata=_metadata)
     plt.close()
     return
+
 def plot_lmb_dep_bw_pres(all_data, plotdir):
     """Make a plot of the lambda dependence of the energy shift
     Where the plot uses colored bands to show the dependence

@@ -101,7 +101,7 @@ def plot_lmb_dep4_sq(all_data, plotdir, fit_data=None, fitfunction=None):
             [fitfunction(all_data["lambdas3"], *bf) for bf in fit_data["bootfit3"]]
         )
 
-        print(all_data["lambdas3"][lmb_range])
+        # print(all_data["lambdas3"][lmb_range])
         fitBS3_ = np.array(
             [
                 fitfunction(all_data["lambdas3"][lmb_range], *bf)
@@ -600,8 +600,8 @@ def plot_lmb_dep_fix(all_data, plotdir, fit_data=None, fitfunction=None, delta_E
         lambdas_ = all_data["lambdas3"]
         fitME = fit_data["bootfit3"]
         fitBS3 = np.array( [delta_E0[ibf] + np.sqrt(delta_E0[ibf]**2 + 4*lambdas_**2*matrix_element**2) - np.abs(delta_E0[ibf]) for ibf, matrix_element in enumerate(fitME)])
-        print(np.shape(fitBS3))
-        print(fitBS3)
+        # print(np.shape(fitBS3))
+        # print(fitBS3)
 
         plt.plot(
             all_data["lambdas3"],
@@ -822,7 +822,7 @@ def main():
             np.std(elem["bootfit3"], axis=0)[0],
         )
         print(elem["lmb_range"], "\t\t", elem["redchisq3"], "\t\t", m_e_3)
-    chosen_fit = [i for i in data_3pts_sq_fix if i["lmb_range"][0] == 1 and i["lmb_range"][-1] == 7][0]
+    chosen_fit = [i for i in data_3pts_sq_fix if i["lmb_range"][0] == 1 and i["lmb_range"][-1] == 13][0]
     print(chosen_fit["redchisq3"])
     print(chosen_fit["lmb_range"])
     # Plot the fit to the lambda-dependence

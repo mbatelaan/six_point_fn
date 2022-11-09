@@ -58,6 +58,7 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
     xerr = np.std(deltaEsquared, axis=1)
 
     plot_data = np.abs(all_data["order3_fit"])
+    # plot_data = all_data["order3_fit"]
 
     plt.figure(figsize=(6, 5))
     plt.fill_between(
@@ -72,11 +73,12 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
         alpha=0.3,
     )
     plt.legend(fontsize="x-small", loc="upper left")
-    plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    # plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.xlim(0,0.05)
     plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
 
-    plt.xlabel("$\lambda$")
-    plt.ylabel("$\Delta E$")
+    plt.xlabel(r"$\lambda$")
+    plt.ylabel(r"$|\Delta E_{\lambda}|$")
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.tight_layout()
     plt.savefig(plotdir / ("lambda_dep_bands_4_paper.pdf"), metadata=_metadata)
@@ -117,7 +119,8 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
             np.average(fitBS3, axis=0) - np.std(fitBS3, axis=0),
             np.average(fitBS3, axis=0) + np.std(fitBS3, axis=0),
             # label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}${newline}$\textrm{{M.E.}}={m_e_3}$",
-            label=rf"$\textrm{{M.E.}}={m_e_3}$",
+            # label=rf"$\textrm{{M.E.}}={m_e_3}$",
+            label=rf"$\textrm{{fit}}$",
             # label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$",
             color=_colors[4],
             linewidth=0,
