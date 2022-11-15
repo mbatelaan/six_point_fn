@@ -101,7 +101,7 @@ def plot_lmb_dep4_sq(all_data, plotdir, fit_data=None, fitfunction=None):
             [fitfunction(all_data["lambdas3"], *bf) for bf in fit_data["bootfit3"]]
         )
 
-        # print(all_data["lambdas3"][lmb_range])
+        print(all_data["lambdas3"][lmb_range])
         fitBS3_ = np.array(
             [
                 fitfunction(all_data["lambdas3"][lmb_range], *bf)
@@ -457,7 +457,7 @@ def plot_lmb_dep4_sqsq_fix_3(all_data, plotdir, fit_data=None, fitfunction=None,
         plt.legend(fontsize="small", loc="upper left")
         # plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
         plt.xlim(0, 0.0024)
-        plt.ylim(-0.0002, 0.011)
+        plt.ylim(-0.0002, 0.007)
         # plt.savefig(
         #     plotdir / ("lambda_dep_bands_fit_fn3_ylim_lmbsq.pdf"), metadata=_metadata
         # )
@@ -600,8 +600,8 @@ def plot_lmb_dep_fix(all_data, plotdir, fit_data=None, fitfunction=None, delta_E
         lambdas_ = all_data["lambdas3"]
         fitME = fit_data["bootfit3"]
         fitBS3 = np.array( [delta_E0[ibf] + np.sqrt(delta_E0[ibf]**2 + 4*lambdas_**2*matrix_element**2) - np.abs(delta_E0[ibf]) for ibf, matrix_element in enumerate(fitME)])
-        # print(np.shape(fitBS3))
-        # print(fitBS3)
+        print(np.shape(fitBS3))
+        print(fitBS3)
 
         plt.plot(
             all_data["lambdas3"],
@@ -771,9 +771,7 @@ def main():
     fitlist3 = [data[ind] for ind in indices3]
     fitlists = [fitlist0, fitlist1, fitlist2, fitlist3]
 
-    # lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
-    lmb_range = np.array([config["lmb_init"], config["lmb_final"]])
-    print(f"\n\n\n\n{lmb_range}")
+    lmb_range = np.arange(config["lmb_init"], config["lmb_final"])
 
     fitfunc2 = Fitfunction2()
     fitfunc3 = Fitfunction3()
@@ -783,11 +781,7 @@ def main():
     chisq_values = np.array([elem["redchisq3"] for elem in data_3pts_sq])
     print("\n3 points")
     for i, elem in enumerate(data_3pts_sq):
-        m_e_3 = err_brackets(
-            np.average(elem["bootfit3"], axis=0)[0],
-            np.std(elem["bootfit3"], axis=0)[0],
-        )
-        print(elem["lmb_range"], "\t\t", elem["redchisq3"], "\t\t", m_e_3)
+        print(elem["lmb_range"], "\t\t", elem["redchisq3"])
     chosen_fit = [
         i for i in data_3pts_sq if i["lmb_range"][0] == 0 and i["lmb_range"][-1] == 12
     ][0]
@@ -819,12 +813,8 @@ def main():
 
     print("\n3 points")
     for i, elem in enumerate(data_3pts_sq_fix):
-        m_e_3 = err_brackets(
-            np.average(elem["bootfit3"], axis=0)[0],
-            np.std(elem["bootfit3"], axis=0)[0],
-        )
-        print(elem["lmb_range"], "\t\t", elem["redchisq3"], "\t\t", m_e_3)
-    chosen_fit = [i for i in data_3pts_sq_fix if i["lmb_range"][0] == lmb_range[0] and i["lmb_range"][-1] == lmb_range[1]][0]
+        print(elem["lmb_range"], "\t\t", elem["redchisq3"])
+    chosen_fit = [i for i in data_3pts_sq_fix if i["lmb_range"][0] == 1 and i["lmb_range"][-1] == 11][0]
     print(chosen_fit["redchisq3"])
     print(chosen_fit["lmb_range"])
     # Plot the fit to the lambda-dependence
@@ -847,12 +837,12 @@ def main():
     delta_E_0 = np.array(
         [fit[f"order3_fit"][:, 1] for fit in fitlists[3]][0]
     )
-    plot_lmb_dep4_sq_fix(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
-    plot_lmb_dep4_sq_fix_2(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
-    plot_lmb_dep4_sqsq_fix_2(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
+    # plot_lmb_dep4_sq_fix(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
+    # plot_lmb_dep4_sq_fix_2(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
+    # plot_lmb_dep4_sqsq_fix_2(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     plot_lmb_dep4_sqsq_fix_3(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
-    plot_lmb_dep4_sqsq_fix_2_pres(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
-    plot_lmb_dep_fix(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
+    # plot_lmb_dep4_sqsq_fix_2_pres(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
+    # plot_lmb_dep_fix(all_data, plotdir, fit_data=chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
     # plot_lmb_dep4(all_data, plotdir, chosen_fit)
 
     with open(datadir / (f"matrix_element.pkl"), "wb") as file_out:

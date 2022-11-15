@@ -57,8 +57,8 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
     xdata = np.average(deltaEsquared, axis=1)
     xerr = np.std(deltaEsquared, axis=1)
 
-    plot_data = np.abs(all_data["order3_fit"])
-    # plot_data = all_data["order3_fit"]
+    # plot_data = np.abs(all_data["order3_fit"])
+    plot_data = all_data["order3_fit"]
 
     plt.figure(figsize=(6, 5))
     plt.fill_between(
@@ -84,7 +84,11 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
     plt.savefig(plotdir / ("lambda_dep_bands_4_paper.pdf"), metadata=_metadata)
 
     if fit_data:
+        print([i for i in fit_data])
         lmb_range = fit_data["lmb_range"]
+        print(lmb_range)
+        lmbfit_range = np.linspace(all_data["lambdas3"][lmb_range[0]], all_data["lambdas3"][lmb_range[-1]], 100)
+        print(lmbfit_range)
         # plt.errorbar(
         #     all_data["lambdas3"][lmb_range]**2,
         #     xdata[lmb_range],
@@ -104,10 +108,14 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
         fitBS3 = np.sqrt(
             [fitfunction(all_data["lambdas3"], *bf, delta_E_fix[ibf]) for ibf, bf in enumerate(fit_data["bootfit3"])]
         )
+        fitBS_lmbs = np.sqrt(
+            [fitfunction( lmbfit_range , *bf, delta_E_fix[ibf]) for ibf, bf in enumerate(fit_data["bootfit3"])]
+        )
 
         plt.plot(
-            all_data["lambdas3"],
-            np.average(fitBS3, axis=0),
+            # all_data["lambdas3"],
+            lmbfit_range,
+            np.average(fitBS_lmbs, axis=0),
             color=_colors[4],
             linewidth=1,
             linestyle="--",
@@ -115,9 +123,10 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
         )
         newline='\n'
         plt.fill_between(
-            all_data["lambdas3"],
-            np.average(fitBS3, axis=0) - np.std(fitBS3, axis=0),
-            np.average(fitBS3, axis=0) + np.std(fitBS3, axis=0),
+            # all_data["lambdas3"],
+            lmbfit_range,
+            np.average(fitBS_lmbs, axis=0) - np.std(fitBS_lmbs, axis=0),
+            np.average(fitBS_lmbs, axis=0) + np.std(fitBS_lmbs, axis=0),
             # label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}${newline}$\textrm{{M.E.}}={m_e_3}$",
             # label=rf"$\textrm{{M.E.}}={m_e_3}$",
             label=rf"$\textrm{{fit}}$",
@@ -130,6 +139,7 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
         plt.savefig(plotdir / ("lambda_dep_bands_fit_4_paper.pdf"), metadata=_metadata)
         plt.ylim(0, 0.15)
         plt.savefig(plotdir / ("lambda_dep_bands_fit_4_paper_ylim.pdf"), metadata=_metadata)
+        plt.savefig(plotdir / ("lambda_dep_fit.pdf"), metadata=_metadata)
 
     # if fit_data:
     #     lmb_range = fit_data["lmb_range"]

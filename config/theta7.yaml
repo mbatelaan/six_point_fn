@@ -7,8 +7,8 @@ time_choice : 6
 delta_t : 4
 t_range0 : 7
 t_range1 : 19
-lmb_init : 1
-lmb_final : 10
+lmb_init : 2
+lmb_final : 12
 tmin_nucl : 10
 tmax_nucl : 21
 tmin_ratio : 8
@@ -16,3 +16,4 @@ tmax_ratio : 17
 lmb_i : 0
 lmb_f : 0.05
 lmb_num : 15
+plotting: True

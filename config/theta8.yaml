@@ -8,7 +8,7 @@ delta_t : 4
 t_range0 : 7
 t_range1 : 19
 lmb_init : 1
-lmb_final : 10
+lmb_final : 13
 tmin_nucl : 10
 tmax_nucl : 22
 tmin_ratio : 8
