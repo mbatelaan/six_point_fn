@@ -1,5 +1,5 @@
 font.size: 18
-font.sans-serif: Fira Sans Condensed
+font.family: DejaVu Sans
 figure.autolayout: True
 xtick.bottom: True
 xtick.direction: in

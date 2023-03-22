@@ -17,3 +17,5 @@ lmb_i : 0
 lmb_f : 0.05
 lmb_num : 15
 plotting: True
+runname: 'run \#5'
+runnumber: 5

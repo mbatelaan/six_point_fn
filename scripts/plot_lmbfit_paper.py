@@ -48,7 +48,7 @@ _markers = ["s", "o", "^", "*", "v", ">", "<", "s", "s"]
 m_N = 0.4179255
 m_S = 0.4641829
 
-def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fix=None):
+def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fix=None, runnumber=1):
     """Make a plot of the lambda dependence of the energy shift
     Where the plot uses colored bands to show the dependence
     """
@@ -57,10 +57,11 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
     xdata = np.average(deltaEsquared, axis=1)
     xerr = np.std(deltaEsquared, axis=1)
 
-    # plot_data = np.abs(all_data["order3_fit"])
-    plot_data = all_data["order3_fit"]
+    plot_data = np.abs(all_data["order3_fit"])
+    # plot_data = all_data["order3_fit"]
 
     plt.figure(figsize=(6, 5))
+    ax = plt.gca()
     plt.fill_between(
         all_data["lambdas3"],
         np.average(plot_data, axis=1)
@@ -82,6 +83,11 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
     plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     plt.tight_layout()
     plt.savefig(plotdir / ("lambda_dep_bands_4_paper.pdf"), metadata=_metadata)
+
+    textstr = f'run \#{runnumber}'
+    props = dict(boxstyle='round', facecolor='wheat', alpha=0.8)
+    ax.text(0.8, 0.95, textstr, transform=ax.transAxes, fontsize=14,
+            verticalalignment='top', bbox=props)
 
     if fit_data:
         print([i for i in fit_data])
@@ -139,7 +145,157 @@ def plot_lmb_dep4(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fi
         plt.savefig(plotdir / ("lambda_dep_bands_fit_4_paper.pdf"), metadata=_metadata)
         plt.ylim(0, 0.15)
         plt.savefig(plotdir / ("lambda_dep_bands_fit_4_paper_ylim.pdf"), metadata=_metadata)
-        plt.savefig(plotdir / ("lambda_dep_fit.pdf"), metadata=_metadata)
+        # plt.savefig(plotdir / ("lambda_dep_fit.pdf"), metadata=_metadata)
+
+    # if fit_data:
+    #     lmb_range = fit_data["lmb_range"]
+    #     # lmb_range3 = fit_data["lmb_range3"]
+
+    #     # plt.fill_between(
+    #     #     np.array(
+    #     #         [
+    #     #             all_data["lambdas3"][lmb_range3[0]],
+    #     #             all_data["lambdas3"][lmb_range3[-1]],
+    #     #         ]
+    #     #     ),
+    #     #     np.array([-10, -10]),
+    #     #     np.array([10, 10]),
+    #     #     color=_colors[3],
+    #     #     alpha=0.1,
+    #     #     linewidth=0,
+    #     # )
+    #     m_e_3 = err_brackets(
+    #         np.average(fit_data["bootfit3"], axis=0)[0],
+    #         np.std(fit_data["bootfit3"], axis=0)[0],
+    #     )
+
+    #     fitBS3 = np.array(
+    #         [fitfunction5(all_data["lambdas3"], *bf) for bf in fit_data["bootfit3"]]
+    #     )
+
+    #     plt.plot(
+    #         all_data["lambdas3"],
+    #         np.average(fitBS3, axis=0),
+    #         label=rf"$\chi_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$"
+    #         + "\n"
+    #         + rf"$\textrm{{M.E.}}={m_e_3}$",
+    #         color=_colors[3],
+    #         linewidth=1,
+    #         linestyle="--",
+    #         alpha=0.9,
+    #     )
+
+    #     plt.legend(fontsize="x-small", loc="upper left")
+    #     plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    #     plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+    #     plt.tight_layout()
+    #     plt.savefig(plotdir / ("lambda_dep_bands_fit_4.pdf"), metadata=_metadata)
+    #     plt.ylim(0, 0.15)
+    #     plt.savefig(plotdir / ("lambda_dep_bands_fit_ylim_4.pdf"), metadata=_metadata)
+
+    plt.close()
+    return
+
+def plot_lmb_dep_paper(all_data, plotdir, fit_data=None, fitfunction=None, delta_E_fix=None, runnumber=1):
+    """Make a plot of the lambda dependence of the energy shift
+    Where the plot uses colored bands to show the dependence
+    """
+
+    deltaEsquared = np.array(all_data["order3_fit"]) ** 2
+    xdata = np.average(deltaEsquared, axis=1)
+    xerr = np.std(deltaEsquared, axis=1)
+
+    plot_data = np.abs(all_data["order3_fit"])
+    # plot_data = all_data["order3_fit"]
+
+    plt.figure(figsize=(6, 5))
+    ax = plt.gca()
+    plt.fill_between(
+        all_data["lambdas3"],
+        np.average(plot_data, axis=1)
+        - np.std(plot_data, axis=1),
+        np.average(plot_data, axis=1)
+        + np.std(plot_data, axis=1),
+        label=r"$\mathcal{O}(\lambda^4)$",
+        color=_colors[3],
+        linewidth=0,
+        alpha=0.3,
+    )
+    plt.legend(fontsize="x-small", loc="upper left")
+    # plt.xlim(all_data["lambdas3"][0] * 0.9, all_data["lambdas3"][-1] * 1.1)
+    plt.xlim(0,0.05)
+    plt.ylim(0, np.average(all_data["order3_fit"], axis=1)[-1] * 1.2)
+
+    plt.xlabel(r"$\lambda$")
+    plt.ylabel(r"$|\Delta E_{\lambda}|$")
+    plt.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(plotdir / ("lambda_dep_bands_4_paper.pdf"), metadata=_metadata)
+
+    textstr = f'run \#{runnumber}'
+    props = dict(boxstyle='round', facecolor='white', alpha=0.3)
+    # props = dict(boxstyle='round', alpha=0.3)
+    ax.text(0.8, 0.95, textstr, transform=ax.transAxes, fontsize=14,
+            verticalalignment='top', bbox=props)
+
+    if fit_data:
+        print([i for i in fit_data])
+        lmb_range = fit_data["lmb_range"]
+        print(lmb_range)
+        # lmbfit_range = np.linspace(all_data["lambdas3"][lmb_range[0]], all_data["lambdas3"][lmb_range[-1]], 100)
+        lmbfit_range = np.linspace(0, 0.05, 100)
+        print(lmbfit_range)
+        # plt.errorbar(
+        #     all_data["lambdas3"][lmb_range]**2,
+        #     xdata[lmb_range],
+        #     xerr[lmb_range],
+        #     capsize=4,
+        #     elinewidth=1,
+        #     color=_colors[3],
+        #     fmt="s",
+        #     markerfacecolor="none",
+        #     label=r"$\mathcal{O}(\lambda^4)$",
+        # )
+
+        m_e_3 = err_brackets(
+            np.average(fit_data["bootfit3"], axis=0)[0],
+            np.std(fit_data["bootfit3"], axis=0)[0],
+        )
+        fitBS3 = np.sqrt(
+            [fitfunction(all_data["lambdas3"], *bf, delta_E_fix[ibf]) for ibf, bf in enumerate(fit_data["bootfit3"])]
+        )
+        fitBS_lmbs = np.sqrt(
+            [fitfunction( lmbfit_range , *bf, delta_E_fix[ibf]) for ibf, bf in enumerate(fit_data["bootfit3"])]
+        )
+
+        plt.plot(
+            # all_data["lambdas3"],
+            lmbfit_range,
+            np.average(fitBS_lmbs, axis=0),
+            color=_colors[4],
+            linewidth=1,
+            linestyle="--",
+            alpha=0.9,
+        )
+        newline='\n'
+        plt.fill_between(
+            # all_data["lambdas3"],
+            lmbfit_range,
+            np.average(fitBS_lmbs, axis=0) - np.std(fitBS_lmbs, axis=0),
+            np.average(fitBS_lmbs, axis=0) + np.std(fitBS_lmbs, axis=0),
+            # label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}${newline}$\textrm{{M.E.}}={m_e_3}$",
+            # label=rf"$\textrm{{M.E.}}={m_e_3}$",
+            label=rf"$\textrm{{fit}}$",
+            # label=rf"$\chi^2_{{\textrm{{dof}} }} = {fit_data['redchisq3']:2.3}$",
+            color=_colors[4],
+            linewidth=0,
+            alpha=0.3,
+        )
+        plt.legend(fontsize="x-small", loc="upper left")
+        plt.savefig(plotdir / (f"run{runnumber}_lambda_dep_bands_fit_4_paper.pdf"), metadata=_metadata)
+        plt.ylim(0, 0.15)
+        plt.savefig(plotdir / (f"run{runnumber}_lambda_dep_bands_fit_4_paper_ylim.pdf"), metadata=_metadata)
+        # plt.savefig(plotdir / ("lambda_dep_fit.pdf"), metadata=_metadata)
 
     # if fit_data:
     #     lmb_range = fit_data["lmb_range"]
@@ -234,7 +390,7 @@ def main():
     print(np.shape(delta_E_0))
 
 
-    plot_lmb_dep4(all_data, plotdir, chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0)
+    plot_lmb_dep_paper(all_data, plotdir, chosen_fit, fitfunction=fitfunc3.eval, delta_E_fix = delta_E_0, runnumber = config["runnumber"])
 
 
 if __name__ == "__main__":

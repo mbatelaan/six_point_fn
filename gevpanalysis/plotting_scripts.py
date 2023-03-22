@@ -44,7 +44,7 @@ def plotting_script_all(
         color=_colors[0],
         fmt="s",
         markerfacecolor="none",
-        label=r"$G_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0)$",
+        label=r"$C_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0)$",
     )
     yavg = np.average(corr_matrix1[1][1], axis=0)
     ystd = np.std(corr_matrix1[1][1], axis=0)
@@ -57,7 +57,7 @@ def plotting_script_all(
         color=_colors[1],
         fmt="s",
         markerfacecolor="none",
-        label=r"$G_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
+        label=r"$C_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
     )
     yavg = np.average(corr_matrix3[1][1], axis=0)
     ystd = np.std(corr_matrix3[1][1], axis=0)
@@ -70,7 +70,7 @@ def plotting_script_all(
         color=_colors[2],
         fmt="s",
         markerfacecolor="none",
-        label=r"$G_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
+        label=r"$C_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
     )
 
     yavg = np.average(corr_matrix[1][0], axis=0)
@@ -84,7 +84,7 @@ def plotting_script_all(
         color=_colors[3],
         fmt="^",
         markerfacecolor="none",
-        label=r"$G_{\Sigma N}(t),\ \mathcal{O}(\lambda^1)$",
+        label=r"$C_{\Sigma N}(t),\ \mathcal{O}(\lambda^1)$",
     )
     yavg = np.average(corr_matrix2[1][0], axis=0)
     ystd = np.std(corr_matrix2[1][0], axis=0)
@@ -97,7 +97,7 @@ def plotting_script_all(
         color=_colors[4],
         fmt="^",
         markerfacecolor="none",
-        label=r"$G_{\Sigma N}(t),\ \mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
+        label=r"$C_{\Sigma N}(t),\ \mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
     )
 
     plt.semilogy()
@@ -111,6 +111,9 @@ def plotting_script_all(
     metadata_ = _metadata
     # metadata_["Keywords"] = f"lmb={lmb_val}"
     plt.savefig(plotdir / ("comp_plot_all_SS_" + name + ".pdf"), metadata=metadata_)
+    plt.ylim(1e-4, 1e-2)
+    plt.xlim(14,26)
+    plt.savefig(plotdir / ("comp_plot_all_SS_" + name + "_ylim.pdf"), metadata=metadata_)
     if show:
         plt.show()
     plt.close()
@@ -143,7 +146,7 @@ def plotting_script_all_N(
         color=_colors[0],
         fmt="s",
         markerfacecolor="none",
-        label=r"$G_{NN}(t),\ \mathcal{O}(\lambda^0)$",
+        label=r"$C_{NN}(t),\ \mathcal{O}(\lambda^0)$",
     )
     yavg = np.average(corr_matrix1[0][0], axis=0)
     ystd = np.std(corr_matrix1[0][0], axis=0)
@@ -156,7 +159,7 @@ def plotting_script_all_N(
         color=_colors[1],
         fmt="s",
         markerfacecolor="none",
-        label=r"$G_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
+        label=r"$C_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
     )
     yavg = np.average(corr_matrix3[0][0], axis=0)
     ystd = np.std(corr_matrix3[0][0], axis=0)
@@ -169,7 +172,7 @@ def plotting_script_all_N(
         color=_colors[2],
         fmt="s",
         markerfacecolor="none",
-        label=r"$G_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
+        label=r"$C_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
     )
 
     yavg = np.average(corr_matrix[0][1], axis=0)
@@ -183,7 +186,7 @@ def plotting_script_all_N(
         color=_colors[3],
         fmt="^",
         markerfacecolor="none",
-        label=r"$G_{N\Sigma}(t),\ \mathcal{O}(\lambda^1)$",
+        label=r"$C_{N\Sigma}(t),\ \mathcal{O}(\lambda^1)$",
     )
     yavg = np.average(corr_matrix2[0][1], axis=0)
     ystd = np.std(corr_matrix2[0][1], axis=0)
@@ -196,7 +199,7 @@ def plotting_script_all_N(
         color=_colors[4],
         fmt="^",
         markerfacecolor="none",
-        label=r"$G_{N\Sigma}(t),\ \mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
+        label=r"$C_{N\Sigma}(t),\ \mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
     )
 
     plt.semilogy()
@@ -210,6 +213,322 @@ def plotting_script_all_N(
         plt.show()
     plt.close()
     return
+
+def plotting_script_SS_new(
+    corr_matrix,
+    corr_matrix1,
+    corr_matrix2,
+    corr_matrix3,
+    lmb_val,
+    plotdir,
+    name="",
+    show=False,
+):
+    spacing = 2
+    xlim = 25
+    time = np.arange(0, np.shape(corr_matrix[0][0])[1])
+
+    deviation1 = corr_matrix1[1][1] / corr_matrix[1][1]
+    deviation2 = corr_matrix3[1][1] / corr_matrix[1][1]
+    deviation3 = corr_matrix2[1][0] / corr_matrix[1][0]
+    avg_dev1 = np.average(deviation1, axis=0)
+    avg_dev2 = np.average(deviation2, axis=0)
+    avg_dev3 = np.average(deviation3, axis=0)
+    std_dev1 = np.std(deviation1, axis=0)
+    std_dev2 = np.std(deviation2, axis=0)
+    std_dev3 = np.std(deviation3, axis=0)
+
+    f, axs = plt.subplots(2, 1, figsize=(6, 7), sharex=True, sharey=False, gridspec_kw={"height_ratios": [3, 1]})
+    f.subplots_adjust(hspace=0, bottom=0.15, left=0.15)
+    yavg = np.average(corr_matrix[1][1], axis=0)
+    ystd = np.std(corr_matrix[1][1], axis=0)
+    axs[0].errorbar(
+        time[:xlim],
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$C_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0)$",
+    )
+    yavg = np.average(corr_matrix1[1][1], axis=0)
+    ystd = np.std(corr_matrix1[1][1], axis=0)
+    axs[0].errorbar(
+        time[:xlim] + 0.2,
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$C_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
+    )
+    yavg = np.average(corr_matrix3[1][1], axis=0)
+    ystd = np.std(corr_matrix3[1][1], axis=0)
+    axs[0].errorbar(
+        time[:xlim] + 0.4,
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$C_{\Sigma\Sigma}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
+    )
+
+    yavg = np.average(corr_matrix[1][0], axis=0)
+    ystd = np.std(corr_matrix[1][0], axis=0)
+    axs[0].errorbar(
+        time[:xlim],
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[3],
+        fmt="^",
+        markerfacecolor="none",
+        label=r"$C_{\Sigma N}(t),\ \mathcal{O}(\lambda^1)$",
+    )
+    yavg = np.average(corr_matrix2[1][0], axis=0)
+    ystd = np.std(corr_matrix2[1][0], axis=0)
+    axs[0].errorbar(
+        time[:xlim] + 0.2,
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[4],
+        fmt="^",
+        markerfacecolor="none",
+        label=r"$C_{\Sigma N}(t),\ \mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
+    )
+                          
+    # Plot the deviation from the unperturbed correlator
+    axs[1].axhline(1,linewidth=0.8,color='k', alpha=0.5)
+    axs[1].errorbar(
+        time[:xlim],
+        avg_dev1[:xlim],
+        std_dev1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$\mathcal{O}(\lambda^2)- \mathcal{O}(\lambda^0)$",
+        label=r"$\mathcal{O}(\lambda^2)/\mathcal{O}(\lambda^0)$",
+    )
+    axs[1].errorbar(
+        time[:xlim]+0.2,
+        avg_dev2[:xlim],
+        std_dev2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$\mathcal{O}(\lambda^4)- \mathcal{O}(\lambda^0)$",
+        label=r"$\mathcal{O}(\lambda^4)/ \mathcal{O}(\lambda^0)$",
+    )
+    axs[1].errorbar(
+        time[:xlim]+0.4,
+        avg_dev3[:xlim],
+        std_dev3[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[4],
+        fmt="^",
+        markerfacecolor="none",
+        # label=r"$\mathcal{O}(\lambda^3)- \mathcal{O}(\lambda^1)$",
+        label=r"$\mathcal{O}(\lambda^3)/ \mathcal{O}(\lambda^1)$",
+    )
+
+
+    # axs[0].tick_params(axis="y", which="minor", right=False, left=True)
+    axs[0].set_ylim(1e-5, 3e2)
+    axs[0].set_yscale("log")
+    # axs[1].set_yscale("log")
+    axs[0].legend(fontsize="x-small")
+    axs[0].set_ylabel(r"$C_{\Sigma B}$")
+    # axs[1].set_ylabel(r"$\mathcal{O}(\lambda^2)- \mathcal{O}(\lambda^0)$")
+    # axs[1].set_ylabel(r"$C_{\Sigma B} - C_{\Sigma B}$")
+    axs[1].set_ylabel(r"$C_{\Sigma B} / C_{\Sigma B}$")
+    axs[1].legend(fontsize="x-small")
+
+    # plt.title("$\lambda=0.04$")
+    # plt.title("$\lambda=" + str(lmb_val) + "$")
+    # plt.xlabel(r"$\textrm{t/a}$")
+    plt.xlabel(r"$t$")
+    metadata_ = _metadata
+    # metadata_["Keywords"] = f"lmb={lmb_val}"
+    plt.savefig(plotdir / ("comp_plot_all_SS_" + name + "_diff.pdf"), metadata=metadata_)
+    # plt.xlim(14,26)
+    # plt.savefig(plotdir / ("comp_plot_all_SS_" + name + "_ylim.pdf"), metadata=metadata_)
+    if show:
+        plt.show()
+    plt.close()
+    return
+
+def plotting_script_NN_new(
+    corr_matrix,
+    corr_matrix1,
+    corr_matrix2,
+    corr_matrix3,
+    lmb_val,
+    plotdir,
+    name="",
+    show=False,
+):
+    spacing = 2
+    xlim = 25
+    time = np.arange(0, np.shape(corr_matrix[0][0])[1])
+
+    deviation1 = corr_matrix1[0][0] / corr_matrix[0][0]
+    deviation2 = corr_matrix3[0][0] / corr_matrix[0][0]
+    deviation3 = corr_matrix2[0][1] / corr_matrix[0][1]
+    avg_dev1 = np.average(deviation1, axis=0)
+    avg_dev2 = np.average(deviation2, axis=0)
+    avg_dev3 = np.average(deviation3, axis=0)
+    std_dev1 = np.std(deviation1, axis=0)
+    std_dev2 = np.std(deviation2, axis=0)
+    std_dev3 = np.std(deviation3, axis=0)
+
+    f, axs = plt.subplots(2, 1, figsize=(6, 7), sharex=True, sharey=False, gridspec_kw={"height_ratios": [3, 1]})
+    f.subplots_adjust(hspace=0, bottom=0.15, left=0.15)
+    yavg = np.average(corr_matrix[0][0], axis=0)
+    ystd = np.std(corr_matrix[0][0], axis=0)
+    axs[0].errorbar(
+        time[:xlim],
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$C_{NN}(t),\ \mathcal{O}(\lambda^0)$",
+    )
+    yavg = np.average(corr_matrix1[0][0], axis=0)
+    ystd = np.std(corr_matrix1[0][0], axis=0)
+    axs[0].errorbar(
+        time[:xlim] + 0.2,
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$C_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2)$",
+    )
+    yavg = np.average(corr_matrix3[0][0], axis=0)
+    ystd = np.std(corr_matrix3[0][0], axis=0)
+    axs[0].errorbar(
+        time[:xlim] + 0.4,
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt="s",
+        markerfacecolor="none",
+        label=r"$C_{NN}(t),\ \mathcal{O}(\lambda^0) + \mathcal{O}(\lambda^2) + \mathcal{O}(\lambda^4)$",
+    )
+
+    yavg = np.average(corr_matrix[0][1], axis=0)
+    ystd = np.std(corr_matrix[0][1], axis=0)
+    axs[0].errorbar(
+        time[:xlim],
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[3],
+        fmt="^",
+        markerfacecolor="none",
+        label=r"$C_{N\Sigma}(t),\ \mathcal{O}(\lambda^1)$",
+    )
+    yavg = np.average(corr_matrix2[0][1], axis=0)
+    ystd = np.std(corr_matrix2[0][1], axis=0)
+    axs[0].errorbar(
+        time[:xlim] + 0.2,
+        yavg[:xlim],
+        ystd[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[4],
+        fmt="^",
+        markerfacecolor="none",
+        label=r"$C_{N\Sigma}(t),\ \mathcal{O}(\lambda^1) + \mathcal{O}(\lambda^3)$",
+    )
+                          
+    # Plot the deviation from the unperturbed correlator
+    axs[1].axhline(1,linewidth=0.8,color='k', alpha=0.5)
+    axs[1].errorbar(
+        time[:xlim],
+        avg_dev1[:xlim],
+        std_dev1[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$\mathcal{O}(\lambda^2)- \mathcal{O}(\lambda^0)$",
+        label=r"$\mathcal{O}(\lambda^2)/\mathcal{O}(\lambda^0)$",
+    )
+    axs[1].errorbar(
+        time[:xlim]+0.2,
+        avg_dev2[:xlim],
+        std_dev2[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt="s",
+        markerfacecolor="none",
+        # label=r"$\mathcal{O}(\lambda^4)- \mathcal{O}(\lambda^0)$",
+        label=r"$\mathcal{O}(\lambda^4)/ \mathcal{O}(\lambda^0)$",
+    )
+    axs[1].errorbar(
+        time[:xlim]+0.4,
+        avg_dev3[:xlim],
+        std_dev3[:xlim],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[4],
+        fmt="^",
+        markerfacecolor="none",
+        # label=r"$\mathcal{O}(\lambda^3)- \mathcal{O}(\lambda^1)$",
+        label=r"$\mathcal{O}(\lambda^3)/ \mathcal{O}(\lambda^1)$",
+    )
+
+
+    axs[0].set_ylim(1e-5, 3e2)
+    axs[0].set_yscale("log")
+    # axs[1].set_yscale("log")
+    axs[0].legend(fontsize="x-small")
+    axs[0].set_ylabel(r"$C_{N B}$")
+    # axs[1].set_ylabel(r"$\mathcal{O}(\lambda^2)- \mathcal{O}(\lambda^0)$")
+    # axs[1].set_ylabel(r"$C_{\Sigma B} - C_{\Sigma B}$")
+    axs[1].set_ylabel(r"$C_{N B} / C_{N B}$")
+    axs[1].legend(fontsize="x-small")
+
+    # plt.title("$\lambda=0.04$")
+    # plt.title("$\lambda=" + str(lmb_val) + "$")
+    # plt.xlabel(r"$\textrm{t/a}$")
+    plt.xlabel(r"$t$")
+    metadata_ = _metadata
+    # metadata_["Keywords"] = f"lmb={lmb_val}"
+    plt.savefig(plotdir / ("comp_plot_all_NN_" + name + "_diff.pdf"), metadata=metadata_)
+    # plt.xlim(14,26)
+    # plt.savefig(plotdir / ("comp_plot_all_SS_" + name + "_ylim.pdf"), metadata=metadata_)
+    if show:
+        plt.show()
+    plt.close()
+    return
+
 
 
 def plot_real_imag(
@@ -369,7 +688,7 @@ def plotting_script_diff_2(
     time = np.arange(0, np.shape(diffG1)[1])
     efftime = time[:-spacing] + 0.5
     f, axs = plt.subplots(1, 1, figsize=(6, 6), sharex=True, sharey=True)
-
+    f.subplots_adjust(hspace=0, bottom=0.15, left=0.2)
     yeffavg_1 = np.average(diffG1, axis=0)
     yeffstd_1 = np.std(diffG1, axis=0)
     axs.errorbar(
@@ -457,8 +776,8 @@ def plotting_script_diff_2(
 
     axs.axhline(y=0, color="k", alpha=0.3, linewidth=0.5)
     # plt.setp(axs, xlim=(0, xlim), ylim=(-0.4, 0.4))
-    # plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.25))
-    plt.setp(axs, xlim=(0, xlim), ylim=(-0.025, 0.15))
+    plt.setp(axs, xlim=(0, xlim), ylim=(-0.05, 0.25))
+    # plt.setp(axs, xlim=(0, xlim), ylim=(-0.025, 0.15))
     plt.ylabel(r"$(\Delta E_{\lambda})_{\textrm{eff}}$")
     # plt.ylabel(r"$(R_{\lambda}(t,\vec{q}))_{\textrm{eff}}$")
     # plt.ylabel(r"$\textrm{eff. energy}\left[(R_{\lambda}(t,\vec{q})\right]$")

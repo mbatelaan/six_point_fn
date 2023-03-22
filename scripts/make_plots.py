@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 from gevpanalysis.definitions import PROJECT_BASE_DIRECTORY
+from gevpanalysis.util import find_file
+from gevpanalysis.util import read_config
 
 from analysis import stats
 from analysis.bootstrap import bootstrap
@@ -1265,6 +1267,8 @@ def plot_energy_diffs(data, config, plotdir):
 
 
 def main():
+    """Read the data and make some plots"""
+
     mystyle = Path(PROJECT_BASE_DIRECTORY) / Path("gevpanalysis/mystyle.txt")
     plt.style.use(mystyle.as_posix())
 
@@ -1272,27 +1276,49 @@ def main():
     nboot = 200
     nbin = 1
 
-    # Read in the directory data from the yaml file
+    # Read in the analysis data from the yaml file if one is given
+    # This config file contains all of the details on the specific dataset.
+    qmax_config = read_config("qmax")
+    qmax_datadir = Path(qmax_config["analysis_dir"]) / Path("data")
     if len(sys.argv) == 2:
-        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
+        config = read_config(sys.argv[1])
     else:
-        config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
-    with open(config_file) as f:
-        config = yaml.safe_load(f)
+        config = read_config("qmax")
 
     # Set parameters to defaults defined in another YAML file
-    with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
-        defaults = yaml.safe_load(f)
+    defaults = read_config("defaults")
     for key, value in defaults.items():
         config.setdefault(key, value)
 
-    pickledir = Path(config["pickle_dir1"])
-    pickledir2 = Path(config["pickle_dir2"])
-    plotdir = Path(config["analysis_dir"]) / Path("plots")
-    datadir = Path(config["analysis_dir"]) / Path("data")
+    # Set the directories for reading data, saving data and saving plots
+    pickledir_k1 = Path(config["pickle_dir1"])
+    pickledir_k2 = Path(config["pickle_dir2"])
+    plotdir = PROJECT_BASE_DIRECTORY / Path("data/plots") / Path(config["name"])
+    datadir = PROJECT_BASE_DIRECTORY / Path("data/pickles") / Path(config["name"])
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
-    print("datadir: ", datadir / ("lambda_dep.pkl"))
+
+    # # Read in the directory data from the yaml file
+    # if len(sys.argv) == 2:
+    #     config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/") / Path(sys.argv[1])
+    # else:
+    #     config_file = Path(PROJECT_BASE_DIRECTORY) / Path("config/data_dir_theta7.yaml")
+    # with open(config_file) as f:
+    #     config = yaml.safe_load(f)
+
+    # # Set parameters to defaults defined in another YAML file
+    # with open(Path(PROJECT_BASE_DIRECTORY) / Path("config/defaults.yaml")) as f:
+    #     defaults = yaml.safe_load(f)
+    # for key, value in defaults.items():
+    #     config.setdefault(key, value)
+
+    # pickledir = Path(config["pickle_dir1"])
+    # pickledir2 = Path(config["pickle_dir2"])
+    # plotdir = Path(config["analysis_dir"]) / Path("plots")
+    # datadir = Path(config["analysis_dir"]) / Path("data")
+    # plotdir.mkdir(parents=True, exist_ok=True)
+    # datadir.mkdir(parents=True, exist_ok=True)
+    # print("datadir: ", datadir / ("lambda_dep.pkl"))
 
     t_range = np.arange(config["t_range0"], config["t_range1"])
     time_choice = config["time_choice"]
@@ -1317,6 +1343,41 @@ def main():
     redchisq3 = np.array([d["red_chisq3"] for d in data])
     time_choice = data[0]["time_choice"]
     delta_t = data[0]["delta_t"]
+
+    for i, lmb_val in enumerate(lambdas):
+        print(f"\n====================\nLambda = {lmb_val}\n====================")
+
+        # O(lambda^0) fit
+        # Construct a correlation matrix for each order in lambda(skipping order 0)
+        matrix_1, matrix_2, matrix_3, matrix_4 = make_matrices(
+            G2_nucl, G2_sigm, lmb_val
+        )
+        print("\nO(lambda^0) fit")
+        (
+            Gt1_0,
+            Gt2_0,
+            [eval_left0, evec_left0, eval_right0, evec_right0],
+        ) = gevp_bootstrap(matrix_1, time_choice, delta_t, name="_test", show=False)
+        ratio0 = np.abs(Gt1_0 / Gt2_0)
+
+        effmass_ratio0 = stats.bs_effmass(ratio0, time_axis=1, spacing=1)
+        effmass_ratio1 = stats.bs_effmass(ratio1, time_axis=1, spacing=1)
+        effmass_ratio2 = stats.bs_effmass(ratio2, time_axis=1, spacing=1)
+        effmass_ratio3 = stats.bs_effmass(ratio3, time_axis=1, spacing=1)
+        plots.plotting_script_diff_2(
+            effmass_ratio0,
+            effmass_ratio1,
+            effmass_ratio2,
+            effmass_ratio3,
+            [bootfit0[:, 1], bootfit1[:, 1], bootfit2[:, 1], bootfit3[:, 1]],
+            ratio_t_range,
+            lmb_val,
+            plotdir,
+            name="_l" + str(lmb_val) + "_all",
+            show=False,
+        )
+
+
 
     all_data0 = {
         "lambdas0": lambdas,

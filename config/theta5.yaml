@@ -16,3 +16,5 @@ tmax_ratio : 20
 lmb_i : 0
 lmb_f : 0.05
 lmb_num : 15
+runname: 'run \#2'
+runnumber: 2
