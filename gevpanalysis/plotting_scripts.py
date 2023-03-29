@@ -698,7 +698,7 @@ def plotting_script_diff_2(
         capsize=4,
         elinewidth=1,
         color=_colors[0],
-        fmt="s",
+        fmt=_markers[1],
         markerfacecolor="none",
         label=r"$\mathcal{O}(\lambda^1)$",
     )
@@ -719,7 +719,8 @@ def plotting_script_diff_2(
         capsize=4,
         elinewidth=1,
         color=_colors[1],
-        fmt="s",
+        fmt=_markers[2],
+        # fmt="s",
         markerfacecolor="none",
         label=r"$\mathcal{O}(\lambda^2)$",
     )
@@ -740,7 +741,8 @@ def plotting_script_diff_2(
         capsize=4,
         elinewidth=1,
         color=_colors[2],
-        fmt="s",
+        fmt=_markers[3],
+        # fmt="s",
         markerfacecolor="none",
         label=r"$\mathcal{O}(\lambda^3)$",
     )
@@ -761,7 +763,8 @@ def plotting_script_diff_2(
         capsize=4,
         elinewidth=1,
         color=_colors[3],
-        fmt="s",
+        fmt=_markers[0],
+        # fmt="s",
         markerfacecolor="none",
         label=r"$\mathcal{O}(\lambda^4)$",
     )
