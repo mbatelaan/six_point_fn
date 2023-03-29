@@ -3,7 +3,9 @@ pickle_dir2 : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_p
 analysis_dir : /scratch/usr/hhpmbate/chroma_3pt/32x64/b5p50kp121040kp120620/six_point_fn_theta4/analysis/
 name : theta4
 onlytwist2 : True
-time_choice : 6
+# time_choice : 6
+# delta_t : 4
+time_choice : 10
 delta_t : 4
 t_range0 : 11
 t_range1 : 24

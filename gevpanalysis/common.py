@@ -1404,9 +1404,9 @@ def fit_correlation_matrix(matrix, t_range, function, diag=False):
             if diag and ((i == 0 and j == 1) or (i == 1 and j == 0)):
                 continue
             else:
-                if i==0 and j==0:
+                if i == 0 and j == 0:
                     time_range = t_range[0]
-                elif i==1 and j==1:
+                elif i == 1 and j == 1:
                     time_range = t_range[1]
                 else:
                     time_range = t_range[2]
@@ -1573,7 +1573,6 @@ def gevp_bootstrap(corr_matrix, time_choice=10, delta_t=1, name="", show=None):
     # if eval_right_avg[0] > eval_right_avg[1]:
     #     eval_right_avg = eval_right_avg[::-1]
     #     evec_right_avg = evec_right_avg[:, ::-1]
-
 
     # evec_left = np.average(evec_left_list, axis=0)
     # evec_right = np.average(evec_right_list, axis=0)
